@@ -1,0 +1,92 @@
+﻿@model paradise.Models.course_enrollments
+@{
+    ViewBag.Title = "Thêm học viên vào khóa học";
+}
+
+<link href="~/Content/custom-css/CreateView.css" rel="stylesheet" />
+
+<div class="page-container">
+    <h4 class="fw-bold m-0">Thêm mới học viên</h4>
+
+    <div class="page-content">
+        @using (Html.BeginForm("Create", "AdminCourse_Enrollments", FormMethod.Post, new { area = "Admin" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="form-card row g-3">
+                <h4>Thêm học viên</h4>
+                <!-- Chọn khóa học -->
+                <div class="col-md-6 form-group">
+                    @Html.LabelFor(m => m.course_id, "Khóa học")
+                    @Html.DropDownList("course_id", (SelectList)ViewBag.Courses, "-- Chọn khóa học --",
+                        new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.course_id, "", new { @class = "text-danger" })
+                </div>
+
+                <!-- Chọn học viên (thủ công) -->
+                <div class="col-md-6 form-group">
+                    @Html.LabelFor(m => m.user_id, "Học viên")
+                    @Html.DropDownList("user_id", (SelectList)ViewBag.Users, "-- Chọn học viên --",
+                        new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.user_id, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="actions">
+                <a href="@Url.Action("Index", "AdminCourse_Enrollments", new { area = "Admin" })" class="btn-secondary">Hủy bỏ</a>
+                <button type="submit" class="btn-primary">Xác nhận</button>
+            </div>
+        }
+
+        <hr />
+
+        @using (Html.BeginForm("ImportExcel", "AdminCourse_Enrollments", FormMethod.Post, new { area = "Admin", enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            <div class="form-card row g-3 align-items-end mt-4">
+                <h4>Thêm danh sách học viên</h4>
+                <!-- Chọn khóa học -->
+                <div class="col-md-6 form-group">
+                    @Html.Label("courseId", "Khóa học")
+                    @Html.DropDownList("course_id", (SelectList)ViewBag.Courses, "-- Chọn khóa học --", new { @class = "form-control", required = "required" })
+                    <span class="text-danger" data-valmsg-for="courseId" data-valmsg-replace="true"></span>
+                </div>
+
+                <!-- File import -->
+                <div class="col-md-6 form-group">
+                    @Html.Label("file", "Import danh sách học viên")
+                    <input type="file" name="file" class="form-control" accept=".xlsx,.xls" required />
+                    <span class="text-danger" data-valmsg-for="file" data-valmsg-replace="true"></span>
+                </div>
+            </div>
+
+            <div class="actions mt-3">
+                <a href="@Url.Action("Index", "AdminCourse_Enrollments", new { area = "Admin" })" class="btn-secondary">Hủy bỏ</a>
+                <button type="submit" class="btn btn-primary">Upload</button>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Chỉ hiển thị popup báo lỗi nếu có lỗi trong ModelState với key là "CustomError"
+       @if (ViewData.ModelState.ContainsKey("CustomError"))
+        {
+            var errors = ViewData.ModelState["CustomError"].Errors;
+            foreach (var error in errors)
+            {
+                <text>
+                    Toastify({
+                        text: @Html.Raw(Json.Encode(error.ErrorMessage)),
+                        duration: 3000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "linear-gradient(to right, #ef4444, #dc2626)",
+                        close: true
+                    }).showToast();
+                </text>
+            }
+        }
+    });
+</script>

@@ -1,0 +1,10 @@
+﻿@model Tuple<string>
+@{
+    string ControllerName = Model.Item1;
+}
+
+<a href="@Url.Action("Create", ControllerName, new { area = "Admin" })"
+   class="btn-dark-modern d-inline-flex align-items-center">
+    <i class="bi bi-plus-lg me-2"></i>
+    Thêm mới
+</a>

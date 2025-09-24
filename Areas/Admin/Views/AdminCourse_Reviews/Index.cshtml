@@ -1,0 +1,171 @@
+﻿@model IEnumerable<paradise.Models.course_reviews>
+
+@{
+    ViewBag.Title = "Quản lý đánh giá";
+}
+
+
+<link href="~/Content/custom-css/ListView.css" rel="stylesheet" />
+<link href="~/Content/custom-css/SwitchButton.css" rel="stylesheet" />
+
+@{
+    Html.RenderPartial("OverLayLoading", "AdminCourse_Reviews");
+}
+
+<h4 class="fw-bold m-0">Quản lý đánh giá</h4>
+
+<div class="d-flex justify-content-between align-items-center mt-5">
+    @{
+        Html.RenderPartial("SearchingBar", Tuple.Create("Tìm kiếm", "AdminCourse_Reviews"));
+    }
+</div>
+
+
+<div class="table-responsive overflow-hidden mt-2 p-4">
+    <table class="table align-middle mb-0">
+        <thead>
+            <tr>
+                <th class="text-nowrap">Tên khóa học</th>
+                <th class="text-nowrap">Người đánh giá</th>
+                <th class="text-nowrap">Mức độ</th>
+                <th class="text-nowrap">Nội dung</th>
+                <th class="text-nowrap">Ngày đánh giá</th>
+                <th class="text-nowrap">Hiển thị</th>
+                <th class="text-nowrap text-center">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var r in Model)
+                {
+                    <tr>
+                        <td>@r.cours.course_title</td>
+                        <td>@r.user.email</td>
+                        <td class="text-center">@r.rating⭐</td>
+                        <td class="table-cell-wrap">@r.review_text</td>
+                        <td>@(r.created_at.ToString("dd/MM/yyyy"))</td>
+                        <td>
+                            <div class="toggler">
+                                <input id="toggler-@r.id"
+                                       name="toggler-@r.id"
+                                       type="checkbox"
+                                       class="toggle-visible"
+                                       data-id="@r.id"
+                                       @(r.is_visible ? "checked" : "") />
+                                <label for="toggler-@r.id">
+                                    <svg class="toggler-on" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
+                                        <polyline class="path check" points="100.2,40.2 51.5,88.8 29.8,67.5"></polyline>
+                                    </svg>
+                                    <svg class="toggler-off" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
+                                        <line class="path line" x1="34.4" y1="34.4" x2="95.8" y2="95.8"></line>
+                                        <line class="path line" x1="95.8" y1="34.4" x2="34.4" y2="95.8"></line>
+                                    </svg>
+                                </label>
+                            </div>
+                        </td>
+                        <td class="action-icons">
+                            <div class="dropdown">
+                                <div class="cursor-pointer d-flex align-items-center justify-content-center text-dark text-decoration-none" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <button class="icon-btn">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                </div>
+                                <ul class="dropdown-menu custom-dropdown shadow bg-white" aria-labelledby="dropdownUser">
+                                    <li>
+                                        <button class="action_btn" title="Delete"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteModal"
+                                                data-EnrollmentId="@r.id"
+                                                data-EnrollmentName="@r.cours.course_title"
+                                                data-username="@r.user.email">
+                                            Xóa
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7" class="text-center text-muted p-5">
+                        Không có dữ liệu.
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @{
+        Html.RenderPartial("Pagination", Tuple.Create((int)ViewBag.Page, (int)ViewBag.TotalPages, "Index", (string)ViewBag.Search));
+    }
+</div>
+
+<script>
+    document.addEventListener("change", function (e) {
+        if (e.target.classList.contains("toggle-visible")) {
+            var id = e.target.getAttribute("data-id");
+            var isVisible = e.target.checked;
+
+            fetch('/Admin/AdminCourse_Reviews/UpdateVisibility', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: `id=${id}&isVisible=${isVisible}`
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        console.log("Cập nhật thành công:", data.isVisible);
+                    } else {
+                        alert("Không tìm thấy review!");
+                    }
+                })
+                .catch(err => alert("Có lỗi xảy ra!"));
+        }
+    });
+</script>
+
+
+@*Modal popup xoa*@
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-3">
+            <div class="modal-header bg-dark text-white rounded-top-3">
+                <h5 class="modal-title fw-semibold">Xác nhận xóa</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa đánh giá khóa học <strong id="deleteEnrollment"></strong> của <strong id="deleteUser"></strong> không?</p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" method="post" action="">
+                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Hủy</button>
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-dark shadow-sm">Xóa</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget; // Nút bấm delete
+        const enrollmentId = button.getAttribute('data-EnrollmentId');
+        const enrollmentName = button.getAttribute('data-EnrollmentName');
+        const userEmail = button.getAttribute('data-username');
+
+        // Hiển thị tên user trong modal
+        document.getElementById('deleteEnrollment').textContent = enrollmentName;
+        document.getElementById('deleteUser').textContent = userEmail;
+
+        // Gán action cho form delete
+        const form = document.getElementById('deleteForm');
+        form.action = `/Admin/AdminCourse_Reviews/Delete/${enrollmentId}`;
+    });
+</script>

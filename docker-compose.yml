@@ -1,0 +1,18 @@
+﻿version: "3.9"
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: paradise
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: mvcdb
+      MYSQL_USER: mvcuser
+      MYSQL_PASSWORD: mvcpass
+    ports:
+      - "5002:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:

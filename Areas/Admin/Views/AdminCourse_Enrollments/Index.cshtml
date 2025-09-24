@@ -1,0 +1,129 @@
+﻿@model IEnumerable<paradise.Models.course_enrollments>
+
+@{
+    ViewBag.Title = "Quản lý đăng ký";
+}
+
+
+<link href="~/Content/custom-css/ListView.css" rel="stylesheet" />
+
+
+@{
+    Html.RenderPartial("OverLayLoading", "AdminCourse_Enrollments");
+}
+
+<h4 class="fw-bold m-0">Quản lý đăng ký</h4>
+
+<div class="d-flex justify-content-between align-items-center mt-5">
+    @{
+        Html.RenderPartial("SearchingBar", Tuple.Create("Tên khóa học hoặc email", "AdminCourse_Enrollments"));
+        Html.RenderPartial("AddingButton", Tuple.Create("AdminCourse_Enrollments"));
+    }
+</div>
+
+<div class="table-responsive overflow-hidden mt-2 p-4">
+    <table class="table align-middle mb-0">
+        <thead>
+            <tr>
+                <th>Tên khóa học</th>
+                <th>Người đăng ký</th>
+                <th>Ngày đăng ký</th>
+                <th class="text-center">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var e in Model)
+                {
+                    <tr>
+                        <td>@e.cours.course_title</td>
+                        <td>@e.user.email</td>
+                        <td>@(e.enrolled_at.ToString("dd/MM/yyyy"))</td>
+                        <td class="action-icons">
+                            <div class="dropdown">
+                                <div class="cursor-pointer d-flex align-items-center justify-content-center text-dark text-decoration-none" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <button class="icon-btn">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                </div>
+                                <ul class="dropdown-menu custom-dropdown shadow bg-white" aria-labelledby="dropdownUser">
+                                    @*<li>
+                                            <a href="@Url.Action("Edit", "AdminCourse_Enrollments", new { area = "Admin", id = e.id })" class="text-decoration-none">
+                                                <button class="action_btn">Chỉnh sửa</button>
+                                            </a>
+                                        </li>*@
+                                    <li>
+                                        <button class="action_btn" title="Delete"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteModal"
+                                                data-EnrollmentId="@e.id"
+                                                data-EnrollmentName="@e.cours.course_title"
+                                                data-username="@e.user.email">
+                                            Xóa
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7" class="text-center text-muted p-5">
+                        Không có dữ liệu.
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @{ Html.RenderPartial(
+                        "Pagination",
+                        Tuple.Create((int)ViewBag.Page, (int)ViewBag.TotalPages, "Index", (string)ViewBag.Search)
+                   );
+    }
+</div>
+
+@*Modal popup xoa*@
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-3">
+            <div class="modal-header bg-dark text-white rounded-top-3">
+                <h5 class="modal-title fw-semibold">Xác nhận xóa</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa khóa học <strong id="deleteEnrollment"></strong> của <strong id="deleteUser"></strong> không?</p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" method="post" action="">
+                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Hủy</button>
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-dark shadow-sm">Xóa</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget; // Nút bấm delete
+        const enrollmentId = button.getAttribute('data-EnrollmentId');
+        const enrollmentName = button.getAttribute('data-EnrollmentName');
+        const userEmail = button.getAttribute('data-username');
+
+        // Hiển thị tên user trong modal
+        document.getElementById('deleteEnrollment').textContent = enrollmentName;
+        document.getElementById('deleteUser').textContent = userEmail;
+
+        // Gán action cho form delete
+        const form = document.getElementById('deleteForm');
+        form.action = `/Admin/AdminCourse_Enrollments/Delete/${enrollmentId}`;
+    });
+</script>
+
+
+

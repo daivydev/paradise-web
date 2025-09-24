@@ -1,0 +1,135 @@
+﻿@model IEnumerable<paradise.Models.user>
+@{
+    ViewBag.Title = "Quản lý người dùng";
+}
+
+<link href="~/Content/custom-css/ListView.css" rel="stylesheet" />
+
+
+@{
+    Html.RenderPartial("OverLayLoading", "AdminUsers");
+}
+
+<h4 class="fw-bold m-0">Quản lý người dùng</h4>
+
+
+
+<div class="d-flex justify-content-between align-items-center mt-5">
+    @{
+        Html.RenderPartial("SearchingBar", Tuple.Create("Tên hoặc email", "AdminUsers"));
+        Html.RenderPartial("AddingButton", Tuple.Create("AdminUsers"));
+    }
+</div>
+
+
+<div class="table-responsive overflow-hidden mt-2 p-4">
+    <table class="table align-middle mb-0">
+        <thead>
+            <tr>
+                <th>Họ tên</th>
+                <th>Email</th>
+                <th>SĐT</th>
+                <th>Ngày sinh</th>
+                <th>Giới tính</th>
+                <th>Vai trò</th>
+                <th class="text-center">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var u in Model)
+                {
+                    <tr>
+                        <td>@(u.user_profiles.first_name + " " + u.user_profiles.last_name)</td>
+                        <td>@u.email</td>
+                        <td>@u.user_profiles.phone_number</td>
+                        <td>
+                            @(u.user_profiles.date_of_birth.HasValue
+                        ? u.user_profiles.date_of_birth.Value.ToString("dd/MM/yyyy")
+                        : "")
+                        </td>
+                        <td>@u.user_profiles.gender</td>
+                        <td>@u.user_profiles.role.role_name</td>
+                        <td class="action-icons">
+
+                            <div class="dropdown">
+                                <div class="cursor-pointer d-flex align-items-center justify-content-center text-dark text-decoration-none" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <button class="icon-btn">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                </div>
+                                <ul class="dropdown-menu custom-dropdown shadow bg-white" aria-labelledby="dropdownUser">
+                                    <li>
+                                        <a href="@Url.Action("Edit", "AdminUsers", new { area = "Admin", id = u.id })" class="text-decoration-none">
+                                            <button class="action_btn">Chỉnh sửa</button>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <button class="action_btn" title="Delete"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteModal"
+                                                data-userid="@u.id"
+                                                data-username="@u.user_profiles.first_name @u.user_profiles.last_name">
+                                            Xóa
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7" class="text-center text-muted p-5">
+                        Không có dữ liệu.
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @{ Html.RenderPartial(
+                         "Pagination",
+                         Tuple.Create((int)ViewBag.Page, (int)ViewBag.TotalPages, "Index", (string)ViewBag.Search));
+    }
+</div>
+
+@*Modal popup xoa*@
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-3">
+            <div class="modal-header bg-dark text-white rounded-top-3">
+                <h5 class="modal-title fw-semibold">Xác nhận xóa</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa user <strong id="deleteUserName"></strong> không?</p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" method="post" action="">
+                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Hủy</button>
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-dark shadow-sm">Xóa</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget; // Nút bấm delete
+        const userId = button.getAttribute('data-userid');
+        const userName = button.getAttribute('data-username');
+
+        // Hiển thị tên user trong modal
+        document.getElementById('deleteUserName').textContent = userName;
+
+        // Gán action cho form delete
+        const form = document.getElementById('deleteForm');
+        form.action = `/Admin/AdminUsers/Delete/${userId}`;
+    });
+</script>

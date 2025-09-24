@@ -1,0 +1,125 @@
+﻿@model paradise.Models.user
+@{
+    ViewBag.Title = "Thêm mới tài khoản";
+}
+
+<link href="~/Content/custom-css/CreateView.css" rel="stylesheet" />
+
+<div class="page-container">
+    <h4 class="fw-bold m-0">Tạo mới tài khoản</h4>
+
+    <div class="page-content">
+        @using (Html.BeginForm("Create", "AdminUsers", FormMethod.Post, new { area = "Admin", id = "userForm", novalidate = "novalidate" }))
+        {
+            <div class="form-card row g-3">
+                <!-- Email -->
+                <div class="col-md-6 form-group">
+                    @Html.LabelFor(m => m.email, "Email")
+                    @Html.TextBoxFor(m => m.email, new { @class = "form-control", type = "email", placeholder = "you@gmail.com" })
+                    @Html.ValidationMessageFor(m => m.email, "", new { @class = "text-danger" })
+                </div>
+
+                <!-- Password -->
+                <div class="col-md-6 form-group">
+                    @Html.LabelFor(m => m.password, "Mật khẩu")
+                    @Html.PasswordFor(m => m.password, new { @class = "form-control", placeholder = "******" })
+                    @Html.ValidationMessageFor(m => m.password, "", new { @class = "text-danger" })
+                </div>
+
+                <!-- First Name -->
+                <div class="col-md-6 form-group">
+                    @Html.LabelFor(m => m.user_profiles.first_name, "Tên")
+                    @Html.TextBoxFor(m => m.user_profiles.first_name, new { @class = "form-control", placeholder = "Hieu" })
+                    @Html.ValidationMessageFor(m => m.user_profiles.first_name, "", new { @class = "text-danger" })
+                </div>
+
+                <!-- Last Name -->
+                <div class="col-md-6 form-group">
+                    @Html.LabelFor(m => m.user_profiles.last_name, "Họ")
+                    @Html.TextBoxFor(m => m.user_profiles.last_name, new { @class = "form-control", placeholder = "Hoang Van" })
+                    @Html.ValidationMessageFor(m => m.user_profiles.last_name, "", new { @class = "text-danger" })
+                </div>
+
+                <!-- Phone -->
+                <div class="col-md-6 form-group">
+                    @Html.LabelFor(m => m.user_profiles.phone_number, "Số điện thoại")
+                    @Html.TextBoxFor(m => m.user_profiles.phone_number, new { @class = "form-control", placeholder = "09x xxx xxxx" })
+                    @Html.ValidationMessageFor(m => m.user_profiles.phone_number, "", new { @class = "text-danger" })
+                </div>
+
+                <!-- DOB -->
+                <div class="col-md-6 form-group">
+                    @Html.LabelFor(m => m.user_profiles.date_of_birth, "Ngày sinh (tháng/ngày/năm)")
+                    @Html.TextBoxFor(m => m.user_profiles.date_of_birth, new { @class = "form-control", type = "date" })
+                    @Html.ValidationMessageFor(m => m.user_profiles.date_of_birth, "", new { @class = "text-danger" })
+                </div>
+
+                <!-- Gender -->
+                <div class="col-md-6 form-group">
+                    @Html.LabelFor(m => m.user_profiles.gender, "Giới tính")
+                    @Html.DropDownListFor(m => m.user_profiles.gender,
+                        new SelectList(new[] {
+                            new { Value = "", Text = "-- Chọn giới tính --" },
+                            new { Value = "Male", Text = "Nam" },
+                            new { Value = "Female", Text = "Nữ" },
+                            new { Value = "Other", Text = "Khác" }
+                        }, "Value", "Text", Model?.user_profiles?.gender),
+                        new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.user_profiles.gender, "", new { @class = "text-danger" })
+                </div>
+
+                <!-- Role -->
+                <div class="col-md-6 form-group">
+                    @Html.LabelFor(m => m.user_profiles.role_id, "Vai trò")
+                    @Html.DropDownListFor(m => m.user_profiles.role_id,
+                        (SelectList)ViewBag.Roles,
+                        "-- Chọn vai trò --",
+                        new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.user_profiles.role_id, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="actions">
+                <a href="@Url.Action("Index", "AdminUsers", new { area = "Admin" })" class="btn-secondary">Hủy bỏ</a>
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn-primary">Xác nhận</button>
+            </div>
+        }
+    </div>
+</div>
+
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Chỉ hiển thị popup báo lỗi nếu có lỗi trong ModelState với key là "CustomError"
+       @if (ViewData.ModelState.ContainsKey("CustomError"))
+        {
+            var errors = ViewData.ModelState["CustomError"].Errors;
+            foreach (var error in errors)
+            {
+                <text>
+                    Toastify({
+                        text: @Html.Raw(Json.Encode(error.ErrorMessage)),
+                        duration: 3000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "linear-gradient(to right, #ef4444, #dc2626)",
+                        close: true
+                    }).showToast();
+                </text>
+            }
+        }
+    });
+</script>
+
+
+@*Reset form khi reload (F5) trang web*@
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Helpers/custom-validation.js"></script>
+}
+
+

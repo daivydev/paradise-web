@@ -1,0 +1,23 @@
+﻿@model Tuple<string, string>
+@{
+    string placeHolder = Model.Item1.ToString();
+    string ControllerName = Model.Item2;
+}
+
+<form method="get" class="d-flex" onsubmit="showOverlay()">
+    <input type="text" name="search" value="@ViewBag.Search"
+           class="form-control me-2 text-sm" placeholder="@placeHolder">
+    @if (!string.IsNullOrEmpty(ViewBag.Search))
+    {
+        <a href="@Url.Action("Index", ControllerName)"
+           class="bg-secondary text-white my-auto me-2 d-inline-flex align-items-center justify-content-center rounded-circle"
+           style="width: 40px; height: 25px;">
+            <i class="bi bi-x"></i>
+        </a>
+    }
+    <button type="submit" class="border-0 bg-transparent text-white">
+        <div class="btn-dark-modern">
+            Tìm
+        </div>
+    </button>
+</form>
