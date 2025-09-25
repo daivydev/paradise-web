@@ -1,0 +1,105 @@
+﻿@model paradise.Models.cours
+@{
+    ViewBag.Title = "Chỉnh sửa khóa học";
+}
+
+<link href="~/Content/custom-css/CreateView.css" rel="stylesheet" />
+
+<div class="page-container">
+    <h4 class="fw-bold m-0">Chỉnh sửa khóa học</h4>
+
+    <div class="page-content">
+        @using (Html.BeginForm("Edit", "AdminCourse", FormMethod.Post, new { area = "Admin", id = "courseForm", novalidate = "novalidate" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.id)
+
+        <div class="form-card row g-3">
+            <!-- Chủ đề -->
+            <div class="col-md-6 form-group">
+                @Html.LabelFor(m => m.topics_id, "Chủ đề")
+                @Html.DropDownListFor(m => m.topics_id,
+                    (SelectList)ViewBag.topics_id,
+                    
+                    new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.topics_id, "", new { @class = "text-danger" })
+            </div>
+
+            <!-- Tác giả -->
+            <div class="col-md-6 form-group">
+                @Html.LabelFor(m => m.author_id, "Người tạo (email)")
+                @Html.DropDownListFor(m => m.author_id,
+                    (SelectList)ViewBag.author_id,
+                   
+                    new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.author_id, "", new { @class = "text-danger" })
+            </div>
+
+            <!-- Tiêu đề -->
+            <div class="col-md-6 form-group">
+                @Html.LabelFor(m => m.course_title, "Tiêu đề")
+                @Html.TextBoxFor(m => m.course_title, new { @class = "form-control", placeholder = "Nhập tiêu đề khóa học..." })
+                @Html.ValidationMessageFor(m => m.course_title, "", new { @class = "text-danger" })
+            </div>
+
+            <!-- Thumbnail -->
+            <div class="col-md-6 form-group">
+                @Html.LabelFor(m => m.course_thumbnail, "Ảnh thumbnail (URL)")
+                @Html.TextBoxFor(m => m.course_thumbnail, new { @class = "form-control", placeholder = "https://..." })
+                @Html.ValidationMessageFor(m => m.course_thumbnail, "", new { @class = "text-danger" })
+            </div>
+
+            <!-- Giá -->
+            <div class="col-md-6 form-group">
+                @Html.LabelFor(m => m.price, "Giá (VNĐ)")
+                @Html.TextBoxFor(m => m.price, new { @class = "form-control", type = "number", step = "1000", min = "0", placeholder = "VD: 199000" })
+                @Html.ValidationMessageFor(m => m.price, "", new { @class = "text-danger" })
+            </div>
+            <!-- Mô tả -->
+            <div class="col-6 form-group">
+                @Html.LabelFor(m => m.course_description, "Mô tả khóa học")
+                @Html.TextAreaFor(m => m.course_description, 6, 50, new { @class = "form-control", placeholder = "Mô tả ngắn gọn nội dung, mục tiêu, đối tượng..." })
+                @Html.ValidationMessageFor(m => m.course_description, "", new { @class = "text-danger" })
+            </div>
+
+
+
+            @* Không cho sửa created_at / updated_at ở form. Controller sẽ set updated_at = Now *@
+        </div>
+
+            <!-- Actions -->
+            <div class="actions">
+                <a href="@Url.Action("Index", "AdminCourse", new { area = "Admin" })" class="btn-secondary">Hủy bỏ</a>
+                <button type="submit" class="btn-primary">Xác nhận</button>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Hiển thị Toastify nếu có lỗi CustomError từ Controller
+        @if (ViewData.ModelState.ContainsKey("CustomError"))
+        {
+            var errors = ViewData.ModelState["CustomError"].Errors;
+            foreach (var error in errors)
+            {
+                <text>
+                    Toastify({
+                        text: @Html.Raw(Json.Encode(error.ErrorMessage)),
+                        duration: 3000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "linear-gradient(to right, #ef4444, #dc2626)",
+                        close: true
+                    }).showToast();
+                </text>
+            }
+        }
+    });
+</script>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Helpers/custom-validation.js"></script>
+}

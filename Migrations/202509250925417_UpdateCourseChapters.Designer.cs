@@ -6,14 +6,14 @@ namespace paradise.Migrations
     using System.Data.Entity.Migrations.Infrastructure;
     using System.Resources;
     
-    [GeneratedCode("EntityFramework.Migrations", "6.4.4")]
-    public sealed partial class AddIsVisibleToCourseReviews : IMigrationMetadata
+    [GeneratedCode("EntityFramework.Migrations", "6.5.1")]
+    public sealed partial class UpdateCourseChapters : IMigrationMetadata
     {
-        private readonly ResourceManager Resources = new ResourceManager(typeof(AddIsVisibleToCourseReviews));
+        private readonly ResourceManager Resources = new ResourceManager(typeof(UpdateCourseChapters));
         
         string IMigrationMetadata.Id
         {
-            get { return "202509201421527_AddIsVisibleToCourseReviews"; }
+            get { return "202509250925417_UpdateCourseChapters"; }
         }
         
         string IMigrationMetadata.Source

@@ -22,7 +22,7 @@ namespace paradise.Models
         [StringLength(255)]
         public string chapter_title { get; set; }
 
-        [Required]
+       
         public string chapter_description { get; set; }
 
         public int display_order { get; set; }
