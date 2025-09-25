@@ -150,6 +150,18 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a href="@Url.Action("Index", "AdminCourse", new { area = "Admin" })"
+                   class="nav-link text-dark d-flex align-items-center text-sm">
+                    <i class="bi bi-journal-text"></i> Khóa học
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="@Url.Action("Index", "AdminCourse_chapters", new { area = "Admin" })"
+                   class="nav-link text-dark d-flex align-items-center text-sm">
+                    <i class="bi bi-journal"></i> Chương
+                </a>
+            </li>
+            <li class="nav-item">
                 <a href="@Url.Action("Index", "AdminCourse_Reviews", new { area = "Admin" })"
                    class="nav-link text-dark d-flex align-items-center text-sm">
                     <i class="bi bi-credit-card-2-front"></i> Đánh Giá Khóa Học

@@ -1,0 +1,164 @@
+﻿@model paradise.Models.course_chapters
+
+@{
+    ViewBag.Title = "Chỉnh sửa chương học";
+}
+
+<div class="page-container">
+    <h4 class="fw-bold m-0">Chỉnh sửa chương học</h4>
+
+    <div class="page-content">
+        @using (Html.BeginForm("Edit", "AdminCourse_chapters", FormMethod.Post, new { area = "Admin", id = "chapterForm", novalidate = "novalidate" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.id)
+
+        <div class="form-card row g-3">
+            <!-- Khóa học -->
+            <div class="col-md-6 form-group">
+                @Html.LabelFor(m => m.course_id, "Khóa học")
+                @Html.DropDownListFor(m => m.course_id,
+                    (SelectList)ViewBag.course_id,
+                    new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.course_id, "", new { @class = "text-danger" })
+            </div>
+
+            <!-- Tiêu đề chương -->
+            <div class="col-md-6 form-group">
+                @Html.LabelFor(m => m.chapter_title, "Tiêu đề chương")
+                @Html.TextBoxFor(m => m.chapter_title, new { @class = "form-control", placeholder = "Nhập tên chương..." })
+                @Html.ValidationMessageFor(m => m.chapter_title, "", new { @class = "text-danger" })
+            </div>
+            <!-- Thứ tự hiển thị -->
+            <div class="col-md-6 form-group">
+                @Html.LabelFor(m => m.display_order, "Thứ tự hiển thị")
+                @Html.TextBoxFor(m => m.display_order, new { @class = "form-control", type = "number", min = "0" })
+                @Html.ValidationMessageFor(m => m.display_order, "", new { @class = "text-danger" })
+            </div>
+            <!-- Mô tả -->
+            <div class="col-6 form-group">
+                @Html.LabelFor(m => m.chapter_description, "Mô tả")
+                @Html.TextAreaFor(m => m.chapter_description, 4, 50, new { @class = "form-control", placeholder = "Mô tả nội dung chương..." })
+                @Html.ValidationMessageFor(m => m.chapter_description, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+            <!-- Actions -->
+            <div class="actions">
+                <a href="@Url.Action("Index", "AdminCourse_chapters", new { area = "Admin" })" class="btn-secondary">Hủy bỏ</a>
+                <button type="submit" class="btn-primary">Xác nhận</button>
+            </div>
+        }
+    </div>
+</div>
+<style>
+    /* Page Layout */
+    .page-container {
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .page-content {
+        max-width: 900px;
+        margin: 0 auto;
+        margin-top: 60px;
+    }
+
+    /* Card */
+    .form-card {
+        border-radius: 1rem;
+        padding: 2.5rem;
+        background: #fff;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease-in-out;
+    }
+
+        .form-card:hover {
+            box-shadow: 0 10px 32px rgba(0, 0, 0, 0.08);
+        }
+
+    /* Labels */
+    .form-group label {
+        font-weight: 500;
+        font-size: 0.9rem;
+        color: #374151;
+        margin-bottom: 0.4rem;
+        display: block;
+    }
+
+    /* Inputs & Selects */
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 0.85rem 1rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.25rem;
+        font-size: 0.95rem;
+        background-color: #fafafa;
+        color: #111827;
+        transition: all 0.2s ease-in-out;
+    }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+            background-color: #ffffff;
+        }
+
+    /* Error text */
+    .error-text {
+        font-size: 0.8rem;
+        color: #ef4444;
+        margin-top: 0.25rem;
+    }
+
+    /* Actions */
+    .actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+
+    /* Buttons */
+    .btn-primary {
+        background: #111827;
+        color: #fff;
+        padding: 0.85rem 1.75rem;
+        border-radius: 0.5rem;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.25s ease;
+    }
+
+        .btn-primary:hover {
+            background: #1f2937;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+        }
+
+    .btn-secondary {
+        background: #f9fafb;
+        color: #374151;
+        padding: 0.85rem 1.75rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        text-decoration: none;
+        border: 1px solid #e5e7eb;
+        transition: all 0.25s ease;
+    }
+
+        .btn-secondary:hover {
+            background: #f3f4f6;
+            color: #111827;
+            transform: translateY(-2px);
+        }
+</style>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Helpers/custom-validation.js"></script>
+}
