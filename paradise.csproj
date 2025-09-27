@@ -222,8 +222,10 @@
     <Compile Include="Areas\Admin\Controllers\AdminCourseController.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminCourse_chaptersController.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminCourse_EnrollmentsController.cs" />
+    <Compile Include="Areas\Admin\Controllers\AdminCourse_lessonsController.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminCourse_ReviewsController.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminHomeController.cs" />
+    <Compile Include="Areas\Admin\Controllers\AdminLesson_contentsController.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminUsersController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\usersController.cs" />
@@ -241,6 +243,7 @@
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AppDbContext.cs" />
     <Compile Include="Models\cours.cs" />
+    <Compile Include="Models\CourseFullCreateVm.cs" />
     <Compile Include="Models\course_chapters.cs" />
     <Compile Include="Models\course_enrollments.cs" />
     <Compile Include="Models\course_lessons.cs" />
@@ -322,6 +325,16 @@
     <Content Include="Areas\Admin\Views\AdminCourse_chapters\Details.cshtml" />
     <Content Include="Areas\Admin\Views\AdminCourse_chapters\Edit.cshtml" />
     <Content Include="Areas\Admin\Views\AdminCourse_chapters\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminLesson_contents\Create.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminLesson_contents\Delete.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminLesson_contents\Details.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminLesson_contents\Edit.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminLesson_contents\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminCourse_lessons\Create.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminCourse_lessons\Delete.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminCourse_lessons\Details.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminCourse_lessons\Edit.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminCourse_lessons\Index.cshtml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />

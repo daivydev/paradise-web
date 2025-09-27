@@ -45,6 +45,9 @@
         [Column(TypeName = "datetime2")]
         public DateTime updated_at { get; set; }
 
+        public bool is_visible { get; set; } = true;
+
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<course_chapters> course_chapters { get; set; }
 

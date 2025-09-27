@@ -206,5 +206,21 @@ namespace paradise.Areas.Admin.Controllers
             if (disposing) db.Dispose();
             base.Dispose(disposing);
         }
+        [HttpPost]
+        public ActionResult UpdateVisibility(long id, bool isVisible)
+        {
+            var review = db.courses.Find(id);
+            if (review == null)
+            {
+                return Json(new { success = false });
+            }
+
+            review.is_visible = isVisible;
+            review.updated_at = DateTime.Now;
+            db.SaveChanges();
+
+            return Json(new { success = true, isVisible = review.is_visible });
+        }
+
     }
 }
