@@ -1,4 +1,4 @@
-namespace paradise.Models
+﻿namespace paradise.Models
 {
     using System;
     using System.Collections.Generic;
@@ -15,19 +15,21 @@ namespace paradise.Models
             lesson_progress = new HashSet<lesson_progress>();
             lesson_quizzes = new HashSet<lesson_quizzes>();
         }
-
+        [Key]
         public long id { get; set; }
 
+        [Required(ErrorMessage = "Vui lòng chọn chương")]
         public long chapter_id { get; set; }
 
-        [Required]
-        [StringLength(255)]
+        [Required(ErrorMessage = "Vui lòng nhập tiêu đề bài học")]
+        [StringLength(255, ErrorMessage = "Tiêu đề tối đa 255 ký tự")]
         public string lesson_title { get; set; }
-
+        [Range(1, int.MaxValue, ErrorMessage = "Thứ tự phải lớn hơn 0")]
         public int display_order { get; set; }
 
         [Column(TypeName = "datetime2")]
         public DateTime created_at { get; set; }
+   
 
         public virtual course_chapters course_chapters { get; set; }
 

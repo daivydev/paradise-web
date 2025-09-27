@@ -1,0 +1,82 @@
+﻿@model paradise.Models.course_lessons
+@{
+    ViewBag.Title = "Thêm mới bài học";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayoutPage1.cshtml";
+}
+
+<link href="~/Content/custom-css/CreateView.css" rel="stylesheet" />
+
+<div class="page-container">
+    <h4 class="fw-bold m-0">Tạo mới bài học</h4>
+
+    <div class="page-content">
+        @using (Html.BeginForm("Create", "AdminCourse_lessons", FormMethod.Post, new { area = "Admin", id = "lessonForm", novalidate = "novalidate" }))
+        {
+            <div class="form-card row g-3">
+                <!-- Chương -->
+                <div class="col-md-6 form-group">
+                    @Html.LabelFor(m => m.chapter_id, "Chương")
+                    @Html.DropDownListFor(m => m.chapter_id,
+                        (SelectList)ViewBag.chapter_id,
+                        "-- Chọn chương --",
+                        new { @class = "form-control" })
+                    @Html.ValidationMessageFor(m => m.chapter_id, "", new { @class = "text-danger" })
+                </div>
+
+                <!-- Tiêu đề bài học -->
+                <div class="col-md-6 form-group">
+                    @Html.LabelFor(m => m.lesson_title, "Tiêu đề bài học")
+                    @Html.TextBoxFor(m => m.lesson_title, new { @class = "form-control", placeholder = "Nhập tiêu đề bài học..." })
+                    @Html.ValidationMessageFor(m => m.lesson_title, "", new { @class = "text-danger" })
+                </div>
+
+                <!-- Thứ tự hiển thị -->
+                <div class="col-md-6 form-group">
+                    @Html.LabelFor(m => m.display_order, "Thứ tự hiển thị")
+                    @Html.TextBoxFor(m => m.display_order, new { @class = "form-control", type = "number", min = "0", placeholder = "Thứ tự" })
+                    @Html.ValidationMessageFor(m => m.display_order, "", new { @class = "text-danger" })
+                </div>
+
+                <!-- Ngày tạo -->
+                <div class="col-md-6 form-group">
+                    @Html.LabelFor(m => m.created_at, "Ngày tạo")
+                    @Html.TextBoxFor(m => m.created_at, "{0:yyyy-MM-dd}",
+                        new { @class = "form-control", type = "date" })
+                    @Html.ValidationMessageFor(m => m.created_at, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="actions">
+                <a href="@Url.Action("Index", "AdminCourse_lessons", new { area = "Admin" })" class="btn-secondary">Hủy bỏ</a>
+                @Html.AntiForgeryToken()
+                <button type="submit" class="btn-primary">Xác nhận</button>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        @if (ViewData.ModelState.ContainsKey("CustomError"))
+        {
+            var errors = ViewData.ModelState["CustomError"].Errors;
+            foreach (var error in errors)
+            {
+                @:Toastify({
+                @:  text: @Html.Raw(Json.Encode(error.ErrorMessage)),
+                @:  duration: 3000,
+                @:  gravity: "top",
+                @:  position: "right",
+                @:  backgroundColor: "linear-gradient(to right, #ef4444, #dc2626)",
+                @:  close: true
+                @:}).showToast();
+            }
+        }
+    });
+</script>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Helpers/custom-validation.js"></script>
+}

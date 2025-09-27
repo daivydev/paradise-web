@@ -1,0 +1,131 @@
+﻿@model IEnumerable<paradise.Models.course_lessons>
+
+@{
+    ViewBag.Title = "Quản lý bài học";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayoutPage1.cshtml";
+}
+
+<link href="~/Content/custom-css/ListView.css" rel="stylesheet" />
+
+@{ Html.RenderPartial("OverLayLoading", "AdminCourse_lessons"); }
+
+<h4 class="fw-bold m-0">Quản lý bài học</h4>
+
+<div class="d-flex justify-content-between align-items-center mt-5">
+    @{
+        Html.RenderPartial("SearchingBar", Tuple.Create("Tìm chương hoặc tiêu đề bài học", "AdminCourse_lessons"));
+        Html.RenderPartial("AddingButton", Tuple.Create("AdminCourse_lessons"));
+    }
+</div>
+
+<div class="table-responsive overflow-hidden mt-2 p-4">
+    <table class="table align-middle mb-0">
+        <thead>
+            <tr>
+                <th>Chương</th>
+                <th>Tiêu đề bài học</th>
+                @*<th class="text-center">Thứ tự</th>*@
+                @*<th>Hiển thị</th>*@
+                <th>Ngày tạo</th>
+                <th class="text-center">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model?.Any() == true)
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@(item?.course_chapters?.chapter_title ?? "—")</td>
+                        <td>@(item?.lesson_title ?? "—")</td>
+                        @*<td class="text-center">@item.display_order</td>*@
+                        <td>@(item?.created_at.ToString("dd/MM/yyyy") ?? "")</td>
+
+                        <td class="action-icons">
+                            <div class="dropdown">
+                                <div class="cursor-pointer d-flex align-items-center justify-content-center text-dark text-decoration-none"
+                                     id="dropdownActions-@item.id"
+                                     data-bs-toggle="dropdown" aria-expanded="false">
+                                    <button class="icon-btn">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                </div>
+                                <ul class="dropdown-menu custom-dropdown shadow bg-white" aria-labelledby="dropdownActions-@item?.id">
+                                    <li>
+                                        <a href="@Url.Action("Edit", "AdminCourse_lessons", new { area = "Admin", id = item?.id })" class="text-decoration-none">
+                                            <button class="action_btn">Chỉnh sửa</button>
+                                        </a>
+                                    </li>
+                                    @*<li>
+                                        <a href="@Url.Action("Details", "AdminCourse_lessons", new { area = "Admin", id = item?.id })" class="text-decoration-none">
+                                            <button class="action_btn">Chi tiết</button>
+                                        </a>
+                                    </li>*@
+                                    <li>
+                                        <button class="action_btn" title="Delete"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteModal"
+                                                data-lessonid="@item.id"
+                                                data-lessontitle="@item.lesson_title">
+                                            Xóa
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center text-muted p-5">Không có dữ liệu.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @{
+        Html.RenderPartial(
+            "Pagination",
+            Tuple.Create((int)(ViewBag.Page ?? 1), (int)(ViewBag.TotalPages ?? 1), "Index", (string)ViewBag.Search)
+        );
+    }
+</div>
+
+<!-- Modal xác nhận xóa -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-3">
+            <div class="modal-header bg-dark text-white rounded-top-3">
+                <h5 class="modal-title fw-semibold">Xác nhận xóa</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa bài học <strong id="deleteLessonTitle"></strong> không?</p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" method="post" action="">
+                    @Html.AntiForgeryToken()
+                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-dark shadow-sm">Xóa</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const lessonId = button.getAttribute('data-lessonid');
+        const lessonTitle = button.getAttribute('data-lessontitle') || '';
+
+        document.getElementById('deleteLessonTitle').textContent = lessonTitle;
+
+        // Đúng controller: AdminCourse_lessons
+        const form = document.getElementById('deleteForm');
+        form.action = '@Url.Action("Delete", "AdminCourse_lessons", new { area = "Admin" })/' + lessonId;
+    });
+</script>

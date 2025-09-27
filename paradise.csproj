@@ -220,6 +220,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminCourse_EnrollmentsController.cs" />
+    <Compile Include="Areas\Admin\Controllers\AdminCourse_lessonsController.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminCourse_ReviewsController.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminHomeController.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminUsersController.cs" />
@@ -227,10 +228,6 @@
     <Compile Include="Controllers\usersController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202509201421527_AddIsVisibleToCourseReviews.cs" />
-    <Compile Include="Migrations\202509201421527_AddIsVisibleToCourseReviews.Designer.cs">
-      <DependentUpon>202509201421527_AddIsVisibleToCourseReviews.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AppDbContext.cs" />
@@ -306,6 +303,11 @@
     <Content Include="Content\custom-css\ListView.css" />
     <Content Include="Areas\Admin\Views\Shared\AddingButton.cshtml" />
     <Content Include="Areas\Admin\Views\Shared\ExportButton.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminCourse_lessons\Create.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminCourse_lessons\Delete.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminCourse_lessons\Details.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminCourse_lessons\Edit.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminCourse_lessons\Index.cshtml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -368,11 +370,6 @@
     <Content Include="Scripts\bootstrap.bundle.js.map" />
     <Content Include="Scripts\jquery-3.7.0.slim.min.map" />
     <Content Include="Scripts\jquery-3.7.0.min.map" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Migrations\202509201421527_AddIsVisibleToCourseReviews.resx">
-      <DependentUpon>202509201421527_AddIsVisibleToCourseReviews.cs</DependentUpon>
-    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
