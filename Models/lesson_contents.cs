@@ -24,6 +24,7 @@ namespace paradise.Models
 
         [Column(TypeName = "datetime2")]
         public DateTime created_at { get; set; }
+        public bool is_visible { get; set; } = true;
 
         public virtual course_lessons course_lessons { get; set; }
     }

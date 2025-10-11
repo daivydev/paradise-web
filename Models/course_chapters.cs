@@ -20,6 +20,7 @@ namespace paradise.Models
 
         [Required]
         [StringLength(255)]
+        [Column(TypeName = "nvarchar")]   // ép NVARCHAR 
         public string chapter_title { get; set; }
 
        
@@ -29,6 +30,7 @@ namespace paradise.Models
 
         [Column(TypeName = "datetime2")]
         public DateTime created_at { get; set; }
+        public bool is_visible { get; set; } = true;
 
         public virtual cours cours { get; set; }
 
