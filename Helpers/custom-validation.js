@@ -8,7 +8,6 @@ $(function () {
         form.removeData("validator");
         form.removeData("unobtrusiveValidation");
         $.validator.unobtrusive.parse(form);
-
         // Cấu hình lại validate
         form.validate({
             onkeyup: function (element) {

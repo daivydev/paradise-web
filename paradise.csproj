@@ -240,6 +240,10 @@
     <Compile Include="Migrations\202509250925417_UpdateCourseChapters.Designer.cs">
       <DependentUpon>202509250925417_UpdateCourseChapters.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202509291014082_NvarcharForTitleChapters.cs" />
+    <Compile Include="Migrations\202509291014082_NvarcharForTitleChapters.Designer.cs">
+      <DependentUpon>202509291014082_NvarcharForTitleChapters.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AppDbContext.cs" />
     <Compile Include="Models\cours.cs" />
@@ -404,6 +408,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202509250925417_UpdateCourseChapters.resx">
       <DependentUpon>202509250925417_UpdateCourseChapters.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202509291014082_NvarcharForTitleChapters.resx">
+      <DependentUpon>202509291014082_NvarcharForTitleChapters.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

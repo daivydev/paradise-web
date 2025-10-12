@@ -28,6 +28,8 @@
 
         [Required(ErrorMessage = "Vui lòng nhập tiêu đề khóa học")]
         [StringLength(255)]
+        [Column(TypeName = "nvarchar")]   // ép NVARCHAR 
+
         public string course_title { get; set; }
 
         public string course_description { get; set; }
