@@ -1,0 +1,125 @@
+﻿@model IEnumerable<paradise.Models.quiz>
+
+@{
+    ViewBag.Title = "Quiz Management";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayoutPage1.cshtml";
+    var page = (int)(ViewBag.Page ?? 1);
+    var totalPages = (int)(ViewBag.TotalPages ?? 1);
+    var search = (string)(ViewBag.Search ?? "");
+}
+
+<link href="~/Content/custom-css/IndexView.css" rel="stylesheet" />
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="m-0">Quiz Management</h4>
+    <a href="@Url.Action("Create","AdminQuizs", new { area="Admin" })" class="btn btn-dark btn-dark-modern">
+        Create New
+    </a>
+</div>
+
+@using (Html.BeginForm("Index", "AdminQuizs", FormMethod.Get, new { area = "Admin", @class = "mb-3" }))
+{
+    <div class="input-group">
+        <input type="text" name="search" value="@search" class="form-control" placeholder="Tìm theo tiêu đề hoặc chủ đề...">
+        <button class="btn btn-outline-secondary" type="submit">Search</button>
+        @if (!string.IsNullOrWhiteSpace(search))
+        {
+            <a class="btn btn-outline-danger" href="@Url.Action("Index","AdminQuizs", new { area="Admin" })" title="Clear">×</a>
+        }
+    </div>
+}
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th>Chủ đề</th>
+                <th>Tiêu đề</th>
+                <th class="text-center">Thời lượng (phút)</th>
+                <th class="text-center">Số câu</th>
+                <th>Ngày tạo</th>
+                <th class="text-end">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.topic_quiz?.title</td>
+                        <td class="fw-semibold">@item.title</td>
+                        <td class="text-center">@item.time</td>       
+                        <td class="text-center">@item.quantity</td>
+                        <td>@(item.created_at.HasValue ? item.created_at.Value.ToString("dd/MM/yyyy HH:mm") : "")</td>
+                        <td class="text-end">
+                            <a class="btn btn-sm btn-light" href="@Url.Action("Edit","AdminQuizs", new { area="Admin", id = item.id })" title="Edit">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <a class="btn btn-sm btn-outline-secondary" href="@Url.Action("Details","AdminQuizs", new { area="Admin", id = item.id })" title="Details">
+                                <i class="bi bi-card-text"></i>
+                            </a>
+                            <button class="btn btn-sm btn-outline-danger"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#deleteModal"
+                                    data-id="@item.id"
+                                    data-name="@item.title"
+                                    title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr><td colspan="7" class="text-center text-muted">Không có dữ liệu</td></tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@Html.Partial("~/Areas/Admin/Views/Shared/_Pagination.cshtml",
+    new System.Tuple<int, int, string, string>(page, totalPages, "Index", search)
+)
+
+<!-- Modal xác nhận xóa -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            @* Controller có [HttpPost, ActionName("Delete")] *@
+            <form id="deleteForm" method="post" action="">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Xóa quiz</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                </div>
+                <div class="modal-body">
+                    Bạn có chắc muốn xóa "<span id="delName"></span>"?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger">Xóa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+  var deleteModal = document.getElementById('deleteModal');
+  if (deleteModal) {
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+      var button = event.relatedTarget;
+      var id = button.getAttribute('data-id');
+      var name = button.getAttribute('data-name') || '';
+      document.getElementById('delName').textContent = name;
+
+      // /Admin/AdminQuizs/Delete/{id}
+      var actionBase = '@Url.Action("Delete","AdminQuizs", new { area="Admin" })';
+      document.getElementById('deleteForm').setAttribute('action', actionBase + '/' + id);
+    });
+  }
+    </script>
+}

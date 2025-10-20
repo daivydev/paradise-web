@@ -1,4 +1,4 @@
-﻿@model paradise.Models.course_lessons
+﻿@model paradise.Models.quiz
 
 @{
     ViewBag.Title = "Details";
@@ -8,31 +8,31 @@
 <h2>Details</h2>
 
 <div>
-    <h4>course_lessons</h4>
+    <h4>quiz</h4>
     <hr />
     <dl class="dl-horizontal">
         <dt>
-            @Html.DisplayNameFor(model => model.course_chapters.chapter_title)
+            @Html.DisplayNameFor(model => model.course_lessons.lesson_title)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.course_chapters.chapter_title)
+            @Html.DisplayFor(model => model.course_lessons.lesson_title)
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.lesson_title)
+            @Html.DisplayNameFor(model => model.quiz_topics.title)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.lesson_title)
+            @Html.DisplayFor(model => model.quiz_topics.title)
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.display_order)
+            @Html.DisplayNameFor(model => model.quiz_title)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.display_order)
+            @Html.DisplayFor(model => model.quiz_title)
         </dd>
 
         <dt>

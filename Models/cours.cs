@@ -17,6 +17,7 @@ namespace paradise.Models
             course_reviews = new HashSet<course_reviews>();
         }
 
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long id { get; set; }
 
         public long topics_id { get; set; }
@@ -24,9 +25,10 @@ namespace paradise.Models
         public long author_id { get; set; }
 
         [Required]
-        [StringLength(255)]
+        [StringLength(1)]
         public string course_title { get; set; }
 
+        [StringLength(1)]
         public string course_description { get; set; }
 
         [StringLength(255)]
@@ -34,11 +36,11 @@ namespace paradise.Models
 
         public decimal price { get; set; }
 
-        [Column(TypeName = "datetime2")]
-        public DateTime created_at { get; set; }
+        public DateTime? created_at { get; set; }
 
-        [Column(TypeName = "datetime2")]
-        public DateTime updated_at { get; set; }
+        public DateTime? updated_at { get; set; }
+
+        public bool is_visible { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<course_chapters> course_chapters { get; set; }

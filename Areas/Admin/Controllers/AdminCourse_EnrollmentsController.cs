@@ -187,7 +187,6 @@ namespace paradise.Areas.Admin.Controllers
                 return RedirectToAction("Index");
 
             var enrollmentsToAdd = new List<course_enrollments>();
-            var usersToAdd = new List<user>();
             var random = new Random();
 
             using (var workbook = new XLWorkbook(file.InputStream))
@@ -206,45 +205,67 @@ namespace paradise.Areas.Admin.Controllers
                     if (string.IsNullOrEmpty(firstName) || string.IsNullOrEmpty(lastName))
                         continue;
 
+                    // Parse DOB với nhiều định dạng, kết quả là nullable
                     DateTime? dob = null;
-                    if (DateTime.TryParse(dobText, out DateTime dobValue))
-                        dob = dobValue;
+                    var fmts = new[] { "dd/MM/yyyy", "d/M/yyyy", "yyyy-MM-dd", "MM/dd/yyyy", "M/d/yyyy" };
+                    foreach (var f in fmts)
+                    {
+                        if (DateTime.TryParseExact(dobText, f, CultureInfo.InvariantCulture,
+                                                   DateTimeStyles.None, out var parsed))
+                        {
+                            dob = parsed;
+                            break;
+                        }
+                    }
+                    // Nếu parse thường cũng được thì chấp nhận
+                    if (!dob.HasValue && DateTime.TryParse(dobText, out var parsed2))
+                        dob = parsed2;
 
+                    // SQL Server không nhận < 1753-01-01
+                    var sqlMin = new DateTime(1753, 1, 1);
+                    var defaultDob = new DateTime(2000, 1, 1); // fallback an toàn
+                    DateTime dobForInsert = dob.HasValue
+                        ? (dob.Value < sqlMin ? defaultDob : dob.Value)
+                        : defaultDob;
 
+                    // Tự sinh email + đảm bảo không trùng
+                    string cleanFirst = RemoveVietnameseSigns(firstName).ToLower().Replace(" ", "");
+                    string cleanLast = RemoveVietnameseSigns(lastName).ToLower().Replace(" ", "");
+                    string email;
+                    int guard = 0;
+                    do
+                    {
+                        email = $"{cleanFirst}{cleanLast}{random.Next(1000, 9999)}@example.com";
+                    } while (db.users.Any(u => u.email == email) && ++guard < 20);
 
-                    // Tự sinh email
-                    string cleanFirstName = RemoveVietnameseSigns(firstName).ToLower().Trim().Replace(" ", "").Replace("  ", " ");
-                    string cleanLastName = RemoveVietnameseSigns(lastName).ToLower().Trim().Replace(" ", "").Replace("  ", " ");
-                    string email = $"{cleanFirstName}{cleanLastName}{random.Next(1000, 9999)}@example.com".ToLower();
-
-                    string genderDb = "Other"; // mặc định nếu không xác định
-
+                    // Map gender
+                    string genderDb = "Other";
                     if (!string.IsNullOrEmpty(gender))
                     {
                         var g = gender.Trim().ToLower();
                         if (g == "male" || g == "nam") genderDb = "Male";
-                        else if (g == "female" || g == "nữ") genderDb = "Female";
-                        else genderDb = "Other";
+                        else if (g == "female" || g == "nữ" || g == "nu") genderDb = "Female";
                     }
 
-                    // Kiểm tra user đã tồn tại chưa
+                    // Tìm user theo email (rất hiếm khi trùng vì đã check ở trên)
                     var user = db.users.FirstOrDefault(u => u.email == email);
                     if (user == null)
                     {
                         user = new user
                         {
                             email = email,
-                            password = cleanFirstName + cleanLastName + "@P123",
+                            password = cleanFirst + cleanLast + "@P123",
                             created_at = DateTime.Now,
                             updated_at = DateTime.Now,
                             user_profiles = new user_profiles
                             {
                                 first_name = firstName,
                                 last_name = lastName,
-                                phone_number = string.IsNullOrEmpty(phone) ? null : phone,
+                                phone_number = string.IsNullOrWhiteSpace(phone) ? null : phone,
                                 gender = genderDb,
-                                date_of_birth = dob,
-                                role_id = 2,
+                                // FIX CS0266: gán DateTime non-nullable bằng giá trị an toàn
+                                date_of_birth = dobForInsert,
+                                role_id = 3, // Student
                                 created_at = DateTime.Now,
                                 updated_at = DateTime.Now
                             }
@@ -254,8 +275,9 @@ namespace paradise.Areas.Admin.Controllers
                         db.SaveChanges();
                     }
 
-                    // Kiểm tra enroll đã tồn tại chưa
-                    bool alreadyEnrolled = db.course_enrollments.Any(e => e.user_id == user.id && e.course_id == course_id);
+                    // Enroll nếu chưa có
+                    bool alreadyEnrolled = db.course_enrollments
+                                             .Any(e => e.user_id == user.id && e.course_id == course_id);
                     if (!alreadyEnrolled)
                     {
                         enrollmentsToAdd.Add(new course_enrollments
@@ -276,6 +298,7 @@ namespace paradise.Areas.Admin.Controllers
 
             return RedirectToAction("Index");
         }
+
 
 
 

@@ -1,0 +1,42 @@
+﻿@model paradise.Models.quiz
+@{
+    ViewBag.Title = "Chi tiết quiz";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayoutPage1.cshtml";
+}
+<link href="~/Content/custom-css/CreateView.css" rel="stylesheet" />
+
+<div class="page-container">
+    <h4 class="fw-bold m-0">Chi tiết quiz</h4>
+
+    <div class="page-content">
+        <div class="form-card">
+            <dl class="row mb-0">
+                <dt class="col-sm-3">Tiêu đề</dt>
+                <dd class="col-sm-9">@Model.title</dd>
+
+                <dt class="col-sm-3">Chủ đề</dt>
+                <dd class="col-sm-9">@Model.topic_quiz?.title</dd>
+
+                <dt class="col-sm-3">Thời lượng (phút)</dt>
+                <dd class="col-sm-9">@Model.time</dd>
+
+                <dt class="col-sm-3">Không giới hạn</dt>
+                <dd class="col-sm-9">@((Model.is_infinity ?? false) ? "Có" : "Không")</dd>
+
+                <dt class="col-sm-3">Số câu</dt>
+                <dd class="col-sm-9">@Model.quantity</dd>
+
+                <dt class="col-sm-3">Tạo lúc</dt>
+                <dd class="col-sm-9">@Model.created_at?.ToString("dd/MM/yyyy HH:mm")</dd>
+
+                <dt class="col-sm-3">Cập nhật</dt>
+                <dd class="col-sm-9">@Model.updated_at?.ToString("dd/MM/yyyy HH:mm")</dd>
+            </dl>
+
+            <div class="mt-3">
+                <a class="btn btn-secondary" href="@Url.Action("Index","AdminQuizs", new { area="Admin"})">Về danh sách</a>
+                <a class="btn btn-primary" href="@Url.Action("Edit","AdminQuizs", new { area="Admin", id = Model.id })">Sửa</a>
+            </div>
+        </div>
+    </div>
+</div>

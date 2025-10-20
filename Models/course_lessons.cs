@@ -1,4 +1,4 @@
-﻿namespace paradise.Models
+namespace paradise.Models
 {
     using System;
     using System.Collections.Generic;
@@ -13,23 +13,22 @@
         {
             lesson_contents = new HashSet<lesson_contents>();
             lesson_progress = new HashSet<lesson_progress>();
-            lesson_quizzes = new HashSet<lesson_quizzes>();
         }
-        [Key]
+
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long id { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng chọn chương")]
         public long chapter_id { get; set; }
 
-        [Required(ErrorMessage = "Vui lòng nhập tiêu đề bài học")]
-        [StringLength(255, ErrorMessage = "Tiêu đề tối đa 255 ký tự")]
+        [Required]
+        [StringLength(1)]
         public string lesson_title { get; set; }
-        [Range(1, int.MaxValue, ErrorMessage = "Thứ tự phải lớn hơn 0")]
+
         public int display_order { get; set; }
 
-        [Column(TypeName = "datetime2")]
-        public DateTime created_at { get; set; }
-   
+        public DateTime? created_at { get; set; }
+
+        public bool is_visible { get; set; }
 
         public virtual course_chapters course_chapters { get; set; }
 
@@ -38,8 +37,5 @@
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<lesson_progress> lesson_progress { get; set; }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<lesson_quizzes> lesson_quizzes { get; set; }
     }
 }

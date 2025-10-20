@@ -220,14 +220,18 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminCourse_EnrollmentsController.cs" />
-    <Compile Include="Areas\Admin\Controllers\AdminCourse_lessonsController.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminCourse_ReviewsController.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminHomeController.cs" />
+    <Compile Include="Areas\Admin\Controllers\AdminQuizsController.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminUsersController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\usersController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202510171557524_RebuildQuizSchema.cs" />
+    <Compile Include="Migrations\202510171557524_RebuildQuizSchema.Designer.cs">
+      <DependentUpon>202510171557524_RebuildQuizSchema.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AppDbContext.cs" />
@@ -238,17 +242,19 @@
     <Compile Include="Models\course_reviews.cs" />
     <Compile Include="Models\lesson_contents.cs" />
     <Compile Include="Models\lesson_progress.cs" />
-    <Compile Include="Models\lesson_quizzes.cs" />
+    <Compile Include="Models\quiz.cs" />
     <Compile Include="Models\quiz_attempts.cs" />
     <Compile Include="Models\quiz_attempt_answers.cs" />
     <Compile Include="Models\quiz_options.cs" />
     <Compile Include="Models\quiz_questions.cs" />
     <Compile Include="Models\role.cs" />
-    <Compile Include="Models\sysdiagram.cs" />
     <Compile Include="Models\topic.cs" />
+    <Compile Include="Models\topic_quiz.cs" />
     <Compile Include="Models\user.cs" />
     <Compile Include="Models\user_profiles.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModels\QuizCreateVm.cs" />
+    <Compile Include="ViewModels\QuizEditVm.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\Admin\Views\AdminHome\Index.cshtml" />
@@ -303,11 +309,17 @@
     <Content Include="Content\custom-css\ListView.css" />
     <Content Include="Areas\Admin\Views\Shared\AddingButton.cshtml" />
     <Content Include="Areas\Admin\Views\Shared\ExportButton.cshtml" />
-    <Content Include="Areas\Admin\Views\AdminCourse_lessons\Create.cshtml" />
-    <Content Include="Areas\Admin\Views\AdminCourse_lessons\Delete.cshtml" />
-    <Content Include="Areas\Admin\Views\AdminCourse_lessons\Details.cshtml" />
-    <Content Include="Areas\Admin\Views\AdminCourse_lessons\Edit.cshtml" />
-    <Content Include="Areas\Admin\Views\AdminCourse_lessons\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Quizs\Create.cshtml" />
+    <Content Include="Areas\Admin\Views\Quizs\Delete.cshtml" />
+    <Content Include="Areas\Admin\Views\Quizs\Details.cshtml" />
+    <Content Include="Areas\Admin\Views\Quizs\Edit.cshtml" />
+    <Content Include="Areas\Admin\Views\Quizs\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminQuizs\Create.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminQuizs\Delete.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminQuizs\Details.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminQuizs\Edit.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminQuizs\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Shared\_Pagination.cshtml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -370,6 +382,11 @@
     <Content Include="Scripts\bootstrap.bundle.js.map" />
     <Content Include="Scripts\jquery-3.7.0.slim.min.map" />
     <Content Include="Scripts\jquery-3.7.0.min.map" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Migrations\202510171557524_RebuildQuizSchema.resx">
+      <DependentUpon>202510171557524_RebuildQuizSchema.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

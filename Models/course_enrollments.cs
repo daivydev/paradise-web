@@ -8,14 +8,14 @@ namespace paradise.Models
 
     public partial class course_enrollments
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long id { get; set; }
 
-        public long course_id { get; set; }
+        public long? course_id { get; set; }
 
-        public long user_id { get; set; }
+        public long? user_id { get; set; }
 
-        [Column(TypeName = "datetime2")]
-        public DateTime enrolled_at { get; set; }
+        public DateTime? enrolled_at { get; set; }
 
         public virtual cours cours { get; set; }
 
