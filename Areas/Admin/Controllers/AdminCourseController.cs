@@ -97,21 +97,21 @@ namespace paradise.Areas.Admin.Controllers
         [HttpGet]
         public ActionResult Create()
         {
-            
-                //Tạo dropdown
-                ViewBag.topics_id = new SelectList(db.topics.ToList(), "id", "topic_name");
-                ViewBag.author_id = new SelectList(db.users.ToList(), "id", "email");
 
-                var vm = new CourseFullCreateVm();
-                // seed 1 chapter > 1 lesson > 1 content để form có sẵn
-                vm.Chapters.Add(new ChapterVm
-                {
-                    Lessons = { new LessonVm { Contents = { new LessonContentVm() } } }
-                });
+            //Tạo dropdown
+            ViewBag.topics_id = new SelectList(db.topics.ToList(), "id", "topic_name");
+            ViewBag.author_id = new SelectList(db.users.ToList(), "id", "email");
 
-                return View(vm);
-          
-            
+            var vm = new CourseFullCreateVm();
+            // seed 1 chapter > 1 lesson > 1 content để form có sẵn
+            vm.Chapters.Add(new ChapterVm
+            {
+                Lessons = { new LessonVm { Contents = { new LessonContentVm() } } }
+            });
+
+            return View(vm);
+
+
         }
 
         // POST: Admin/AdminCourse/Create
@@ -127,7 +127,7 @@ namespace paradise.Areas.Admin.Controllers
             TryValidateModel(vm);
 
             // Validate bổ sung theo nghiệp vụ
-           
+
 
             if (!string.IsNullOrWhiteSpace(vm.course_title) &&
                 db.courses.Any(x => x.course_title.Trim().ToLower() == vm.course_title.Trim().ToLower()
@@ -173,7 +173,7 @@ namespace paradise.Areas.Admin.Controllers
                             chapter_title = ch.chapter_title.Trim(),
                             chapter_description = ch.chapter_description,
                             display_order = ch.display_order ?? chOrd++,
-                            is_visible = ch.is_visible,              
+                            is_visible = ch.is_visible,
                             created_at = DateTime.Now
                         };
                         db.course_chapters.Add(chapter);
@@ -188,7 +188,7 @@ namespace paradise.Areas.Admin.Controllers
                                 chapter_id = chapter.id,
                                 lesson_title = ls.lesson_title.Trim(),
                                 display_order = ls.display_order ?? lsOrd++,
-                                is_visible = ls.is_visible,              
+                                is_visible = ls.is_visible,
                                 created_at = DateTime.Now
                             };
                             db.course_lessons.Add(lesson);
@@ -223,22 +223,39 @@ namespace paradise.Areas.Admin.Controllers
                                     content.content_url = "/Uploads/LessonContents/" + safeName;
 
                                     // (tuỳ chọn) tự gán content_type theo đuôi file
-                                    if (string.IsNullOrWhiteSpace(content.content_type))
+                                    var detected =
+                                    new[] { ".mp4", ".mov", ".mkv", ".webm" }.Contains(ext, StringComparer.OrdinalIgnoreCase) ? "video" :
+                                    ext.Equals(".pdf", StringComparison.OrdinalIgnoreCase) ? "pdf" :
+                                    new[] { ".doc", ".docx" }.Contains(ext, StringComparer.OrdinalIgnoreCase) ? "doc" :
+                                    new[] { ".xlsx", ".xls" }.Contains(ext, StringComparer.OrdinalIgnoreCase) ? "excel" :
+                                    new[] { ".png", ".jpg", ".jpeg", ".gif", ".webp" }.Contains(ext, StringComparer.OrdinalIgnoreCase) ? "image" :
+                                    "file";
+
+                                    // nếu user không chọn loại hoặc chọn "text" thì cho detected đè lên
+                                    if (string.IsNullOrWhiteSpace(content.content_type) ||
+                                        content.content_type.Equals("text", StringComparison.OrdinalIgnoreCase))
                                     {
-                                        content.content_type =
-                                            new[] { ".mp4", ".mov", ".mkv" }.Contains(ext, StringComparer.OrdinalIgnoreCase) ? "video" :
-                                            new[] { ".pdf" }.Contains(ext, StringComparer.OrdinalIgnoreCase) ? "pdf" :
-                                            new[] { ".doc", ".docx" }.Contains(ext, StringComparer.OrdinalIgnoreCase) ? "doc" :
-                                            new[] { ".xlsx", ".xls" }.Contains(ext, StringComparer.OrdinalIgnoreCase) ? "excel" :
-                                            new[] { ".png", ".jpg", ".jpeg", ".gif", ".webp" }.Contains(ext, StringComparer.OrdinalIgnoreCase) ? "image" :
-                                            "file";
+                                        content.content_type = detected;
                                     }
+
                                 }
                                 else
                                 {
                                     // Không có file: nếu bạn vẫn muốn hỗ trợ URL text, dùng content_body làm URL
                                     // (Nếu bạn không cần nữa, có thể bỏ nhánh này)
-                                    content.content_url = ct.content_body;
+                                    var body = ct.content_body;
+                                    var embed = ToYouTubeEmbed(body);
+                                    content.content_url = embed ?? body;
+
+                                    // Nếu là YouTube link, đảm bảo content_type là "video" để view render <iframe>/<video>
+                                    if (!string.IsNullOrWhiteSpace(embed))
+                                    {
+                                        if (string.IsNullOrWhiteSpace(content.content_type)
+                                            || content.content_type.Equals("link", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            content.content_type = "video";
+                                        }
+                                    }
                                 }
 
                                 db.lesson_contents.Add(content);
@@ -411,7 +428,7 @@ namespace paradise.Areas.Admin.Controllers
                             chapter_title = ch.chapter_title.Trim(),
                             chapter_description = ch.chapter_description,
                             display_order = ch.display_order ?? chOrd++,    //nếu tạo thêm 1 chương sẽ tự động + thêm 1 giá trị cho thứ tự chương
-                            is_visible = ch.is_visible,             
+                            is_visible = ch.is_visible,
                             created_at = DateTime.Now
                         };
                         db.course_chapters.Add(chapter);
@@ -428,7 +445,7 @@ namespace paradise.Areas.Admin.Controllers
                                 chapter_id = chapter.id,
                                 lesson_title = ls.lesson_title.Trim(),
                                 display_order = ls.display_order ?? lsOrd++,    //nếu tạo thêm 1 bài thì sẽ tự động + thêm 1 giá trị thứ tự cho bài
-                                is_visible = ls.is_visible,              
+                                is_visible = ls.is_visible,
                                 created_at = DateTime.Now
                             };
                             db.course_lessons.Add(lesson);
@@ -442,11 +459,11 @@ namespace paradise.Areas.Admin.Controllers
                                     continue;
 
                                 var content = new lesson_contents
-                                {   
+                                {
                                     lesson_id = lesson.id,
                                     content_type = (ct.content_type ?? "").Trim(),
                                     content_text = (ct.title ?? "").Trim(),
-                                    display_order = (ct.display_order.HasValue && ct.display_order.Value > 0)? ct.display_order.Value : ctOrd++,
+                                    display_order = (ct.display_order.HasValue && ct.display_order.Value > 0) ? ct.display_order.Value : ctOrd++,
                                     is_visible = ct.is_visible,
                                     created_at = DateTime.Now
                                 };
@@ -478,6 +495,19 @@ namespace paradise.Areas.Admin.Controllers
                                 {
                                     // không upload mới -> dùng URL/text sẵn có
                                     content.content_url = ct.content_body;
+                                    var body = ct.content_body;
+                                    var embed = ToYouTubeEmbed(body);
+                                    content.content_url = embed ?? body;
+
+                                    // Nếu là YouTube link, đảm bảo content_type là "video" để view render <iframe>/<video>
+                                    if (!string.IsNullOrWhiteSpace(embed))
+                                    {
+                                        if (string.IsNullOrWhiteSpace(content.content_type)
+                                            || content.content_type.Equals("link", StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            content.content_type = "video";
+                                        }
+                                    }
                                 }
 
                                 db.lesson_contents.Add(content);
@@ -489,7 +519,7 @@ namespace paradise.Areas.Admin.Controllers
 
                     tx.Commit();
                     TempData["Success"] = "Cập nhật khóa học (Course + Chapter + Lesson + Content) thành công!";
-                    return RedirectToAction("Index");
+                    return RedirectToAction("Details", "AdminCourse", new { area = "Admin", id = course.id });
                 }
                 catch (Exception ex)
                 {
@@ -592,5 +622,31 @@ namespace paradise.Areas.Admin.Controllers
             if (vm.Chapters != null)
                 vm.Chapters = vm.Chapters.Where(c => !IsBlankChapter(c)).ToList();
         }
+        private static string ToYouTubeEmbed(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url)) return null;
+            Uri u;
+            if (!Uri.TryCreate(url.Trim(), UriKind.Absolute, out u)) return null;
+
+            var host = u.Host.ToLowerInvariant();
+            // youtu.be/VIDEOID
+            if (host.Contains("youtu.be"))
+            {
+                var id = u.AbsolutePath.Trim('/');
+                return string.IsNullOrWhiteSpace(id) ? null : $"https://www.youtube.com/embed/{id}";
+            }
+            // youtube.com/*
+            if (host.Contains("youtube.com"))
+            {
+                var q = System.Web.HttpUtility.ParseQueryString(u.Query);
+                var v = q.Get("v");
+                if (!string.IsNullOrWhiteSpace(v)) return $"https://www.youtube.com/embed/{v}";
+                if (u.AbsolutePath.StartsWith("/embed/", StringComparison.OrdinalIgnoreCase))
+                    return $"https://www.youtube.com{u.AbsolutePath}";
+            }
+            return null;
+        }
+
     }
-}
+} 
+     

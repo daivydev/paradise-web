@@ -217,31 +217,35 @@
     <div class="border rounded p-2 mt-2 contentItem" data-ct-key="__ctKey__">
         <input type="hidden" name="Chapters[__chKey__].Lessons[__lsKey__].Contents.index" value="__ctKey__" />
         <div class="row g-2 align-items-center">
+            <!-- Tiêu đề -->
             <div class="col-md-4">
                 <input class="form-control form-control-sm"
                        name="Chapters[__chKey__].Lessons[__lsKey__].Contents[__ctKey__].title"
                        placeholder="Tiêu đề nội dung..." />
             </div>
+
+            <!-- Loại nội dung -->
             <div class="col-md-3">
-                <select class="form-control form-control-sm"
+                <select class="form-control form-control-sm content-type"
                         name="Chapters[__chKey__].Lessons[__lsKey__].Contents[__ctKey__].content_type">
                     <option value="">-- Loại nội dung --</option>
-                    <option>text</option>
-                    <option>video</option>
-                    <option>pdf</option>
-                    <option>link</option>
+                    <option value="text">text</option>
+                    <option value="video">video</option>
+                    <option value="link">link (YouTube)</option>
                 </select>
             </div>
+
+            <!-- Thứ tự -->
             <div class="col-md-3">
                 <input class="form-control form-control-sm"
                        name="Chapters[__chKey__].Lessons[__lsKey__].Contents[__ctKey__].display_order"
                        type="number" min="0"
                        placeholder="Thứ tự" />
             </div>
-            <div class="d-flex align-items-center gap-2">
-                <!-- hidden để luôn có false khi unchecked -->
-                <input type="hidden" name="Chapters[__ch__].Lessons[__ls__].Contents[__ct__].is_visible" value="false" />
 
+            <!-- Toggle hiển thị -->
+            <div class="d-flex align-items-center gap-2">
+                <input type="hidden" name="Chapters[__ch__].Lessons[__ls__].Contents[__ct__].is_visible" value="false" />
                 <div class="toggler" style="margin:0">
                     <input id="ct-visible-__ch__-__ls__-__ct__"
                            type="checkbox"
@@ -249,7 +253,6 @@
                            value="true"
                            checked
                            data-role="toggle-content" />
-
                     <label for="ct-visible-__ch__-__ls__-__ct__">
                         <svg class="toggler-on" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
                             <polyline class="path check" points="100.2,40.2 51.5,88.8 29.8,67.5"></polyline>
@@ -263,11 +266,27 @@
                 <label for="ct-visible-__ch__-__ls__-__ct__" class="m-0 user-select-none">Hiển thị nội dung</label>
             </div>
 
-            <div class="col-12">
+            <!-- Upload file (chỉ hiện khi type=video) -->
+            <div class="col-12 file-wrap">
                 <input type="file"
                        name="Chapters[__chKey__].Lessons[__lsKey__].Contents[__ctKey__].upload_file"
                        class="form-control form-control-sm"
                        accept=".pdf,.doc,.docx,.xlsx,.xls,.mp4,.mp3,.png,.jpg,.jpeg" />
+            </div>
+
+            <!-- Link YouTube (chỉ hiện khi type=link) -->
+            <div class="col-12 link-wrap" style="display:none;">
+                <input class="form-control form-control-sm yt-link"
+                       name="Chapters[__chKey__].Lessons[__lsKey__].Contents[__ctKey__].content_body"
+                       placeholder="https://youtu.be/... hoặc https://www.youtube.com/watch?v=..." />
+            </div>
+
+            <!-- Preview iframe -->
+            <div class="col-12 yt-preview" style="display:none;">
+                <div style="position:relative;padding-top:56.25%;background:#000;border-radius:8px;overflow:hidden;margin-top:6px;">
+                    <iframe loading="lazy" allowfullscreen
+                            style="position:absolute;inset:0;width:100%;height:100%;border:0;"></iframe>
+                </div>
             </div>
 
             <div class="col-12 text-end">
@@ -276,6 +295,7 @@
         </div>
     </div>
 </script>
+
 
 <!-- ======== JS khởi tạo + thêm/xóa item (KHÔNG cần reindex tên) ========= -->
 <script>
@@ -304,6 +324,7 @@
                 .replaceAll('__ch_display__', displayIndex);
 
             const node = htmlToNode(html);
+
 
             // events
             node.querySelector('.btnRemoveChapter').addEventListener('click', function () {
@@ -335,6 +356,7 @@
                 .replaceAll('__ls_display__', displayIndex);
 
             const node = htmlToNode(html);
+
 
             node.querySelector('.btnRemoveLesson').addEventListener('click', function () {
                 node.remove();
@@ -372,6 +394,7 @@
                 .replaceAll(/__ctKey__/g, ctKey);
 
             const node = htmlToNode(html);
+            applyContentRow(node);
 
             node.querySelector('.btnRemoveContent').addEventListener('click', function () {
                 node.remove();
@@ -418,6 +441,8 @@
                 if (firstLesson) addContent(firstLesson);
             }
         })();
+        chaptersContainer.querySelectorAll('.contentItem').forEach(applyContentRow);
+
         // ====== Propagate visible ======
         function setChecked(el, v) {
             // đừng dùng disabled vì sẽ không post được; chỉ set checked
@@ -428,6 +453,60 @@
         function closestChapter(el) { return el.closest('.chapterItem'); }
         // tìm lesson wrapper gần nhất
         function closestLesson(el) { return el.closest('.lessonItem'); }
+
+        function toYouTubeEmbed(u) {
+            if (!u) return null;
+            try {
+                const url = new URL(u.trim());
+                if (url.hostname.includes('youtu.be')) {
+                    const id = url.pathname.replace('/', '').trim();
+                    return id ? `https://www.youtube.com/embed/${id}` : null;
+                }
+                if (url.hostname.includes('youtube.com')) {
+                    const v = url.searchParams.get('v');
+                    if (v) return `https://www.youtube.com/embed/${v}`;
+                    if (url.pathname.startsWith('/embed/')) {
+                        return `https://www.youtube.com${url.pathname}`;
+                    }
+                }
+            } catch (e) { }
+            return null;
+        }
+
+        function applyContentRow(node) {
+            const typeSel = node.querySelector('.content-type');
+            const fileWrap = node.querySelector('.file-wrap');
+            const linkWrap = node.querySelector('.link-wrap');
+            const linkInp = node.querySelector('.yt-link');
+            const prevBox = node.querySelector('.yt-preview');
+            const iframe = prevBox ? prevBox.querySelector('iframe') : null;
+
+            function syncUI() {
+                const t = (typeSel?.value || '').toLowerCase();
+                if (fileWrap) fileWrap.style.display = (t === 'video' || t === 'text' || t === 'pdf' || t === '') ? '' : 'none';
+                if (linkWrap) linkWrap.style.display = (t === 'link') ? '' : 'none';
+                if (prevBox && iframe) {
+                    if (t === 'link') {
+                        const em = toYouTubeEmbed(linkInp?.value || '');
+                        if (em) {
+                            prevBox.style.display = '';
+                            iframe.src = em;
+                        } else {
+                            prevBox.style.display = 'none';
+                            iframe.src = '';
+                        }
+                    } else {
+                        prevBox.style.display = 'none';
+                        iframe.src = '';
+                    }
+                }
+            }
+
+            typeSel?.addEventListener('change', syncUI);
+            linkInp?.addEventListener('input', syncUI);
+            syncUI();
+        }
+
 
         // Lắng nghe thay đổi cho tất cả checkbox trong vùng đề cương (event delegation)
         chaptersContainer.addEventListener('change', function (e) {

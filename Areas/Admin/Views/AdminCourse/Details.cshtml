@@ -262,6 +262,7 @@
         padding: 2rem;
     }
 </style>
+
 @helper RenderContentInline(paradise.Models.lesson_contents c, System.Web.Mvc.UrlHelper urlHelper, System.Web.HttpRequestBase req)
 {
     if (c == null || string.IsNullOrWhiteSpace(c.content_url)) { return; }
@@ -283,6 +284,17 @@
     Func<bool> isHttpsAbsolute = () =>
         Uri.TryCreate(abs, UriKind.Absolute, out var u) && u.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase);
 
+    // 💡 YouTube (ưu tiên trước nhánh video): controller đã convert sang /embed/
+    if (url.IndexOf("youtube.com/embed", StringComparison.OrdinalIgnoreCase) >= 0)
+    {
+        <div style="position:relative;padding-top:56.25%;background:#000;border-radius:8px;overflow:hidden;margin:8px 0;">
+            <iframe src="@url" title="YouTube video" allowfullscreen loading="lazy"
+                    style="position:absolute;inset:0;width:100%;height:100%;border:0;"></iframe>
+        </div>
+        return;
+    }
+
+
     // Ảnh
     if (type == "image" || new[] { ".png", ".jpg", ".jpeg", ".gif", ".webp" }.Contains(ext))
     {
@@ -290,7 +302,7 @@
         return;
     }
 
-    // Video
+    // Video file (mp4/mov/mkv/webm) hoặc type=video
     if (type == "video" || new[] { ".mp4", ".mov", ".mkv", ".webm" }.Contains(ext))
     {
         @:<video src="@url" controls style="max-width:100%;border-radius:6px;"></video>
@@ -325,7 +337,7 @@
         return;
     }
 
-    // Mặc định: hiện link
+    // Mặc định: hiện link/text
     var anchorText = !string.IsNullOrWhiteSpace(c.content_text) ? c.content_text : url;
     if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
     {

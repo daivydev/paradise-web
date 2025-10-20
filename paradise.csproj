@@ -232,17 +232,9 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\202509241308331_updateDB.cs" />
-    <Compile Include="Migrations\202509241308331_updateDB.Designer.cs">
-      <DependentUpon>202509241308331_updateDB.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202509250925417_UpdateCourseChapters.cs" />
-    <Compile Include="Migrations\202509250925417_UpdateCourseChapters.Designer.cs">
-      <DependentUpon>202509250925417_UpdateCourseChapters.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\202509291014082_NvarcharForTitleChapters.cs" />
-    <Compile Include="Migrations\202509291014082_NvarcharForTitleChapters.Designer.cs">
-      <DependentUpon>202509291014082_NvarcharForTitleChapters.cs</DependentUpon>
+    <Compile Include="Migrations\202510131211550_InitialSync.cs" />
+    <Compile Include="Migrations\202510131211550_InitialSync.Designer.cs">
+      <DependentUpon>202510131211550_InitialSync.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AppDbContext.cs" />
@@ -369,7 +361,7 @@
     <Content Include="Views\users\Details.cshtml" />
     <Content Include="Views\users\Edit.cshtml" />
     <Content Include="Views\users\Index.cshtml" />
-    <None Include="Web.local.config" />
+    <None Include="Web.Local.Config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -403,14 +395,8 @@
     <Content Include="Scripts\jquery-3.7.0.min.map" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\202509241308331_updateDB.resx">
-      <DependentUpon>202509241308331_updateDB.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202509250925417_UpdateCourseChapters.resx">
-      <DependentUpon>202509250925417_UpdateCourseChapters.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Migrations\202509291014082_NvarcharForTitleChapters.resx">
-      <DependentUpon>202509291014082_NvarcharForTitleChapters.cs</DependentUpon>
+    <EmbeddedResource Include="Migrations\202510131211550_InitialSync.resx">
+      <DependentUpon>202510131211550_InitialSync.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>
