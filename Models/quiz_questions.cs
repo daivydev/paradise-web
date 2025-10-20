@@ -25,6 +25,7 @@ namespace paradise.Models
         [Required]
         [StringLength(1000)]
         public string question_text { get; set; }
+        public string question_type { get; set; }
 
         public DateTime? created_at { get; set; }
 

@@ -233,6 +233,10 @@
     <Compile Include="Migrations\202510171557524_RebuildQuizSchema.Designer.cs">
       <DependentUpon>202510171557524_RebuildQuizSchema.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202510201217557_AddQuestionTypeToQuizQuestions.cs" />
+    <Compile Include="Migrations\202510201217557_AddQuestionTypeToQuizQuestions.Designer.cs">
+      <DependentUpon>202510201217557_AddQuestionTypeToQuizQuestions.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AppDbContext.cs" />
     <Compile Include="Models\cours.cs" />
@@ -253,6 +257,7 @@
     <Compile Include="Models\user.cs" />
     <Compile Include="Models\user_profiles.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModels\OptionVm.cs" />
     <Compile Include="ViewModels\QuizCreateVm.cs" />
     <Compile Include="ViewModels\QuizEditVm.cs" />
   </ItemGroup>
@@ -386,6 +391,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\202510171557524_RebuildQuizSchema.resx">
       <DependentUpon>202510171557524_RebuildQuizSchema.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202510201217557_AddQuestionTypeToQuizQuestions.resx">
+      <DependentUpon>202510201217557_AddQuestionTypeToQuizQuestions.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

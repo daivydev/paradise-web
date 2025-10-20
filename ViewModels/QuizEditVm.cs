@@ -19,25 +19,17 @@ namespace paradise.ViewModels
     {
         public long? id { get; set; }
 
+        // multiple_choice | essay
+        public string question_type { get; set; } = "multiple_choice";
+
         [AllowHtml]
         public string question_text { get; set; }
 
         public int? CorrectOption { get; set; }
 
-        public List<OptionEditVm> Options { get; set; } = new List<OptionEditVm>();
+        // Dùng chung OptionVm
+        public List<OptionVm> Options { get; set; } = new List<OptionVm>();
 
-        // flag dùng khi xoá câu hỏi trên UI
-        public bool _remove { get; set; }
-    }
-
-    public class OptionEditVm
-    {
-        public long? id { get; set; }
-
-        [AllowHtml]
-        public string option_text { get; set; }
-
-        // flag dùng khi xoá đáp án trên UI
         public bool _remove { get; set; }
     }
 }
