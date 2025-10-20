@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="packages\EntityFramework.6.4.4\build\EntityFramework.props" Condition="Exists('packages\EntityFramework.6.4.4\build\EntityFramework.props')" />
+  <Import Project="packages\EntityFramework.6.5.1\build\EntityFramework.props" Condition="Exists('packages\EntityFramework.6.5.1\build\EntityFramework.props')" />
   <Import Project="packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -62,10 +62,10 @@
       <HintPath>packages\DocumentFormat.OpenXml.Framework.3.1.1\lib\net46\DocumentFormat.OpenXml.Framework.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>packages\EntityFramework.6.4.4\lib\net45\EntityFramework.dll</HintPath>
+      <HintPath>packages\EntityFramework.6.5.1\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
-      <HintPath>packages\EntityFramework.6.4.4\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+      <HintPath>packages\EntityFramework.6.5.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
     <Reference Include="ExcelNumberFormat, Version=1.1.0.0, Culture=neutral, PublicKeyToken=23c6f5d73be07eca, processorArchitecture=MSIL">
       <HintPath>packages\ExcelNumberFormat.1.1.0\lib\net20\ExcelNumberFormat.dll</HintPath>
@@ -219,19 +219,24 @@
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
+    <Compile Include="Areas\Admin\Controllers\AdminCourseController.cs" />
+    <Compile Include="Areas\Admin\Controllers\AdminCourse_chaptersController.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminCourse_EnrollmentsController.cs" />
+    <Compile Include="Areas\Admin\Controllers\AdminCourse_lessonsController.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminCourse_ReviewsController.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminHomeController.cs" />
-    <Compile Include="Areas\Admin\Controllers\AdminQuizsController.cs" />
+
+    <Compile Include="Areas\Admin\Controllers\AdminLesson_contentsController.cs" />
+
     <Compile Include="Areas\Admin\Controllers\AdminUsersController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\usersController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\202510171557524_RebuildQuizSchema.cs" />
-    <Compile Include="Migrations\202510171557524_RebuildQuizSchema.Designer.cs">
-      <DependentUpon>202510171557524_RebuildQuizSchema.cs</DependentUpon>
+    <Compile Include="Migrations\202510131211550_InitialSync.cs" />
+    <Compile Include="Migrations\202510131211550_InitialSync.Designer.cs">
+      <DependentUpon>202510131211550_InitialSync.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\202510201217557_AddQuestionTypeToQuizQuestions.cs" />
     <Compile Include="Migrations\202510201217557_AddQuestionTypeToQuizQuestions.Designer.cs">
@@ -240,6 +245,7 @@
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AppDbContext.cs" />
     <Compile Include="Models\cours.cs" />
+    <Compile Include="Models\CourseFullCreateVm.cs" />
     <Compile Include="Models\course_chapters.cs" />
     <Compile Include="Models\course_enrollments.cs" />
     <Compile Include="Models\course_lessons.cs" />
@@ -314,17 +320,28 @@
     <Content Include="Content\custom-css\ListView.css" />
     <Content Include="Areas\Admin\Views\Shared\AddingButton.cshtml" />
     <Content Include="Areas\Admin\Views\Shared\ExportButton.cshtml" />
-    <Content Include="Areas\Admin\Views\Quizs\Create.cshtml" />
-    <Content Include="Areas\Admin\Views\Quizs\Delete.cshtml" />
-    <Content Include="Areas\Admin\Views\Quizs\Details.cshtml" />
-    <Content Include="Areas\Admin\Views\Quizs\Edit.cshtml" />
-    <Content Include="Areas\Admin\Views\Quizs\Index.cshtml" />
-    <Content Include="Areas\Admin\Views\AdminQuizs\Create.cshtml" />
-    <Content Include="Areas\Admin\Views\AdminQuizs\Delete.cshtml" />
-    <Content Include="Areas\Admin\Views\AdminQuizs\Details.cshtml" />
-    <Content Include="Areas\Admin\Views\AdminQuizs\Edit.cshtml" />
-    <Content Include="Areas\Admin\Views\AdminQuizs\Index.cshtml" />
-    <Content Include="Areas\Admin\Views\Shared\_Pagination.cshtml" />
+
+    <Content Include="Areas\Admin\Views\AdminCourse\Create.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminCourse\Delete.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminCourse\Details.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminCourse\Edit.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminCourse\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminCourse_chapters\Create.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminCourse_chapters\Delete.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminCourse_chapters\Details.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminCourse_chapters\Edit.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminCourse_chapters\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminLesson_contents\Create.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminLesson_contents\Delete.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminLesson_contents\Details.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminLesson_contents\Edit.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminLesson_contents\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminCourse_lessons\Create.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminCourse_lessons\Delete.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminCourse_lessons\Details.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminCourse_lessons\Edit.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminCourse_lessons\Index.cshtml" />
+
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -355,7 +372,7 @@
     <Content Include="Views\users\Details.cshtml" />
     <Content Include="Views\users\Edit.cshtml" />
     <Content Include="Views\users\Index.cshtml" />
-    <None Include="Web.local.config" />
+    <None Include="Web.Local.Config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -389,8 +406,10 @@
     <Content Include="Scripts\jquery-3.7.0.min.map" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Migrations\202510171557524_RebuildQuizSchema.resx">
-      <DependentUpon>202510171557524_RebuildQuizSchema.cs</DependentUpon>
+
+    <EmbeddedResource Include="Migrations\202510131211550_InitialSync.resx">
+      <DependentUpon>202510131211550_InitialSync.cs</DependentUpon>
+
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202510201217557_AddQuestionTypeToQuizQuestions.resx">
       <DependentUpon>202510201217557_AddQuestionTypeToQuizQuestions.cs</DependentUpon>
@@ -429,10 +448,10 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.2.0.1\build\net46\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
-    <Error Condition="!Exists('packages\EntityFramework.6.4.4\build\EntityFramework.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\EntityFramework.6.4.4\build\EntityFramework.props'))" />
-    <Error Condition="!Exists('packages\EntityFramework.6.4.4\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\EntityFramework.6.4.4\build\EntityFramework.targets'))" />
+    <Error Condition="!Exists('packages\EntityFramework.6.5.1\build\EntityFramework.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\EntityFramework.6.5.1\build\EntityFramework.props'))" />
+    <Error Condition="!Exists('packages\EntityFramework.6.5.1\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\EntityFramework.6.5.1\build\EntityFramework.targets'))" />
   </Target>
-  <Import Project="packages\EntityFramework.6.4.4\build\EntityFramework.targets" Condition="Exists('packages\EntityFramework.6.4.4\build\EntityFramework.targets')" />
+  <Import Project="packages\EntityFramework.6.5.1\build\EntityFramework.targets" Condition="Exists('packages\EntityFramework.6.5.1\build\EntityFramework.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

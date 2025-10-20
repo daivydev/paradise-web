@@ -26,9 +26,11 @@ namespace paradise.Models
 
         public int display_order { get; set; }
 
-        public DateTime? created_at { get; set; }
 
-        public bool is_visible { get; set; }
+        [Column(TypeName = "datetime2")]
+        public DateTime created_at { get; set; }
+        public bool is_visible { get; set; } = true;
+
 
         public virtual course_chapters course_chapters { get; set; }
 

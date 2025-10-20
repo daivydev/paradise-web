@@ -1,4 +1,4 @@
-namespace paradise.Models
+﻿namespace paradise.Models
 {
     using System;
     using System.Collections.Generic;
@@ -20,12 +20,19 @@ namespace paradise.Models
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long id { get; set; }
 
+        [Required(ErrorMessage = "Vui lòng chọn chủ đề")]
+
         public long topics_id { get; set; }
 
+        [Required(ErrorMessage = "Vui lòng chọn tác giả")]
         public long author_id { get; set; }
 
-        [Required]
-        [StringLength(1)]
+
+        [Required(ErrorMessage = "Vui lòng nhập tiêu đề khóa học")]
+        [StringLength(255)]
+        [Column(TypeName = "nvarchar")]  
+
+
         public string course_title { get; set; }
 
         [StringLength(1)]
@@ -34,6 +41,8 @@ namespace paradise.Models
         [StringLength(255)]
         public string course_thumbnail { get; set; }
 
+        [Required(ErrorMessage = "Vui lòng nhập giá")]
+        [Range(1000, Double.MaxValue, ErrorMessage = "Giá phải từ 1000 trở lên")]
         public decimal price { get; set; }
 
         public DateTime? created_at { get; set; }
@@ -41,6 +50,9 @@ namespace paradise.Models
         public DateTime? updated_at { get; set; }
 
         public bool is_visible { get; set; }
+
+        public bool is_visible { get; set; } = true;
+
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<course_chapters> course_chapters { get; set; }
