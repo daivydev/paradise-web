@@ -1,30 +1,34 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Web.Mvc;
 
-namespace paradise.Models
+namespace paradise.ViewModels
 {
     public class QuizCreateVm
     {
-        public string title { get; set; }
         public long topic { get; set; }
+        public string title { get; set; }
         public decimal? time { get; set; }
         public bool is_infinity { get; set; }
         public int quantity { get; set; }
 
-        // Danh sách câu hỏi nhập từ view
-        public List<QuestionVm> Questions { get; set; }
+        public List<QuestionVm> Questions { get; set; } = new List<QuestionVm>();
     }
 
     public class QuestionVm
     {
-        [AllowHtml] public string question_text { get; set; }
-        public List<OptionVm> Options { get; set; }
-        public int? CorrectOption { get; set; }
-    }
+        public long? id { get; set; }
 
-    public class OptionVm
-    {
-        [AllowHtml] public string option_text { get; set; }     // <-- cho HTML
+        // multiple_choice | essay
+        public string question_type { get; set; } = "multiple_choice";
+
+        [AllowHtml]
+        public string question_text { get; set; }
+
+        public int? CorrectOption { get; set; }
+
+        // Dùng chung OptionVm
+        public List<OptionVm> Options { get; set; } = new List<OptionVm>();
+
+        public bool _remove { get; set; }
     }
 }

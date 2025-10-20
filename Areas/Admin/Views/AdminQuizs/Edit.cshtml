@@ -1,5 +1,6 @@
 ﻿@model paradise.ViewModels.QuizEditVm
 @using System.Linq
+@using paradise.ViewModels
 
 @{
     ViewBag.Title = "Sửa quiz";
@@ -37,6 +38,11 @@
             padding: 8px;
             font-weight: 600;
         }
+
+    .question-type-note {
+        font-size: .9rem;
+        color: #6c757d;
+    }
 </style>
 
 <div class="page-container">
@@ -97,6 +103,7 @@
                     @for (int i = 0; i < (Model.Questions?.Count ?? 0); i++)
                     {
                         var q = Model.Questions[i];
+                        var isEssay = (q.question_type ?? "multiple_choice").ToLower() == "essay";
                         <div class="question-block p-3 mb-3" data-qindex="@i">
                             @Html.Hidden($"Questions[{i}].id", q.id)
                             @Html.Hidden($"Questions[{i}]._remove", "false", new { @class = "q-remove-flag" })
@@ -106,16 +113,34 @@
                                 <button type="button" class="btn btn-outline-danger btn-sm btn-remove-q">Xoá câu này</button>
                             </div>
 
+                            <div class="row g-2 mb-2">
+                                <div class="col-md-4">
+                                    <label class="form-label">Loại câu hỏi</label>
+                                    <select class="form-select q-type" name="Questions[@i].question_type">
+                                        <option value="multiple_choice" @(isEssay ? "" : "selected")>Trắc nghiệm</option>
+                                        <option value="essay" @(isEssay ? "selected" : "")>Tự luận</option>
+                                    </select>
+                                </div>
+                                <div class="col d-flex align-items-end">
+                                    <div class="question-type-note type-note" @(isEssay ? "" : "hidden")>
+                                        Câu tự luận: không có đáp án lựa chọn, hệ thống không tự chấm điểm.
+                                    </div>
+                                </div>
+                            </div>
+
                             <div class="mb-3">
                                 <label class="form-label">Nội dung câu hỏi</label>
                                 <textarea name="Questions[@i].question_text" class="form-control question-text" rows="2">@q.question_text</textarea>
                             </div>
 
-                            <div class="mb-2">
+                            <div class="mb-2 mc-wrap" style="@(isEssay ? "display:none" : "")">
                                 <label class="form-label">Các đáp án</label>
                                 <div class="option-list">
                                     @{
-                                        var opts = q.Options ?? new List<paradise.ViewModels.OptionEditVm>();
+                                        var opts = q.Options != null
+                                            ? q.Options.Cast<OptionVm>().ToList()
+                                            : new List<OptionVm>();
+
                                         for (int j = 0; j < opts.Count; j++)
                                         {
                                             var o = opts[j];
@@ -132,7 +157,7 @@
                                                        type="radio"
                                                        name="Questions[@i].CorrectOption"
                                                        value="@j"
-                                                       @(q.CorrectOption == j ? "checked" : "") />
+                                                       @((q.CorrectOption == j && !isEssay) ? "checked" : "") />
 
                                                 <button type="button" class="btn btn-outline-danger btn-sm btn-remove-opt">Xoá</button>
                                             </div>
@@ -182,6 +207,30 @@
                 if (qty) qty.value = n;
             }
 
+            // Hiển thị theo loại câu hỏi
+            function syncTypeUI(qb) {
+                const sel = qb.querySelector('.q-type');
+                const mcWrap = qb.querySelector('.mc-wrap');
+                const note = qb.querySelector('.type-note');
+                const isEssay = (sel?.value || 'multiple_choice') === 'essay';
+
+                if (!mcWrap) return;
+
+                if (isEssay) {
+                    mcWrap.style.display = 'none';
+                    note && (note.hidden = false);
+                    mcWrap.querySelectorAll('.option-text').forEach(t => t.required = false);
+                    mcWrap.querySelectorAll('input[type="radio"]').forEach(r => { r.required = false; r.checked = false; });
+                } else {
+                    mcWrap.style.display = '';
+                    note && (note.hidden = true);
+                    mcWrap.querySelectorAll('.option-text').forEach(t => t.required = true);
+                    const first = mcWrap.querySelector('input[type="radio"]');
+                    if (first && !mcWrap.querySelector('input[type="radio"]:checked')) first.checked = true;
+                    mcWrap.querySelectorAll('input[type="radio"]').forEach(r => r.required = true);
+                }
+            }
+
             function reindexAll() {
                 const qBlocks = box.querySelectorAll('.question-block');
                 qBlocks.forEach((qb, qi) => {
@@ -197,6 +246,9 @@
 
                     let qText = qb.querySelector('.question-text');
                     if (qText) qText.name = `Questions[${qi}].question_text`;
+
+                    let qType = qb.querySelector('.q-type');
+                    if (qType) qType.name = `Questions[${qi}].question_type`;
 
                     const items = qb.querySelectorAll('.option-item');
                     items.forEach((opt, oj) => {
@@ -215,6 +267,8 @@
                         let radio = opt.querySelector('input[type="radio"]');
                         if (radio) { radio.name = `Questions[${qi}].CorrectOption`; radio.value = String(oj); }
                     });
+
+                    syncTypeUI(qb);
                 });
                 syncQuantity();
             }
@@ -226,12 +280,12 @@
                 const wrap = document.createElement('div');
                 wrap.className = 'option-item';
                 wrap.innerHTML = `
-                    <span class="letter">A</span>
-                    <input type="hidden" class="o-remove-flag" name="" value="false" />
-                    <textarea class="option-text" rows="1" placeholder="Đáp án"></textarea>
-                    <input class="form-check-input mt-1" type="radio" name="" value="${oj}" />
-                    <button type="button" class="btn btn-outline-danger btn-sm btn-remove-opt">Xoá</button>
-                `;
+                        <span class="letter">A</span>
+                        <input type="hidden" class="o-remove-flag" name="" value="false" />
+                        <textarea class="option-text" rows="1" placeholder="Đáp án"></textarea>
+                        <input class="form-check-input mt-1" type="radio" name="" value="${oj}" />
+                        <button type="button" class="btn btn-outline-danger btn-sm btn-remove-opt">Xoá</button>
+                    `;
                 list.appendChild(wrap);
 
                 const area = wrap.querySelector('.option-text');
@@ -261,36 +315,50 @@
                 qb.dataset.qindex = qi;
 
                 qb.innerHTML = `
-                    <input type="hidden" name="Questions[${qi}].id" value="" />
-                    <input type="hidden" class="q-remove-flag" name="Questions[${qi}]._remove" value="false" />
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h6 class="fw-bold m-0">Câu hỏi ${qi + 1}</h6>
-                        <button type="button" class="btn btn-outline-danger btn-sm btn-remove-q">Xoá câu này</button>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Nội dung câu hỏi</label>
-                        <textarea name="Questions[${qi}].question_text" class="form-control question-text" rows="2" placeholder="Nhập nội dung câu hỏi"></textarea>
-                    </div>
-                    <div class="mb-2">
-                        <label class="form-label">Các đáp án</label>
-                        <div class="option-list"></div>
-                        <div class="mt-2">
-                            <button type="button" class="btn btn-outline-secondary btn-sm btn-add-opt">+ Thêm đáp án</button>
+                        <input type="hidden" name="Questions[${qi}].id" value="" />
+                        <input type="hidden" class="q-remove-flag" name="Questions[${qi}]._remove" value="false" />
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="fw-bold m-0">Câu hỏi ${qi + 1}</h6>
+                            <button type="button" class="btn btn-outline-danger btn-sm btn-remove-q">Xoá câu này</button>
                         </div>
-                    </div>
-                `;
+
+                        <div class="row g-2 mb-2">
+                            <div class="col-md-4">
+                                <label class="form-label">Loại câu hỏi</label>
+                                <select class="form-select q-type" name="Questions[${qi}].question_type">
+                                    <option value="multiple_choice" selected>Trắc nghiệm</option>
+                                    <option value="essay">Tự luận</option>
+                                </select>
+                            </div>
+                            <div class="col d-flex align-items-end">
+                                <div class="question-type-note type-note" hidden>
+                                    Câu tự luận: không có đáp án lựa chọn, hệ thống không tự chấm điểm.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Nội dung câu hỏi</label>
+                            <textarea name="Questions[${qi}].question_text" class="form-control question-text" rows="2" placeholder="Nhập nội dung câu hỏi"></textarea>
+                        </div>
+                        <div class="mb-2 mc-wrap">
+                            <label class="form-label">Các đáp án</label>
+                            <div class="option-list"></div>
+                            <div class="mt-2">
+                                <button type="button" class="btn btn-outline-secondary btn-sm btn-add-opt">+ Thêm đáp án</button>
+                            </div>
+                        </div>
+                    `;
 
                 box.appendChild(qb);
 
-                // 4 đáp án mặc định
                 for (let j = 0; j < 4; j++) addOption(qb);
-                // chọn A mặc định
                 const firstRadio = qb.querySelector('.option-list input[type="radio"]');
                 if (firstRadio) firstRadio.checked = true;
 
-                qb.querySelector('.btn-add-opt').addEventListener('click', () => addOption(qb));
+                qb.querySelector('.btn-add-opt')?.addEventListener('click', () => addOption(qb));
 
-                qb.querySelector('.btn-remove-q').addEventListener('click', () => {
+                qb.querySelector('.btn-remove-q')?.addEventListener('click', () => {
                     const idInput = qb.querySelector('input[name$=".id"]');
                     if (idInput && idInput.value) {
                         qb.querySelector('.q-remove-flag').value = 'true';
@@ -304,6 +372,9 @@
 
                 const qArea = qb.querySelector('.question-text');
                 qArea.addEventListener('input', () => autoResize(qArea)); autoResize(qArea);
+
+                qb.querySelector('.q-type').addEventListener('change', () => syncTypeUI(qb));
+                syncTypeUI(qb);
 
                 reindexAll();
             }
@@ -344,11 +415,13 @@
                     }
                     reindexAll();
                 });
+
+                qb.querySelector('.q-type')?.addEventListener('change', () => syncTypeUI(qb));
+                syncTypeUI(qb);
             });
 
             if (btnAddQ) btnAddQ.addEventListener('click', addQuestion);
 
-            // init qty
             syncQuantity();
         })();
     </script>

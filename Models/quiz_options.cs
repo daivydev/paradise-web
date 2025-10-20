@@ -25,6 +25,7 @@ namespace paradise.Models
         [StringLength(500)]
         public string option_text { get; set; }
 
+
         public bool is_correct { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

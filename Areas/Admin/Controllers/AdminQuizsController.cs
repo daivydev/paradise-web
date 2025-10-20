@@ -23,7 +23,7 @@ namespace paradise.Areas.Admin.Controllers
                 .Where(kv => kv.Value.Errors.Count > 0)
                 .SelectMany(kv => kv.Value.Errors.Select(e =>
                     string.IsNullOrWhiteSpace(e.ErrorMessage)
-                        ? e.Exception?.Message
+                        ? (e.Exception != null ? e.Exception.Message : null)
                         : e.ErrorMessage))
                 .Where(msg => !string.IsNullOrWhiteSpace(msg))
                 .Distinct()
@@ -94,7 +94,12 @@ namespace paradise.Areas.Admin.Controllers
         // ======================= CREATE GET =======================
         public ActionResult Create()
         {
-            ViewBag.topicItems = new SelectList(db.topic_quiz.OrderBy(x => x.title), "id", "title");
+            ViewBag.topicItems = db.topic_quiz
+                .OrderBy(x => x.title)
+                .ToList()
+                .Select(x => new SelectListItem { Value = x.id.ToString(), Text = x.title })
+                .ToList();
+
             return View(new QuizCreateVm
             {
                 time = 30,
@@ -114,7 +119,9 @@ namespace paradise.Areas.Admin.Controllers
             if (model == null)
             {
                 TempData["CustomError"] = "Dữ liệu không hợp lệ.";
-                ViewBag.topicItems = new SelectList(db.topic_quiz, "id", "title");
+                ViewBag.topicItems = db.topic_quiz.OrderBy(x => x.title)
+                    .ToList()
+                    .Select(x => new SelectListItem { Value = x.id.ToString(), Text = x.title }).ToList();
                 return View(model);
             }
 
@@ -133,39 +140,66 @@ namespace paradise.Areas.Admin.Controllers
 
             // Validate câu hỏi
             if (model.Questions == null || model.Questions.Count < 1)
+            {
                 ModelState.AddModelError("Questions", "Phải có ít nhất 1 câu hỏi.");
+            }
             else
             {
                 for (int i = 0; i < model.Questions.Count; i++)
                 {
                     var q = model.Questions[i];
+
                     if (string.IsNullOrWhiteSpace(q.question_text))
                         ModelState.AddModelError($"Questions[{i}].question_text", "Nội dung câu hỏi không được trống.");
 
-                    if (q.Options == null || q.Options.Count < 2)
-                        ModelState.AddModelError($"Questions[{i}].Options", "Mỗi câu cần ít nhất 2 đáp án.");
-                    else
+                    var type = (q.question_type ?? "multiple_choice").Trim().ToLower();
+
+                    if (type == "multiple_choice")
                     {
-                        for (int j = 0; j < q.Options.Count; j++)
+                        if (q.Options == null || q.Options.Count < 2)
+                            ModelState.AddModelError($"Questions[{i}].Options", "Mỗi câu trắc nghiệm cần ít nhất 2 đáp án.");
+                        else
                         {
-                            if (string.IsNullOrWhiteSpace(q.Options[j]?.option_text))
-                                ModelState.AddModelError($"Questions[{i}].Options[{j}].option_text", $"Đáp án {j + 1} không được trống.");
+                            for (int j = 0; j < q.Options.Count; j++)
+                            {
+                                if (string.IsNullOrWhiteSpace(q.Options[j] != null ? q.Options[j].option_text : null))
+                                    ModelState.AddModelError($"Questions[{i}].Options[{j}].option_text", "Đáp án không được trống.");
+                            }
+                        }
+
+                        if (!q.CorrectOption.HasValue ||
+                            q.CorrectOption.Value < 0 ||
+                            q.CorrectOption.Value >= (q.Options != null ? q.Options.Count : 0))
+                        {
+                            ModelState.AddModelError($"Questions[{i}].CorrectOption", "Phải chọn 1 đáp án đúng cho câu trắc nghiệm.");
                         }
                     }
-
-                    if (!q.CorrectOption.HasValue ||
-                        q.CorrectOption.Value < 0 ||
-                        q.CorrectOption.Value >= (q.Options?.Count ?? 0))
-                        ModelState.AddModelError($"Questions[{i}].CorrectOption", "Phải chọn 1 đáp án đúng.");
+                    else if (type == "essay")
+                    {
+                        // essay: bỏ qua options & correct
+                        q.Options = new List<OptionVm>();
+                        q.CorrectOption = null;
+                    }
+                    else
+                    {
+                        ModelState.AddModelError($"Questions[{i}].question_type", "Loại câu hỏi không hợp lệ.");
+                    }
                 }
             }
 
-            model.quantity = model.Questions?.Count ?? 0;
+            model.quantity = model.Questions != null ? model.Questions.Count : 0;
 
             if (!ModelState.IsValid)
             {
                 TempData["CustomError"] = "Form chưa hợp lệ: " + CollectModelErrors();
-                ViewBag.topicItems = new SelectList(db.topic_quiz, "id", "title", model.topic);
+                ViewBag.topicItems = db.topic_quiz.OrderBy(x => x.title)
+                    .ToList()
+                    .Select(x => new SelectListItem
+                    {
+                        Value = x.id.ToString(),
+                        Text = x.title,
+                        Selected = x.id == model.topic
+                    }).ToList();
                 return View(model);
             }
 
@@ -176,7 +210,7 @@ namespace paradise.Areas.Admin.Controllers
                 {
                     var quiz = new quiz
                     {
-                        title = model.title?.Trim(),
+                        title = model.title != null ? model.title.Trim() : null,
                         topic = model.topic,
                         time = model.is_infinity ? (decimal?)null : model.time,
                         is_infinity = model.is_infinity,
@@ -190,27 +224,34 @@ namespace paradise.Areas.Admin.Controllers
 
                     foreach (var qvm in model.Questions)
                     {
+                        var qtype = (qvm.question_type ?? "multiple_choice").Trim().ToLower();
+
                         var q = new quiz_questions
                         {
                             quiz_id = quiz.id,
-                            question_text = qvm.question_text?.Trim(),
+                            question_text = qvm.question_text != null ? qvm.question_text.Trim() : null,
+                            question_type = qtype,
                             created_at = DateTime.Now
                         };
                         db.quiz_questions.Add(q);
                         db.SaveChanges();
 
-                        for (int idx = 0; idx < qvm.Options.Count; idx++)
+                        if (qtype == "multiple_choice")
                         {
-                            var optVm = qvm.Options[idx];
-                            var opt = new quiz_options
+                            for (int idx = 0; idx < qvm.Options.Count; idx++)
                             {
-                                question_id = q.id,
-                                option_text = optVm.option_text?.Trim(),
-                                is_correct = (idx == qvm.CorrectOption)
-                            };
-                            db.quiz_options.Add(opt);
+                                var optVm = qvm.Options[idx];
+                                var opt = new quiz_options
+                                {
+                                    question_id = q.id,
+                                    option_text = optVm != null ? (optVm.option_text != null ? optVm.option_text.Trim() : null) : null,
+                                    is_correct = (idx == qvm.CorrectOption)
+                                };
+                                db.quiz_options.Add(opt);
+                            }
+                            db.SaveChanges();
                         }
-                        db.SaveChanges();
+                        // essay: không thêm options
                     }
 
                     tx.Commit();
@@ -224,7 +265,9 @@ namespace paradise.Areas.Admin.Controllers
                 }
             }
 
-            ViewBag.topicItems = new SelectList(db.topic_quiz, "id", "title", model.topic);
+            ViewBag.topicItems = db.topic_quiz.OrderBy(x => x.title)
+                .ToList()
+                .Select(x => new SelectListItem { Value = x.id.ToString(), Text = x.title, Selected = x.id == model.topic }).ToList();
             return View(model);
         }
 
@@ -254,22 +297,27 @@ namespace paradise.Areas.Admin.Controllers
                     {
                         id = qq.id,
                         question_text = qq.question_text,
+                        question_type = (qq.question_type ?? "multiple_choice"),
                         Options = qq.quiz_options
                             .OrderBy(o => o.id)
-                            .Select(o => new OptionEditVm
+                            .Select(o => new OptionVm
                             {
                                 id = o.id,
                                 option_text = o.option_text
                             }).ToList(),
-                        CorrectOption = qq.quiz_options
-                            .OrderBy(o => o.id)
-                            .Select((o, idx) => new { o, idx })
-                            .FirstOrDefault(x => x.o.is_correct)?.idx
+                        CorrectOption = (qq.question_type ?? "multiple_choice") == "multiple_choice"
+                            ? qq.quiz_options
+                                .OrderBy(o => o.id)
+                                .Select((o, idx) => new { o, idx })
+                                .FirstOrDefault(x => x.o.is_correct) != null
+                                    ? (int?)qq.quiz_options.OrderBy(o => o.id)
+                                        .Select((o, idx) => new { o, idx }).FirstOrDefault(x => x.o.is_correct).idx
+                                    : (int?)null
+                            : (int?)null
                     })
                     .ToList()
             };
 
-            // Tạo list SelectListItem để tránh lỗi long/int mismatch
             ViewBag.topicItems = db.topic_quiz
                 .OrderBy(x => x.title)
                 .ToList()
@@ -312,6 +360,32 @@ namespace paradise.Areas.Admin.Controllers
             if (effectiveQs.Count < 1)
                 ModelState.AddModelError("Questions", "Phải có ít nhất 1 câu hỏi.");
 
+            // validate theo loại
+            for (int i = 0; i < effectiveQs.Count; i++)
+            {
+                var q = effectiveQs[i];
+                if (string.IsNullOrWhiteSpace(q.question_text))
+                    ModelState.AddModelError($"Questions[{i}].question_text", "Nội dung câu hỏi không được trống.");
+
+                var type = (q.question_type ?? "multiple_choice").Trim().ToLower();
+                if (type == "multiple_choice")
+                {
+                    var opts = (q.Options ?? new List<OptionVm>()).Where(o => o._remove != true).ToList();
+                    if (opts.Count < 2)
+                        ModelState.AddModelError($"Questions[{i}].Options", "Mỗi câu trắc nghiệm cần ít nhất 2 đáp án hợp lệ.");
+                    if (!q.CorrectOption.HasValue || q.CorrectOption.Value < 0 || q.CorrectOption.Value >= opts.Count)
+                        ModelState.AddModelError($"Questions[{i}].CorrectOption", "Phải chọn 1 đáp án đúng.");
+                }
+                else if (type == "essay")
+                {
+                    // OK
+                }
+                else
+                {
+                    ModelState.AddModelError($"Questions[{i}].question_type", "Loại câu hỏi không hợp lệ.");
+                }
+            }
+
             if (!ModelState.IsValid)
             {
                 ModelState.Remove("topic");
@@ -330,7 +404,8 @@ namespace paradise.Areas.Admin.Controllers
             {
                 try
                 {
-                    entity.title = model.title?.Trim();
+                    // header
+                    entity.title = model.title != null ? model.title.Trim() : null;
                     entity.topic = model.topic;
                     entity.is_infinity = model.is_infinity;
                     entity.time = model.is_infinity ? (decimal?)null : model.time;
@@ -356,62 +431,82 @@ namespace paradise.Areas.Admin.Controllers
                     {
                         if (qvm._remove == true) continue;
 
+                        var qtype = (qvm.question_type ?? "multiple_choice").Trim().ToLower();
                         quiz_questions qq;
+
                         if (qvm.id.HasValue && qvm.id.Value > 0)
                         {
+                            // update
                             qq = entity.quiz_questions.First(x => x.id == qvm.id.Value);
-                            qq.question_text = qvm.question_text?.Trim();
+                            qq.question_text = qvm.question_text != null ? qvm.question_text.Trim() : null;
+                            qq.question_type = qtype;
                         }
                         else
                         {
+                            // insert
                             qq = new quiz_questions
                             {
                                 quiz_id = entity.id,
-                                question_text = qvm.question_text?.Trim(),
+                                question_text = qvm.question_text != null ? qvm.question_text.Trim() : null,
+                                question_type = qtype,
                                 created_at = DateTime.Now
                             };
                             db.quiz_questions.Add(qq);
                             db.SaveChanges();
                         }
 
-                        var formOpts = qvm.Options ?? new List<OptionEditVm>();
-                        var keepOptIds = formOpts.Where(o => o._remove != true && o.id.HasValue)
-                                                 .Select(o => o.id.Value)
-                                                 .ToHashSet();
-
-                        var toDelOpts = qq.quiz_options
-                            .Where(o => !keepOptIds.Contains(o.id) ||
-                                        formOpts.Any(fo => fo.id == o.id && fo._remove == true))
-                            .ToList();
-                        db.quiz_options.RemoveRange(toDelOpts);
-
-                        for (int idx = 0; idx < formOpts.Count; idx++)
+                        // Đồng bộ options theo loại
+                        if (qtype == "multiple_choice")
                         {
-                            var ovm = formOpts[idx];
-                            if (ovm._remove == true) continue;
+                            var formOpts = qvm.Options ?? new List<OptionVm>();
+                            var keepOptIds = formOpts.Where(o => o._remove != true && o.id.HasValue)
+                                                     .Select(o => o.id.Value)
+                                                     .ToHashSet();
 
-                            if (ovm.id.HasValue && ovm.id.Value > 0)
+                            var toDelOpts = qq.quiz_options
+                                .Where(o => !keepOptIds.Contains(o.id) ||
+                                            formOpts.Any(fo => fo.id == o.id && fo._remove == true))
+                                .ToList();
+                            db.quiz_options.RemoveRange(toDelOpts);
+
+                            for (int idx = 0; idx < formOpts.Count; idx++)
                             {
-                                var opt = qq.quiz_options.First(o => o.id == ovm.id.Value);
-                                opt.option_text = ovm.option_text?.Trim();
-                            }
-                            else
-                            {
-                                db.quiz_options.Add(new quiz_options
+                                var ovm = formOpts[idx];
+                                if (ovm._remove == true) continue;
+
+                                if (ovm.id.HasValue && ovm.id.Value > 0)
                                 {
-                                    question_id = qq.id,
-                                    option_text = ovm.option_text?.Trim(),
-                                    is_correct = false
-                                });
+                                    var opt = qq.quiz_options.First(o => o.id == ovm.id.Value);
+                                    opt.option_text = ovm.option_text != null ? ovm.option_text.Trim() : null;
+                                }
+                                else
+                                {
+                                    db.quiz_options.Add(new quiz_options
+                                    {
+                                        question_id = qq.id,
+                                        option_text = ovm.option_text != null ? ovm.option_text.Trim() : null,
+                                        is_correct = false
+                                    });
+                                }
+                            }
+
+                            db.SaveChanges();
+
+                            // set correct
+                            var ordered = qq.quiz_options.OrderBy(o => o.id).ToList();
+                            int correctIdx = qvm.CorrectOption.HasValue ? qvm.CorrectOption.Value : -1;
+                            for (int i = 0; i < ordered.Count; i++)
+                                ordered[i].is_correct = (i == correctIdx);
+                        }
+                        else // essay
+                        {
+                            // essay: xoá sạch options nếu còn
+                            if (qq.quiz_options.Any())
+                            {
+                                db.quiz_options.RemoveRange(qq.quiz_options.ToList());
+                                db.SaveChanges();
                             }
                         }
-
-                        db.SaveChanges();
-
-                        var ordered = qq.quiz_options.OrderBy(o => o.id).ToList();
-                        int correctIdx = qvm.CorrectOption ?? -1;
-                        for (int i = 0; i < ordered.Count; i++)
-                            ordered[i].is_correct = (i == correctIdx);
                     }
 
                     entity.quantity = db.quiz_questions.Count(x => x.quiz_id == entity.id);

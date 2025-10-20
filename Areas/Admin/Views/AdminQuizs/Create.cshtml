@@ -1,4 +1,5 @@
-﻿@model paradise.Models.QuizCreateVm
+﻿@model paradise.ViewModels.QuizCreateVm
+@using System.Linq
 @{
     ViewBag.Title = "Tạo quiz";
     Layout = "~/Areas/Admin/Views/Shared/_AdminLayoutPage1.cshtml";
@@ -6,26 +7,25 @@
 <link href="~/Content/custom-css/CreateView.css" rel="stylesheet" />
 
 <style>
-    /* Khối câu hỏi */
     .question-block {
         background: #f8f9fa;
         border: 1px solid #dee2e6;
-        border-radius: .5rem;
+        border-radius: .5rem
     }
-        /* Textarea câu hỏi: full width, cao hơn, co giãn */
+
         .question-block .question-text {
             width: 100%;
             min-height: 100px;
             resize: vertical;
             padding: 10px 12px;
-            font-size: 15px;
+            font-size: 15px
         }
-        /* Mỗi đáp án là flex -> chiếm hết chiều ngang */
+
         .question-block .option-item {
             display: flex;
             align-items: flex-start;
             gap: 8px;
-            margin-bottom: 8px;
+            margin-bottom: 8px
         }
 
             .question-block .option-item .letter {
@@ -34,7 +34,7 @@
                 font-weight: 600;
                 min-width: 34px;
                 text-align: center;
-                padding: 8px;
+                padding: 8px
             }
 
         .question-block .option-text {
@@ -42,19 +42,24 @@
             min-height: 50px;
             resize: vertical;
             padding: 8px 10px;
-            font-size: 14px;
+            font-size: 14px
         }
 
         .question-block .option-item .form-check-input {
             margin-top: 10px;
-            transform: scale(1.15);
+            transform: scale(1.15)
         }
 
         .question-block .delete-option {
             padding: 6px 10px;
             font-size: 13px;
-            white-space: nowrap;
+            white-space: nowrap
         }
+
+    .question-type-note {
+        font-size: .9rem;
+        color: #6c757d
+    }
 </style>
 
 <div class="page-container">
@@ -68,43 +73,34 @@
 
             <div class="form-card">
                 <div class="row g-3">
-                    <!-- Tiêu đề -->
                     <div class="col-md-6">
                         <label class="form-label">Tiêu đề</label>
                         @Html.TextBoxFor(m => m.title, new { @class = "form-control", placeholder = "Nhập tiêu đề", required = "required" })
                         @Html.ValidationMessageFor(m => m.title, "", new { @class = "text-danger" })
                     </div>
 
-                    <!-- Chủ đề -->
                     <div class="col-md-6">
                         <label class="form-label">Chủ đề</label>
                         @Html.DropDownListFor(
-                             m => m.topic,
-                             ViewBag.topicItems as IEnumerable<SelectListItem>,
-                             "-- chọn chủ đề --",                     
-                             new { @class = "form-select", required = "required" }
-                         )
+                            m => m.topic,
+                            ViewBag.topicItems as IEnumerable<SelectListItem>,
+                            "-- chọn chủ đề --",
+                            new { @class = "form-select", required = "required" })
                         @Html.ValidationMessageFor(m => m.topic, "", new { @class = "text-danger" })
                     </div>
 
-                    <!-- Thời lượng -->
                     <div class="col-md-4">
                         <label class="form-label">Thời lượng (phút)</label>
                         @Html.TextBoxFor(m => m.time, "{0:0.#}", new { @class = "form-control", type = "number", step = "1", min = "0", id = "time", placeholder = "VD: 30" })
                         @Html.ValidationMessageFor(m => m.time, "", new { @class = "text-danger" })
                     </div>
 
-                    <!-- Số câu -->
                     <div class="col-md-4">
                         <label class="form-label">Số câu</label>
-                        @Html.TextBoxFor(
-                            m => m.quantity,
-                            new { @class = "form-control", type = "number", min = "1", id = "quantity", placeholder = "VD: 10" }
-                        )
+                        @Html.TextBoxFor(m => m.quantity, new { @class = "form-control", type = "number", min = "1", id = "quantity", placeholder = "VD: 10" })
                         @Html.ValidationMessageFor(m => m.quantity, "", new { @class = "text-danger" })
                     </div>
 
-                    <!-- Không giới hạn -->
                     <div class="col-md-4 d-flex align-items-end">
                         <div class="form-check mt-1">
                             @Html.CheckBoxFor(m => m.is_infinity, new { @class = "form-check-input", id = "is_infinity" })
@@ -113,7 +109,6 @@
                     </div>
                 </div>
 
-                <!-- Container sinh câu hỏi -->
                 <div id="questionsContainer" class="mt-4"></div>
 
                 <div class="actions mt-4">
@@ -134,7 +129,6 @@
             const box = document.getElementById('questionsContainer');
             const form = document.getElementById('quizForm');
 
-            // Toggle thời gian (fix: required khi KHÔNG infinity)
             function toggleTime() {
                 if (!chk || !time) return;
                 time.disabled = chk.checked;
@@ -143,18 +137,13 @@
             }
             if (chk) { chk.addEventListener('change', toggleTime); toggleTime(); }
 
-            // Auto-resize textarea theo nội dung
-            function autoResize(el) {
-                el.style.height = 'auto';
-                el.style.height = (el.scrollHeight) + 'px';
-            }
+            function autoResize(el) { el.style.height = 'auto'; el.style.height = (el.scrollHeight) + 'px'; }
 
-            // Re-index option: A/B/C…, name/value, radio group
             function reindexOptions(qIndex, listEl) {
                 const items = listEl.querySelectorAll('.option-item');
                 items.forEach((optEl, i) => {
-                    const letterSpan = optEl.querySelector('.letter');
-                    if (letterSpan) letterSpan.textContent = String.fromCharCode(65 + i);
+                    const letter = optEl.querySelector('.letter');
+                    if (letter) letter.textContent = String.fromCharCode(65 + i);
 
                     const txt = optEl.querySelector('.option-text');
                     if (txt) {
@@ -166,14 +155,34 @@
                     const radio = optEl.querySelector('input[type="radio"]');
                     if (radio) {
                         radio.name = `Questions[${qIndex}].CorrectOption`;
-                        radio.value = i.toString();            // binder nhận chỉ số
-                        radio.required = true;                 // nhóm phải có 1 đáp án đúng
+                        radio.value = i.toString();
+                        radio.required = true;
                         radio.title = "Đáp án đúng";
                     }
                 });
             }
 
-            // Tạo 1 block câu hỏi
+            // --- NEW: đồng bộ hiển thị theo loại ---
+            function syncTypeUI(qBlock) {
+                const typeSel = qBlock.querySelector('.q-type');
+                const mcWrap = qBlock.querySelector('.mc-wrap');
+                const isEssay = (typeSel?.value || 'multiple_choice') === 'essay';
+
+                if (isEssay) {
+                    mcWrap.style.display = 'none';
+                    mcWrap.querySelectorAll('.option-text').forEach(t => t.required = false);
+                    mcWrap.querySelectorAll('input[type="radio"]').forEach(r => { r.required = false; r.checked = false; });
+                    qBlock.querySelector('.type-note').hidden = false;
+                } else {
+                    mcWrap.style.display = '';
+                    mcWrap.querySelectorAll('.option-text').forEach(t => t.required = true);
+                    const first = mcWrap.querySelector('input[type="radio"]');
+                    if (first && !mcWrap.querySelector('input[type="radio"]:checked')) first.checked = true;
+                    mcWrap.querySelectorAll('input[type="radio"]').forEach(r => r.required = true);
+                    qBlock.querySelector('.type-note').hidden = true;
+                }
+            }
+
             function createQuestionBlock(qIndex) {
                 const el = document.createElement('div');
                 el.className = 'question-block border rounded p-3 mb-3 shadow-sm';
@@ -183,6 +192,21 @@
                     <h6 class="fw-bold m-0">Câu hỏi ${qIndex + 1}</h6>
                 </div>
 
+                <div class="row g-2 mb-2">
+                    <div class="col-md-4">
+                        <label class="form-label">Loại câu hỏi</label>
+                        <select class="form-select q-type" name="Questions[${qIndex}].question_type">
+                            <option value="multiple_choice" selected>Trắc nghiệm</option>
+                            <option value="essay">Tự luận</option>
+                        </select>
+                    </div>
+                    <div class="col d-flex align-items-end">
+                        <div class="type-note question-type-note" hidden>
+                            Câu tự luận: không có đáp án lựa chọn, hệ thống không tự chấm điểm.
+                        </div>
+                    </div>
+                </div>
+
                 <div class="mb-3">
                     <label class="form-label">Nội dung câu hỏi</label>
                     <textarea class="form-control question-text"
@@ -190,7 +214,7 @@
                               placeholder="Nhập nội dung câu hỏi" rows="1" required></textarea>
                 </div>
 
-                <div class="mb-2">
+                <div class="mb-2 mc-wrap">
                     <label class="form-label">Các đáp án</label>
                     <div class="option-list"></div>
                     <div class="d-flex gap-2 mt-2">
@@ -199,10 +223,8 @@
                 </div>
             `;
 
-                // Auto-resize cho câu hỏi
                 const qText = el.querySelector('.question-text');
-                qText.addEventListener('input', () => autoResize(qText));
-                autoResize(qText);
+                qText.addEventListener('input', () => autoResize(qText)); autoResize(qText);
 
                 const optionList = el.querySelector('.option-list');
                 const addBtn = el.querySelector('.add-option');
@@ -216,19 +238,12 @@
                     <input class="form-check-input mt-1" type="radio">
                     <button type="button" class="btn btn-outline-danger btn-sm delete-option">Xóa</button>
                 `;
-
-                    // Auto-resize cho đáp án
                     const area = optEl.querySelector('.option-text');
-                    area.addEventListener('input', () => autoResize(area));
-                    autoResize(area);
+                    area.addEventListener('input', () => autoResize(area)); autoResize(area);
 
-                    // Xóa đáp án
                     optEl.querySelector('.delete-option').addEventListener('click', () => {
                         const items = optionList.querySelectorAll('.option-item');
-                        if (items.length <= 2) {
-                            alert('Cần ít nhất 2 đáp án.');
-                            return;
-                        }
+                        if (items.length <= 2) { alert('Cần ít nhất 2 đáp án.'); return; }
                         optEl.remove();
                         reindexOptions(qIndex, optionList);
                     });
@@ -237,57 +252,53 @@
                     reindexOptions(qIndex, optionList);
                 }
 
-                // Mặc định 4 đáp án đầu
                 for (let j = 0; j < 4; j++) addOption();
-                // ✅ Mặc định tick đáp án A
                 const firstRadio = optionList.querySelector('input[type="radio"]');
                 if (firstRadio) firstRadio.checked = true;
 
-                // Thêm đáp án mới
                 addBtn.addEventListener('click', () => addOption());
+
+                // gắn handler cho select loại
+                const typeSel = el.querySelector('.q-type');
+                typeSel.addEventListener('change', () => syncTypeUI(el));
+                syncTypeUI(el);
 
                 return el;
             }
 
-            // Render N câu hỏi
             function renderQuestions(n) {
                 box.innerHTML = "";
                 n = parseInt(n) || 0;
                 if (n <= 0) return;
-
-                for (let i = 0; i < n; i++) {
-                    const qBlock = createQuestionBlock(i);
-                    box.appendChild(qBlock);
-                }
+                for (let i = 0; i < n; i++) box.appendChild(createQuestionBlock(i));
             }
 
-            // Khởi tạo số câu tối thiểu 1 & render ngay
             if (qty) {
                 qty.addEventListener('input', () => {
                     const v = parseInt(qty.value) || 0;
-                    qty.value = v < 1 ? 1 : v; // luôn >= 1
+                    qty.value = v < 1 ? 1 : v;
                     renderQuestions(qty.value);
                 });
                 if (!qty.value || parseInt(qty.value) < 1) qty.value = 1;
                 renderQuestions(qty.value);
             }
 
-            // ===== Trước khi submit: thêm hidden .index cho Questions & Options =====
+            // giữ index cho model binder; bỏ Options.index nếu là tự luận
             function addHiddenIndexInputs() {
-                // Xóa index cũ (nếu có)
                 form.querySelectorAll('input[name="Questions.index"], input[name$=".Options.index"]').forEach(x => x.remove());
 
-                // Duyệt các câu hỏi hiện có
                 const qBlocks = document.querySelectorAll('#questionsContainer .question-block');
                 qBlocks.forEach((qb, qi) => {
-                    // Questions.index
                     const qiHidden = document.createElement('input');
                     qiHidden.type = 'hidden';
                     qiHidden.name = 'Questions.index';
                     qiHidden.value = qi.toString();
                     form.appendChild(qiHidden);
 
-                    // Duyệt các options của câu qi
+                    const typeSel = qb.querySelector('.q-type');
+                    const isEssay = (typeSel?.value || 'multiple_choice') === 'essay';
+                    if (isEssay) return; // không thêm Options.index
+
                     const optItems = qb.querySelectorAll('.option-list .option-item');
                     optItems.forEach((_, oj) => {
                         const ojHidden = document.createElement('input');
@@ -298,16 +309,11 @@
                     });
                 });
 
-                // Đồng bộ quantity = số câu thực tế
                 const qCount = qBlocks.length;
                 if (qCount > 0 && qty) qty.value = qCount;
             }
 
-            if (form) {
-                form.addEventListener('submit', function () {
-                    addHiddenIndexInputs();
-                });
-            }
+            if (form) form.addEventListener('submit', () => addHiddenIndexInputs());
         });
     </script>
 }
