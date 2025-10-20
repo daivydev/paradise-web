@@ -1,0 +1,752 @@
+﻿@model paradise.Models.CourseFullCreateVm
+@{
+    ViewBag.Title = "Cập nhật khóa học (đầy đủ)";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayoutPage1.cshtml";
+}
+
+<link href="~/Content/custom-css/CreateView.css" rel="stylesheet" />
+<link href="~/Content/custom-css/SwitchButton.css" rel="stylesheet" />
+
+<div class="page-container create-full no-margin">
+    <h4 class="fw-bold m-0">Cập nhật khóa học</h4>
+
+    <div class="page-content">
+        @using (Html.BeginForm(
+            actionName: "Edit",
+            controllerName: "AdminCourse",
+            routeValues: new { area = "Admin" },
+            method: FormMethod.Post,
+            htmlAttributes: new { id = "editForm", enctype = "multipart/form-data", novalidate = "novalidate", onsubmit = "console.log('edit submit')" }
+        ))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
+            @Html.HiddenFor(m => m.id)
+
+            <div class="row g-4">
+                <!-- Cột trái: Thông tin cơ bản -->
+                <div class="col-md-3">
+                    <div class="form-card">
+                        <h5 class="fw-bold mb-3">Thông tin khóa học</h5>
+                        <div class="mb-3 d-flex align-items-center gap-2">
+                            <!-- Checkbox thật (value=true) -->
+                            <div class="toggler" style="margin:0">
+                                <input id="is_visible"
+                                       name="is_visible"
+                                       type="checkbox"
+                                       class="toggle-visible"
+                                       value="true"
+                                       @(Model != null && Model.is_visible ? "checked" : "") />
+                                <label for="is_visible">
+                                    <svg class="toggler-on" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
+                                        <polyline class="path check" points="100.2,40.2 51.5,88.8 29.8,67.5"></polyline>
+                                    </svg>
+                                    <svg class="toggler-off" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
+                                        <line class="path line" x1="34.4" y1="34.4" x2="95.8" y2="95.8"></line>
+                                        <line class="path line" x1="95.8" y1="34.4" x2="34.4" y2="95.8"></line>
+                                    </svg>
+                                </label>
+                            </div>
+
+                            <!-- Hidden phải đứng SAU checkbox để khi unchecked sẽ post false -->
+                            <input type="hidden" name="is_visible" value="false" />
+
+                            <label for="is_visible" class="m-0 user-select-none">Hiển thị khóa học</label>
+                            @Html.ValidationMessageFor(m => m.is_visible, "", new { @class = "text-danger d-block ms-2" })
+                        </div>
+                        <div class="form-group mb-3">
+                            @Html.Label("Chủ đề")
+                            @Html.DropDownListFor(m => m.topics_id, (SelectList)ViewBag.topics_id, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.topics_id, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="form-group mb-3">
+                            @Html.Label("Người tạo (email)")
+                            @Html.DropDownListFor(m => m.author_id, (SelectList)ViewBag.author_id, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.author_id, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="form-group mb-3">
+                            @Html.Label("Tiêu đề")
+                            @Html.TextBoxFor(m => m.course_title, new { @class = "form-control", placeholder = "Nhập tiêu đề khóa học..." })
+                            @Html.ValidationMessageFor(m => m.course_title, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="form-group mb-3">
+                            @Html.Label("Ảnh thumbnail (URL)")
+                            @Html.TextBoxFor(m => m.course_thumbnail, new { @class = "form-control", placeholder = "https://..." })
+                        </div>
+
+                        <div class="form-group mb-3">
+                            @Html.Label("Giá (VNĐ)")
+                            @Html.TextBoxFor(m => m.price, "{0:0.##}",
+                               new { @class = "form-control", type = "number", step = "any", min = "1000", placeholder = "VD: 199000" })
+                            @Html.ValidationMessageFor(m => m.price, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="form-group mb-3">
+                            @Html.Label("Mô tả khóa học")
+                            @Html.TextAreaFor(m => m.course_description, 6, 50, new { @class = "form-control" })
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cột phải: Đề cương -->
+                <div class="col-md-9">
+                    <div class="form-card">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="fw-bold mb-0">Đề cương</h5>
+                            <button type="button" class="btn btn-primary btn-sm" id="btnAddChapter">
+                                + Thêm chương
+                            </button>
+                        </div>
+
+                        <div id="chaptersContainer" class="accordion">
+                            @if (Model.Chapters != null && Model.Chapters.Count > 0)
+                            {
+                                for (var i = 0; i < Model.Chapters.Count; i++)
+                                {
+                                    // Tạo key ổn định trong 1 lần render
+                                    var chKey = $"ch_{i}_{Guid.NewGuid().ToString("N").Substring(0, 6)}";
+                                    var ch = Model.Chapters[i];
+
+                                    <div class="accordion-item mb-2 shadow-sm rounded chapterItem" data-ch-key="@chKey">
+                                        <input type="hidden" name="Chapters.index" value="@chKey" />
+
+                                        <h2 class="accordion-header" id="chapHeading_@chKey">
+                                            <button class="accordion-button collapsed" type="button"
+                                                    data-bs-toggle="collapse"
+                                                    data-bs-target="#chapBody_@chKey"
+                                                    aria-expanded="false"
+                                                    aria-controls="chapBody_@chKey">
+                                                <span class="fw-semibold me-2">Chương <span class="ch-index">#@(i+1)</span>:</span>
+                                                <input class="form-control form-control-sm ms-2"
+                                                       name="Chapters[@chKey].chapter_title"
+                                                       value="@ch.chapter_title"
+                                                       placeholder="Tiêu đề chương..."
+                                                       style="max-width: 420px;" />
+                                            </button>
+                                        </h2>
+
+                                        <div id="chapBody_@chKey" class="accordion-collapse collapse" aria-labelledby="chapHeading_@chKey">
+                                            <div class="accordion-body">
+                                                <div class="row g-2 mb-2">
+                                                    <div class="col-md-3">
+                                                        <input class="form-control form-control-sm"
+                                                               name="Chapters[@chKey].display_order"
+                                                               type="number" min="0"
+                                                               value="@(ch.display_order ?? 0)"
+                                                               placeholder="Thứ tự (optional)" />
+                                                    </div>
+
+                                                    <div class="col-md-3 d-flex align-items-center gap-2">
+                                                        <div class="toggler" style="margin:0">
+                                                            <input id="chap-visible-@chKey"
+                                                                   type="checkbox"
+                                                                   name="Chapters[@chKey].is_visible"
+                                                                   value="true"
+                                                                   @(ch.is_visible ? "checked" : "")
+                                                                   data-role="toggle-chapter" />
+                                                            <label for="chap-visible-@chKey">
+                                                                <svg class="toggler-on" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2"><polyline class="path check" points="100.2,40.2 51.5,88.8 29.8,67.5"></polyline></svg>
+                                                                <svg class="toggler-off" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2"><line class="path line" x1="34.4" y1="34.4" x2="95.8" y2="95.8"></line><line class="path line" x1="95.8" y1="34.4" x2="34.4" y2="95.8"></line></svg>
+                                                            </label>
+                                                        </div>
+                                                        <!-- hidden để luôn có false khi unchecked -->
+                                                        <input type="hidden" name="Chapters[@chKey].is_visible" value="false" />
+                                                        <label for="chap-visible-@chKey" class="m-0 user-select-none">Hiển thị chương</label>
+                                                    </div>
+
+                                                    <div class="col-md-6 text-end">
+                                                        <button type="button" class="btn btn-outline-danger btn-sm btnRemoveChapter">Xóa chương</button>
+                                                        <button type="button" class="btn btn-outline-primary btn-sm btnAddLesson">+ Thêm bài</button>
+                                                    </div>
+                                                </div>
+
+                                                <div class="list-group lessonsContainer">
+                                                    @if (ch.Lessons != null && ch.Lessons.Count > 0)
+                                                    {
+                                                        for (var j = 0; j < ch.Lessons.Count; j++)
+                                                        {
+                                                            var ls = ch.Lessons[j];
+                                                            var lsKey = $"ls_{i}_{j}_{Guid.NewGuid().ToString("N").Substring(0, 6)}";
+
+                                                            <div class="list-group-item mb-2 p-2 border rounded lessonItem" data-ls-key="@lsKey">
+                                                                <input type="hidden" name="Chapters[@chKey].Lessons.index" value="@lsKey" />
+                                                                <div class="d-flex align-items-center justify-content-between">
+                                                                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                                        <span class="badge bg-secondary">Bài <span class="ls-index">#@(j+1)</span></span>
+                                                                        <input class="form-control form-control-sm"
+                                                                               name="Chapters[@chKey].Lessons[@lsKey].lesson_title"
+                                                                               value="@ls.lesson_title"
+                                                                               placeholder="Tiêu đề bài..."
+                                                                               style="min-width:220px; max-width:380px;" />
+                                                                        <input class="form-control form-control-sm"
+                                                                               name="Chapters[@chKey].Lessons[@lsKey].display_order"
+                                                                               type="number" min="0"
+                                                                               value="@(ls.display_order ?? 0)"
+                                                                               placeholder="Thứ tự"
+                                                                               style="width:120px;" />
+
+                                                                        <div class="d-flex align-items-center gap-2">
+                                                                            <div class="toggler" style="margin:0">
+                                                                                <input id="ls-visible-@chKey-@lsKey"
+                                                                                       type="checkbox"
+                                                                                       name="Chapters[@chKey].Lessons[@lsKey].is_visible"
+                                                                                       value="true"
+                                                                                       @(ls.is_visible ? "checked" : "")
+                                                                                       data-role="toggle-lesson" />
+                                                                                <label for="ls-visible-@chKey-@lsKey">
+                                                                                    <svg class="toggler-on" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2"><polyline class="path check" points="100.2,40.2 51.5,88.8 29.8,67.5"></polyline></svg>
+                                                                                    <svg class="toggler-off" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2"><line class="path line" x1="34.4" y1="34.4" x2="95.8" y2="95.8"></line><line class="path line" x1="95.8" y1="34.4" x2="34.4" y2="95.8"></line></svg>
+                                                                                </label>
+                                                                            </div>
+                                                                            <input type="hidden" name="Chapters[@chKey].Lessons[@lsKey].is_visible" value="false" />
+                                                                            <label for="ls-visible-@chKey-@lsKey" class="m-0 user-select-none">Hiển thị bài</label>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="d-flex gap-2">
+                                                                        <button type="button" class="btn btn-outline-danger btn-sm btnRemoveLesson">Xóa bài</button>
+                                                                        <button type="button" class="btn btn-outline-primary btn-sm btnAddContent">+ Thêm nội dung</button>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="mt-2 contentsContainer">
+                                                                    @if (ls.Contents != null && ls.Contents.Count > 0)
+                                                                    {
+                                                                        for (var k = 0; k < ls.Contents.Count; k++)
+                                                                        {
+                                                                            var content = Model.Chapters[i].Lessons[j].Contents[k];
+                                                                            var hasOld = !string.IsNullOrWhiteSpace(content.content_body);
+                                                                            var ct = ls.Contents[k];
+                                                                            var ctKey = $"ct_{i}_{j}_{k}_{Guid.NewGuid().ToString("N").Substring(0, 6)}";
+
+                                                                            <div class="border rounded p-2 mt-2 contentItem" data-ct-key="@ctKey">
+                                                                                <input type="hidden" name="Chapters[@chKey].Lessons[@lsKey].Contents.index" value="@ctKey" />
+
+                                                                                <div class="row g-2 align-items-center">
+                                                                                    <div class="col-md-4">
+                                                                                        <input class="form-control form-control-sm"
+                                                                                               name="Chapters[@chKey].Lessons[@lsKey].Contents[@ctKey].title"
+                                                                                               value="@ct.title"
+                                                                                               placeholder="Tiêu đề nội dung..." />
+                                                                                    </div>
+                                                                                    <div class="col-md-3">
+                                                                                        <select class="form-control form-control-sm content-type"
+                                                                                                name="Chapters[@chKey].Lessons[@lsKey].Contents[@ctKey].content_type">
+                                                                                            <option value="">-- Loại nội dung --</option>
+                                                                                            <option @(ct.content_type == "text" ? "selected" : "") value="text">text</option>
+                                                                                            <option @(ct.content_type == "video" ? "selected" : "") value="video">video</option>
+                                                                                            <option @(ct.content_type == "pdf" ? "selected" : "") value="pdf">pdf</option>
+                                                                                            <option @(ct.content_type == "link" ? "selected" : "") value="link">link (YouTube)</option>
+                                                                                        </select>
+                                                                                    </div>
+                                                                                    <div class="col-md-3">
+                                                                                        <input class="form-control form-control-sm"
+                                                                                               name="Chapters[@chKey].Lessons[@lsKey].Contents[@ctKey].display_order"
+                                                                                               type="number" min="0"
+                                                                                               value="@(ct.display_order ?? 0)"
+                                                                                               placeholder="Thứ tự" />
+                                                                                    </div>
+
+                                                                                    <div class="d-flex align-items-center gap-2">
+                                                                                        <div class="toggler" style="margin:0">
+                                                                                            <input id="ct-visible-@chKey-@lsKey-@ctKey"
+                                                                                                   type="checkbox"
+                                                                                                   name="Chapters[@chKey].Lessons[@lsKey].Contents[@ctKey].is_visible"
+                                                                                                   value="true"
+                                                                                                   @(ct.is_visible ? "checked" : "")
+                                                                                                   data-role="toggle-content" />
+                                                                                            <label for="ct-visible-@chKey-@lsKey-@ctKey">
+                                                                                                <svg class="toggler-on" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2"><polyline class="path check" points="100.2,40.2 51.5,88.8 29.8,67.5"></polyline></svg>
+                                                                                                <svg class="toggler-off" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2"><line class="path line" x1="34.4" y1="34.4" x2="95.8" y2="95.8"></line><line class="path line" x1="95.8" y1="34.4" x2="34.4" y2="95.8"></line></svg>
+                                                                                            </label>
+                                                                                        </div>
+                                                                                        <input type="hidden" name="Chapters[@chKey].Lessons[@lsKey].Contents[@ctKey].is_visible" value="false" />
+                                                                                        <label for="ct-visible-@chKey-@lsKey-@ctKey" class="m-0 user-select-none">Hiển thị nội dung</label>
+                                                                                    </div>
+
+                                                                                    <!-- FILE MODE (wrap để ẩn/hiện) -->
+                                                                                    <div class="col-12 file-wrap">
+                                                                                        <div class="mb-2">
+                                                                                            <label class="form-label">File hiện có</label>
+                                                                                            @if (hasOld)
+                                                                                            {
+                                                                                                var fileName = System.IO.Path.GetFileName(content.content_body);
+                                                                                                <div class="form-text">
+                                                                                                    <a href="@content.content_body" target="_blank">@fileName</a>
+                                                                                                </div>
+                                                                                            }
+                                                                                            else
+                                                                                            {
+                                                                                                <div class="form-text text-muted">Chưa có file.</div>
+                                                                                            }
+
+                                                                                            <!-- Giữ lại URL file cũ để server đọc lại nếu không upload mới -->
+                                                                                            <input type="hidden"
+                                                                                                   class="old-url-hidden"
+                                                                                                   name="Chapters[@chKey].Lessons[@lsKey].Contents[@ctKey].content_body"
+                                                                                                   value="@content.content_body" />
+                                                                                        </div>
+
+                                                                                        <div class="mb-3">
+                                                                                            <label class="form-label">Thay thế (tùy chọn)</label>
+                                                                                            <input type="file"
+                                                                                                   name="Chapters[@chKey].Lessons[@lsKey].Contents[@ctKey].upload_file"
+                                                                                                   class="form-control"
+                                                                                                   accept=".doc,.docx,.pdf,.mp4,.png,.jpg,.jpeg,.gif,.webp" />
+                                                                                            <div class="form-text">Để trống nếu muốn giữ nguyên file cũ.</div>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                    <!-- LINK MODE (YouTube) -->
+                                                                                    <div class="col-12 link-wrap" style="display:none;">
+                                                                                        <label class="form-label">Link YouTube</label>
+                                                                                        <input class="form-control form-control-sm yt-link"
+                                                                                               name="Chapters[@chKey].Lessons[@lsKey].Contents[@ctKey].content_body"
+                                                                                               value="@content.content_body"
+                                                                                               placeholder="https://youtu.be/... hoặc https://www.youtube.com/watch?v=..." />
+                                                                                    </div>
+
+                                                                                    <!-- Preview iframe -->
+                                                                                    <div class="col-12 yt-preview" style="display:none;">
+                                                                                        <div style="position:relative;padding-top:56.25%;background:#000;border-radius:8px;overflow:hidden;margin-top:6px;">
+                                                                                            <iframe loading="lazy" allowfullscreen
+                                                                                                    style="position:absolute;inset:0;width:100%;height:100%;border:0;"></iframe>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                    <div class="col-12 text-end">
+                                                                                        <button type="button" class="btn btn-outline-danger btn-sm btnRemoveContent">Xóa nội dung</button>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        }
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        }
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                            else
+                            {
+                                <div class="text-muted">Khóa học này chưa có chương nào. Hãy bấm “+ Thêm chương”.</div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="actions mt-4">
+                <a href="@Url.Action("Index", "AdminCourse", new { area = "Admin" })" class="btn-secondary">Hủy bỏ</a>
+                <button type="submit" class="btn-primary">Lưu thay đổi</button>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- ======== Templates (JS) cho Chapter/Lesson/Content khi thêm mới ========= -->
+<script type="text/template" id="tpl-chapter">
+    <div class="accordion-item mb-2 shadow-sm rounded chapterItem" data-ch-key="__chKey__">
+        <input type="hidden" name="Chapters.index" value="__chKey__" />
+        <h2 class="accordion-header" id="chapHeading___chKey__">
+            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#chapBody___chKey__" aria-expanded="false" aria-controls="chapBody___chKey__">
+                <span class="fw-semibold me-2">Chương <span class="ch-index">#__ch_display__</span>:</span>
+                <input class="form-control form-control-sm ms-2" name="Chapters[__chKey__].chapter_title" placeholder="Tiêu đề chương..." style="max-width: 420px;" />
+            </button>
+        </h2>
+        <div id="chapBody___chKey__" class="accordion-collapse collapse" aria-labelledby="chapHeading___chKey__">
+            <div class="accordion-body">
+                <div class="row g-2 mb-2">
+                    <div class="col-md-3">
+                        <input class="form-control form-control-sm" name="Chapters[__chKey__].display_order" type="number" min="0" placeholder="Thứ tự (optional)" />
+                    </div>
+                    <div class="col-md-3 d-flex align-items-center gap-2">
+                        <div class="toggler" style="margin:0">
+                            <input id="chap-visible-__chKey__"
+                                   type="checkbox"
+                                   name="Chapters[__chKey__].is_visible"
+                                   value="true"
+                                   checked
+                                   data-role="toggle-chapter" />
+                            <label for="chap-visible-__chKey__">
+                                <svg class="toggler-on" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
+                                    <polyline class="path check" points="100.2,40.2 51.5,88.8 29.8,67.5"></polyline>
+                                </svg>
+                                <svg class="toggler-off" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
+                                    <line class="path line" x1="34.4" y1="34.4" x2="95.8" y2="95.8"></line>
+                                    <line class="path line" x1="95.8" y1="34.4" x2="34.4" y2="95.8"></line>
+                                </svg>
+                            </label>
+                        </div>
+                        <input type="hidden" name="Chapters[__chKey__].is_visible" value="false" />
+                        <label for="chap-visible-__chKey__" class="m-0 user-select-none">Hiển thị chương</label>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <button type="button" class="btn btn-outline-danger btn-sm btnRemoveChapter">Xóa chương</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm btnAddLesson">+ Thêm bài</button>
+                    </div>
+                </div>
+
+                <div class="list-group lessonsContainer"></div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="tpl-lesson">
+    <div class="list-group-item mb-2 p-2 border rounded lessonItem" data-ls-key="__lsKey__">
+        <input type="hidden" name="Chapters[__chKey__].Lessons.index" value="__lsKey__" />
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="badge bg-secondary">Bài <span class="ls-index">#__ls_display__</span></span>
+                <input class="form-control form-control-sm" name="Chapters[__chKey__].Lessons[__lsKey__].lesson_title" placeholder="Tiêu đề bài..." style="min-width:220px; max-width:380px;" />
+                <input class="form-control form-control-sm" name="Chapters[__chKey__].Lessons[__lsKey__].display_order" type="number" min="0" placeholder="Thứ tự" style="width:120px;" />
+                <div class="d-flex align-items-center gap-2">
+                    <div class="toggler" style="margin:0">
+                        <input id="ls-visible-__chKey__-__lsKey__"
+                               type="checkbox"
+                               name="Chapters[__chKey__].Lessons[__lsKey__].is_visible"
+                               value="true"
+                               checked
+                               data-role="toggle-lesson" />
+                        <label for="ls-visible-__chKey__-__lsKey__">
+                            <svg class="toggler-on" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
+                                <polyline class="path check" points="100.2,40.2 51.5,88.8 29.8,67.5"></polyline>
+                            </svg>
+                            <svg class="toggler-off" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
+                                <line class="path line" x1="34.4" y1="34.4" x2="95.8" y2="95.8"></line>
+                                <line class="path line" x1="95.8" y1="34.4" x2="34.4" y2="95.8"></line>
+                            </svg>
+                        </label>
+                    </div>
+                    <input type="hidden" name="Chapters[__chKey__].Lessons[__lsKey__].is_visible" value="false" />
+                    <label for="ls-visible-__chKey__-__lsKey__" class="m-0 user-select-none">Hiển thị bài</label>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-danger btn-sm btnRemoveLesson">Xóa bài</button>
+                <button type="button" class="btn btn-outline-primary btn-sm btnAddContent">+ Thêm nội dung</button>
+            </div>
+        </div>
+        <div class="mt-2 contentsContainer"></div>
+    </div>
+</script>
+
+<script type="text/template" id="tpl-content">
+    <div class="border rounded p-2 mt-2 contentItem" data-ct-key="__ctKey__">
+        <input type="hidden" name="Chapters[__chKey__].Lessons[__lsKey__].Contents.index" value="__ctKey__" />
+        <div class="row g-2 align-items-center">
+            <div class="col-md-4">
+                <input class="form-control form-control-sm" name="Chapters[__chKey__].Lessons[__lsKey__].Contents[__ctKey__].title" placeholder="Tiêu đề nội dung..." />
+            </div>
+            <div class="col-md-3">
+                <select class="form-control form-control-sm content-type" name="Chapters[__chKey__].Lessons[__lsKey__].Contents[__ctKey__].content_type">
+                    <option value="">-- Loại nội dung --</option>
+                    <option value="text">text</option>
+                    <option value="video">video</option>
+                    <option value="link">link (YouTube)</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <input class="form-control form-control-sm" name="Chapters[__chKey__].Lessons[__lsKey__].Contents[__ctKey__].display_order" type="number" min="0" placeholder="Thứ tự" />
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+                <div class="toggler" style="margin:0">
+                    <input id="ct-visible-__chKey__-__lsKey__-__ctKey__"
+                           type="checkbox"
+                           name="Chapters[__chKey__].Lessons[__lsKey__].Contents[__ctKey__].is_visible"
+                           value="true"
+                           checked
+                           data-role="toggle-content" />
+                    <label for="ct-visible-__chKey__-__lsKey__-__ctKey__">
+                        <svg class="toggler-on" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2"><polyline class="path check" points="100.2,40.2 51.5,88.8 29.8,67.5"></polyline></svg>
+                        <svg class="toggler-off" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2"><line class="path line" x1="34.4" y1="34.4" x2="95.8" y2="95.8"></line><line class="path line" x1="95.8" y1="34.4" x2="34.4" y2="95.8"></line></svg>
+                    </label>
+                </div>
+                <input type="hidden" name="Chapters[__chKey__].Lessons[__lsKey__].Contents[__ctKey__].is_visible" value="false" />
+                <label for="ct-visible-__chKey__-__lsKey__-__ctKey__" class="m-0 user-select-none">Hiển thị nội dung</label>
+            </div>
+
+            <!-- FILE MODE -->
+            <div class="col-12 file-wrap">
+                <div class="mb-2">
+                    <label class="form-label">File hiện có</label>
+                    <div class="form-text text-muted">Chưa có file.</div>
+                    <input type="hidden" class="old-url-hidden" name="Chapters[__chKey__].Lessons[__lsKey__].Contents[__ctKey__].content_body" value="" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Thay thế (tùy chọn)</label>
+                    <input type="file"
+                           name="Chapters[__chKey__].Lessons[__lsKey__].Contents[__ctKey__].upload_file"
+                           class="form-control"
+                           accept=".doc,.docx,.pdf,.mp4,.png,.jpg,.jpeg,.gif,.webp" />
+                    <div class="form-text">Để trống nếu muốn giữ nguyên file cũ.</div>
+                </div>
+            </div>
+
+            <!-- LINK MODE -->
+            <div class="col-12 link-wrap" style="display:none;">
+                <label class="form-label">Link YouTube</label>
+                <input class="form-control form-control-sm yt-link"
+                       name="Chapters[__chKey__].Lessons[__lsKey__].Contents[__ctKey__].content_body"
+                       placeholder="https://youtu.be/... hoặc https://www.youtube.com/watch?v=..." />
+            </div>
+
+            <!-- Preview -->
+            <div class="col-12 yt-preview" style="display:none;">
+                <div style="position:relative;padding-top:56.25%;background:#000;border-radius:8px;overflow:hidden;margin-top:6px;">
+                    <iframe loading="lazy" allowfullscreen style="position:absolute;inset:0;width:100%;height:100%;border:0;"></iframe>
+                </div>
+            </div>
+
+            <div class="col-12 text-end">
+                <button type="button" class="btn btn-outline-danger btn-sm btnRemoveContent">Xóa nội dung</button>
+            </div>
+        </div>
+    </div>
+</script>
+
+<!-- ======== JS thêm/xóa + reindex ========= -->
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/bootstrap.bundle.min.js"></script>
+
+    <script>
+        (function () {
+            const chaptersContainer = document.getElementById('chaptersContainer');
+            const tplChapter = document.getElementById('tpl-chapter').innerHTML;
+            const tplLesson = document.getElementById('tpl-lesson').innerHTML;
+            const tplContent = document.getElementById('tpl-content').innerHTML;
+
+            function genKey() { return (Date.now().toString(36) + Math.random().toString(36).slice(2, 7)); }
+            function htmlToNode(html) { const w = document.createElement('div'); w.innerHTML = html.trim(); return w.firstElementChild; }
+
+            // --- YouTube helpers & UI binder ---
+            function toYouTubeEmbed(u) {
+                if (!u) return null;
+                try {
+                    const url = new URL(u.trim());
+                    if (url.hostname.includes('youtu.be')) {
+                        const id = url.pathname.replace('/', '').trim();
+                        return id ? `https://www.youtube.com/embed/${id}` : null;
+                    }
+                    if (url.hostname.includes('youtube.com')) {
+                        const v = url.searchParams.get('v');
+                        if (v) return `https://www.youtube.com/embed/${v}`;
+                        if (url.pathname.startsWith('/embed/')) return `https://www.youtube.com${url.pathname}`;
+                    }
+                } catch (e) { }
+                return null;
+            }
+
+            function applyContentRow(node) {
+                const typeSel = node.querySelector('.content-type');
+                const fileWrap = node.querySelector('.file-wrap');
+                const linkWrap = node.querySelector('.link-wrap');
+                const linkInp = node.querySelector('.yt-link');
+                const prevBox = node.querySelector('.yt-preview');
+                const iframe = prevBox ? prevBox.querySelector('iframe') : null;
+                const hiddenOld = node.querySelector('.old-url-hidden'); // hidden giữ URL cũ (file mode)
+
+                function syncUI() {
+                    const t = (typeSel?.value || '').toLowerCase();
+                    if (fileWrap) fileWrap.style.display = (t === 'video' || t === 'pdf' || t === 'text' || t === '') ? '' : 'none';
+                    if (linkWrap) linkWrap.style.display = (t === 'link') ? '' : 'none';
+
+                    // Khi là link → disable hiddenOld để tránh post trùng tên
+                    if (hiddenOld) {
+                        hiddenOld.disabled = (t === 'link');
+                    }
+
+                    if (prevBox && iframe) {
+                        if (t === 'link') {
+                            const em = toYouTubeEmbed(linkInp?.value || '');
+                            if (em) { prevBox.style.display = ''; iframe.src = em; }
+                            else { prevBox.style.display = 'none'; iframe.src = ''; }
+                        } else {
+                            prevBox.style.display = 'none';
+                            iframe.src = '';
+                        }
+                    }
+                }
+
+                typeSel?.addEventListener('change', syncUI);
+                linkInp?.addEventListener('input', syncUI);
+                syncUI();
+            }
+
+            function renumberDisplay() {
+                chaptersContainer.querySelectorAll('.chapterItem').forEach((chap, i) => {
+                    const span = chap.querySelector('.ch-index');
+                    if (span) span.textContent = (i + 1);
+                    chap.querySelectorAll('.lessonItem').forEach((ls, j) => {
+                        const s = ls.querySelector('.ls-index');
+                        if (s) s.textContent = (j + 1);
+                        // đảm bảo có data-ls-key
+                        if (!ls.getAttribute('data-ls-key')) {
+                            const hd = ls.querySelector('input[name$=".Lessons.index"]');
+                            const k = hd ? hd.value : genKey();
+                            ls.setAttribute('data-ls-key', k);
+                        }
+                    });
+                });
+
+                // Áp dụng UI cho mọi contentItem hiện có (sau khi DOM thay đổi)
+                chaptersContainer.querySelectorAll('.contentItem').forEach(applyContentRow);
+            }
+
+            function addChapter() {
+                const chKey = genKey();
+                const displayIndex = chaptersContainer.querySelectorAll('.chapterItem').length + 1;
+
+                const html = tplChapter
+                    .replaceAll('__chKey__', chKey)
+                    .replaceAll('__ch_display__', displayIndex);
+
+                const node = htmlToNode(html);
+                chaptersContainer.appendChild(node);
+
+                // auto mở accordion
+                const btn = node.querySelector('.accordion-button'); if (btn) btn.click();
+                renumberDisplay();
+            }
+
+            function addLesson(chapterNode) {
+                const chKey = chapterNode.getAttribute('data-ch-key');
+                const lsKey = genKey();
+                const displayIndex = chapterNode.querySelectorAll('.lessonItem').length + 1;
+
+                const html = tplLesson
+                    .replaceAll(/__chKey__/g, chKey)
+                    .replaceAll(/__lsKey__/g, lsKey)
+                    .replaceAll('__ls_display__', displayIndex);
+
+                const node = htmlToNode(html);
+                chapterNode.querySelector('.lessonsContainer').appendChild(node);
+                renumberDisplay();
+            }
+
+            function addContent(lessonNode) {
+                const chapterNode = lessonNode.closest('.chapterItem');
+                const chKey = chapterNode.getAttribute('data-ch-key');
+                // đảm bảo lesson có key
+                let lsKey = lessonNode.getAttribute('data-ls-key');
+                if (!lsKey) {
+                    const hidden = lessonNode.querySelector('input[name$=".Lessons.index"]');
+                    lsKey = hidden ? hidden.value : genKey();
+                    lessonNode.setAttribute('data-ls-key', lsKey);
+                }
+                const ctKey = genKey();
+                const html = tplContent
+                    .replaceAll(/__chKey__/g, chKey)
+                    .replaceAll(/__lsKey__/g, lsKey)
+                    .replaceAll(/__ctKey__/g, ctKey);
+
+                const node = htmlToNode(html);
+                lessonNode.querySelector('.contentsContainer').appendChild(node);
+                renumberDisplay();
+            }
+
+            // ===== Event delegation cho Add/Remove trên cả item cũ & mới =====
+            chaptersContainer.addEventListener('click', function (e) {
+                const btnAddLesson = e.target.closest('.btnAddLesson');
+                const btnRemoveChap = e.target.closest('.btnRemoveChapter');
+                const btnAddContent = e.target.closest('.btnAddContent');
+                const btnRemoveLesson = e.target.closest('.btnRemoveLesson');
+                const btnRemoveCt = e.target.closest('.btnRemoveContent');
+
+                if (btnAddLesson) {
+                    const chap = btnAddLesson.closest('.chapterItem');
+                    if (chap) addLesson(chap);
+                }
+                if (btnAddContent) {
+                    const lesson = btnAddContent.closest('.lessonItem');
+                    if (lesson) addContent(lesson);
+                }
+                if (btnRemoveCt) {
+                    const ct = btnRemoveCt.closest('.contentItem');
+                    if (ct) { ct.remove(); renumberDisplay(); }
+                }
+                if (btnRemoveLesson) {
+                    const ls = btnRemoveLesson.closest('.lessonItem');
+                    if (ls) { ls.remove(); renumberDisplay(); }
+                }
+                if (btnRemoveChap) {
+                    const chap = btnRemoveChap.closest('.chapterItem');
+                    if (chap) { chap.remove(); renumberDisplay(); }
+                }
+            });
+
+            document.getElementById('btnAddChapter')?.addEventListener('click', addChapter);
+
+            // Cập nhật số hiển thị & bind UI lúc đầu cho dữ liệu render sẵn
+            renumberDisplay();
+        })();
+    </script>
+
+    <script>
+        (function () {
+            const chaptersContainer = document.getElementById('chaptersContainer');
+            if (!chaptersContainer) return;
+
+            function setChecked(el, v) { if (el && el.type === 'checkbox') el.checked = !!v; }
+            function closest(el, selector) { return el ? el.closest(selector) : null; }
+
+            // Lắng nghe toggle trên toàn cây; cascade xuống dưới
+            chaptersContainer.addEventListener('change', function (e) {
+                const t = e.target;
+                if (!(t instanceof HTMLInputElement)) return;
+                if (t.type !== 'checkbox') return;
+
+                // 1) Tắt/mở CHƯƠNG => áp cho tất cả BÀI & NỘI DUNG trong chương
+                if (t.dataset.role === 'toggle-chapter') {
+                    const chap = closest(t, '.chapterItem');
+                    if (!chap) return;
+                    const checked = t.checked;
+
+                    // Bật/tắt tất cả bài dưới chương
+                    chap.querySelectorAll('input[type="checkbox"][data-role="toggle-lesson"]').forEach(cb => {
+                        setChecked(cb, checked);
+                        // Kích hoạt change để bài tự cascade xuống nội dung
+                        cb.dispatchEvent(new Event('change', { bubbles: true }));
+                    });
+
+                    // Bật/tắt tất cả nội dung dưới chương (phòng khi không có bài)
+                    chap.querySelectorAll('input[type="checkbox"][data-role="toggle-content"]').forEach(cb => {
+                        setChecked(cb, checked);
+                    });
+                }
+
+                // 2) Tắt/mở BÀI => áp cho tất cả NỘI DUNG trong bài
+                if (t.dataset.role === 'toggle-lesson') {
+                    const lesson = closest(t, '.lessonItem');
+                    if (!lesson) return;
+                    const checked = t.checked;
+                    lesson.querySelectorAll('input[type="checkbox"][data-role="toggle-content"]').forEach(cb => {
+                        setChecked(cb, checked);
+                    });
+                }
+            });
+        })();
+    </script>
+}
+<style>
+    .create-full .page-content {
+        max-width: 1280px !important;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .create-full .form-card {
+        padding: 2rem;
+    }
+</style>

@@ -1,0 +1,574 @@
+﻿@model paradise.Models.CourseFullCreateVm
+@{
+    ViewBag.Title = "Tạo mới khóa học";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayoutPage1.cshtml";
+}
+<link href="~/Content/custom-css/CreateView.css" rel="stylesheet" />
+<link href="~/Content/custom-css/SwitchButton.css" rel="stylesheet" />
+
+<div class="page-container create-full no-margin">
+    <h4 class="fw-bold m-0">Tạo mới khóa học</h4>
+
+    <div class="page-content">
+        @using (Html.BeginForm("Create", "AdminCourse", FormMethod.Post, new { area = "Admin", id = "courseForm", novalidate = "novalidate", enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="row g-4">
+                <!-- Cột trái: Thông tin cơ bản -->
+                <div class="col-md-3">
+                    <div class="form-card">
+                        <h5 class="fw-bold mb-3">Thông tin khóa học</h5>
+                        <div class="mb-3 d-flex align-items-center gap-2">
+                            <div class="toggler" style="margin:0">
+                                <input id="is_visible"
+                                       name="is_visible"
+                                       type="checkbox"
+                                       class="toggle-visible"
+                                       value="true"
+                                       @(Model != null && Model.is_visible ? "checked" : "") />
+                                <label for="is_visible">
+                                    <svg class="toggler-on" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
+                                        <polyline class="path check" points="100.2,40.2 51.5,88.8 29.8,67.5"></polyline>
+                                    </svg>
+                                    <svg class="toggler-off" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
+                                        <line class="path line" x1="34.4" y1="34.4" x2="95.8" y2="95.8"></line>
+                                        <line class="path line" x1="95.8" y1="34.4" x2="34.4" y2="95.8"></line>
+                                    </svg>
+                                </label>
+                            </div>
+
+                            <!-- Hidden phải đứng SAU checkbox: khi unchecked sẽ post false -->
+                            <input type="hidden" name="is_visible" value="false" />
+
+                            <label for="is_visible" class="m-0 user-select-none">Hiển thị khóa học</label>
+                            @Html.ValidationMessageFor(m => m.is_visible, "", new { @class = "text-danger d-block ms-2" })
+                        </div>
+
+
+                        <div class="form-group mb-3">
+                            @Html.Label("Chủ đề")
+                            @Html.DropDownListFor(m => m.topics_id, (SelectList)ViewBag.topics_id, "-- Chọn chủ đề --", new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.topics_id, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="form-group mb-3">
+                            @Html.Label("Người tạo (email)")
+                            @Html.DropDownListFor(m => m.author_id, (SelectList)ViewBag.author_id, "-- Chọn người tạo --", new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.author_id, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="form-group mb-3">
+                            @Html.Label("Tiêu đề")
+                            @Html.TextBoxFor(m => m.course_title, new { @class = "form-control", placeholder = "Nhập tiêu đề khóa học..." })
+                            @Html.ValidationMessageFor(m => m.course_title, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="form-group mb-3">
+                            @Html.Label("Ảnh thumbnail (URL)")
+                            @Html.TextBoxFor(m => m.course_thumbnail, new { @class = "form-control", placeholder = "https://..." })
+                        </div>
+
+                        <div class="form-group mb-3">
+                            @Html.Label("Giá (VNĐ)")
+                            @Html.TextBoxFor(m => m.price, new { @class = "form-control", type = "number", step = "any", min = "1000", placeholder = "VD: 199000" })
+                            @Html.ValidationMessageFor(m => m.price, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="form-group mb-3">
+                            @Html.Label("Mô tả khóa học")
+                            @Html.TextAreaFor(m => m.course_description, 6, 50, new { @class = "form-control" })
+                        </div>
+
+
+
+                    </div>
+                </div>
+
+                <!-- Cột phải: Đề cương -->
+                <div class="col-md-9">
+                    <div class="form-card">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="fw-bold mb-0">Đề cương</h5>
+                            <button type="button" class="btn btn-primary btn-sm" id="btnAddChapter">
+                                + Thêm chương
+                            </button>
+                        </div>
+                        <div id="chaptersContainer" class="accordion">
+                            <!-- Chapter/lesson/content sẽ render vào đây -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="actions mt-4">
+                <a href="@Url.Action("Index", "AdminCourse", new { area = "Admin" })" class="btn-secondary">Hủy bỏ</a>
+                <button type="submit" class="btn-primary">Xác nhận</button>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- ======== Templates (JS) dùng Collection Indexer Pattern (.index hidden) ======== -->
+<script type="text/template" id="tpl-chapter">
+    <div class="accordion-item mb-2 shadow-sm rounded chapterItem" data-ch-key="__chKey__">
+        <input type="hidden" name="Chapters.index" value="__chKey__" />
+        <h2 class="accordion-header" id="chapHeading___chKey__">
+            <button class="accordion-button collapsed"
+                    type="button" data-bs-toggle="collapse"
+                    data-bs-target="#chapBody___chKey__"
+                    aria-expanded="false"
+                    aria-controls="chapBody___chKey__">
+                <span class="fw-semibold me-2">Chương <span class="ch-index">#__ch_display__</span>:</span>
+                <input class="form-control form-control-sm ms-2" name="Chapters[__chKey__].chapter_title" placeholder="Tiêu đề chương..." style="max-width: 420px;" />
+            </button>
+        </h2>
+        <div id="chapBody___chKey__" class="accordion-collapse collapse" aria-labelledby="chapHeading___chKey__">
+            <div class="accordion-body">
+                <div class="row g-2 mb-2">
+                    <div class="col-md-3">
+                        <input class="form-control form-control-sm" name="Chapters[__chKey__].display_order" type="number" min="0" placeholder="Thứ tự (optional)" />
+                    </div>
+                    <div class="col-md-3 d-flex align-items-center gap-2">
+                        <!-- hidden để luôn có false khi unchecked -->
+                        <input type="hidden" name="Chapters[__ch__].is_visible" value="false" />
+
+                        <div class="toggler" style="margin:0">
+                            <input id="chap-visible-__ch__"
+                                   type="checkbox"
+                                   name="Chapters[__ch__].is_visible"
+                                   value="true"
+                                   checked
+                                   data-role="toggle-chapter" />
+                            <label for="chap-visible-__ch__">
+                                <svg class="toggler-on" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
+                                    <polyline class="path check" points="100.2,40.2 51.5,88.8 29.8,67.5"></polyline>
+                                </svg>
+                                <svg class="toggler-off" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
+                                    <line class="path line" x1="34.4" y1="34.4" x2="95.8" y2="95.8"></line>
+                                    <line class="path line" x1="95.8" y1="34.4" x2="34.4" y2="95.8"></line>
+                                </svg>
+                            </label>
+                        </div>
+                        <label for="chap-visible-__ch__" class="m-0 user-select-none">Hiển thị chương</label>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <button type="button" class="btn btn-outline-danger btn-sm btnRemoveChapter">Xóa chương</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm btnAddLesson">+ Thêm bài</button>
+                    </div>
+                </div>
+
+                <div class="list-group lessonsContainer">
+                    <!-- Lesson items -->
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="tpl-lesson">
+    <div class="list-group-item mb-2 p-2 border rounded lessonItem" data-ls-key="__lsKey__">
+        <input type="hidden" name="Chapters[__chKey__].Lessons.index" value="__lsKey__" />
+        <div class="d-flex align-items-center justify-content-between">
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <span class="badge bg-secondary">Bài <span class="ls-index">#__ls_display__</span></span>
+                <input class="form-control form-control-sm" name="Chapters[__chKey__].Lessons[__lsKey__].lesson_title" placeholder="Tiêu đề bài..." style="min-width:220px; max-width:380px;" />
+                <input class="form-control form-control-sm" name="Chapters[__chKey__].Lessons[__lsKey__].display_order" type="number" min="0" placeholder="Thứ tự" style="width:120px;" />
+                <div class="d-flex align-items-center gap-2">
+                    <!-- hidden để luôn có false khi unchecked -->
+                    <input type="hidden" name="Chapters[__ch__].Lessons[__ls__].is_visible" value="false" />
+
+                    <div class="toggler" style="margin:0">
+                        <input id="ls-visible-__ch__-__ls__"
+                               type="checkbox"
+                               name="Chapters[__ch__].Lessons[__ls__].is_visible"
+                               value="true"
+                               checked
+                               data-role="toggle-lesson" />
+
+                        <label for="ls-visible-__ch__-__ls__">
+                            <svg class="toggler-on" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
+                                <polyline class="path check" points="100.2,40.2 51.5,88.8 29.8,67.5"></polyline>
+                            </svg>
+                            <svg class="toggler-off" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
+                                <line class="path line" x1="34.4" y1="34.4" x2="95.8" y2="95.8"></line>
+                                <line class="path line" x1="95.8" y1="34.4" x2="34.4" y2="95.8"></line>
+                            </svg>
+                        </label>
+                    </div>
+                    <label for="ls-visible-__ch__-__ls__" class="m-0 user-select-none">Hiển thị bài</label>
+                </div>
+
+            </div>
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-outline-danger btn-sm btnRemoveLesson">Xóa bài</button>
+                <button type="button" class="btn btn-outline-primary btn-sm btnAddContent">+ Thêm nội dung</button>
+            </div>
+        </div>
+
+        <div class="mt-2 contentsContainer">
+            <!-- Content items -->
+        </div>
+    </div>
+</script>
+
+<script type="text/template" id="tpl-content">
+    <div class="border rounded p-2 mt-2 contentItem" data-ct-key="__ctKey__">
+        <input type="hidden" name="Chapters[__chKey__].Lessons[__lsKey__].Contents.index" value="__ctKey__" />
+        <div class="row g-2 align-items-center">
+            <!-- Tiêu đề -->
+            <div class="col-md-4">
+                <input class="form-control form-control-sm"
+                       name="Chapters[__chKey__].Lessons[__lsKey__].Contents[__ctKey__].title"
+                       placeholder="Tiêu đề nội dung..." />
+            </div>
+
+            <!-- Loại nội dung -->
+            <div class="col-md-3">
+                <select class="form-control form-control-sm content-type"
+                        name="Chapters[__chKey__].Lessons[__lsKey__].Contents[__ctKey__].content_type">
+                    <option value="">-- Loại nội dung --</option>
+                    <option value="text">text</option>
+                    <option value="video">video</option>
+                    <option value="link">link (YouTube)</option>
+                </select>
+            </div>
+
+            <!-- Thứ tự -->
+            <div class="col-md-3">
+                <input class="form-control form-control-sm"
+                       name="Chapters[__chKey__].Lessons[__lsKey__].Contents[__ctKey__].display_order"
+                       type="number" min="0"
+                       placeholder="Thứ tự" />
+            </div>
+
+            <!-- Toggle hiển thị -->
+            <div class="d-flex align-items-center gap-2">
+                <input type="hidden" name="Chapters[__ch__].Lessons[__ls__].Contents[__ct__].is_visible" value="false" />
+                <div class="toggler" style="margin:0">
+                    <input id="ct-visible-__ch__-__ls__-__ct__"
+                           type="checkbox"
+                           name="Chapters[__ch__].Lessons[__ls__].Contents[__ct__].is_visible"
+                           value="true"
+                           checked
+                           data-role="toggle-content" />
+                    <label for="ct-visible-__ch__-__ls__-__ct__">
+                        <svg class="toggler-on" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
+                            <polyline class="path check" points="100.2,40.2 51.5,88.8 29.8,67.5"></polyline>
+                        </svg>
+                        <svg class="toggler-off" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 130.2 130.2">
+                            <line class="path line" x1="34.4" y1="34.4" x2="95.8" y2="95.8"></line>
+                            <line class="path line" x1="95.8" y1="34.4" x2="34.4" y2="95.8"></line>
+                        </svg>
+                    </label>
+                </div>
+                <label for="ct-visible-__ch__-__ls__-__ct__" class="m-0 user-select-none">Hiển thị nội dung</label>
+            </div>
+
+            <!-- Upload file (chỉ hiện khi type=video) -->
+            <div class="col-12 file-wrap">
+                <input type="file"
+                       name="Chapters[__chKey__].Lessons[__lsKey__].Contents[__ctKey__].upload_file"
+                       class="form-control form-control-sm"
+                       accept=".pdf,.doc,.docx,.xlsx,.xls,.mp4,.mp3,.png,.jpg,.jpeg" />
+            </div>
+
+            <!-- Link YouTube (chỉ hiện khi type=link) -->
+            <div class="col-12 link-wrap" style="display:none;">
+                <input class="form-control form-control-sm yt-link"
+                       name="Chapters[__chKey__].Lessons[__lsKey__].Contents[__ctKey__].content_body"
+                       placeholder="https://youtu.be/... hoặc https://www.youtube.com/watch?v=..." />
+            </div>
+
+            <!-- Preview iframe -->
+            <div class="col-12 yt-preview" style="display:none;">
+                <div style="position:relative;padding-top:56.25%;background:#000;border-radius:8px;overflow:hidden;margin-top:6px;">
+                    <iframe loading="lazy" allowfullscreen
+                            style="position:absolute;inset:0;width:100%;height:100%;border:0;"></iframe>
+                </div>
+            </div>
+
+            <div class="col-12 text-end">
+                <button type="button" class="btn btn-outline-danger btn-sm btnRemoveContent">Xóa nội dung</button>
+            </div>
+        </div>
+    </div>
+</script>
+
+
+<!-- ======== JS khởi tạo + thêm/xóa item (KHÔNG cần reindex tên) ========= -->
+<script>
+    (function () {
+        const form = document.getElementById('courseForm');
+        const chaptersContainer = document.getElementById('chaptersContainer');
+        const tplChapter = document.getElementById('tpl-chapter').innerHTML;
+        const tplLesson  = document.getElementById('tpl-lesson').innerHTML;
+        const tplContent = document.getElementById('tpl-content').innerHTML;
+
+        // sinh key ngắn, ổn định
+        function genKey() { return (Date.now().toString(36) + Math.random().toString(36).slice(2,7)); }
+
+        function parseValidation(scope) {
+            if (window.jQuery && window.$ && $.validator && $.validator.unobtrusive) {
+                $.validator.unobtrusive.parse(scope);
+            }
+        }
+
+        function addChapter() {
+            const chKey = genKey();
+            const displayIndex = chaptersContainer.querySelectorAll('.chapterItem').length + 1;
+
+            const html = tplChapter
+                .replaceAll('__chKey__', chKey)
+                .replaceAll('__ch_display__', displayIndex);
+
+            const node = htmlToNode(html);
+
+
+            // events
+            node.querySelector('.btnRemoveChapter').addEventListener('click', function () {
+                node.remove();
+                renumberDisplay();
+            });
+            node.querySelector('.btnAddLesson').addEventListener('click', function () {
+                addLesson(node);
+            });
+
+            chaptersContainer.appendChild(node);
+
+            // auto mở accordion
+            const btn = node.querySelector('.accordion-button');
+            if (btn) btn.click();
+
+            renumberDisplay();
+            parseValidation(node);
+        }
+
+        function addLesson(chapterNode) {
+            const chKey = chapterNode.getAttribute('data-ch-key');
+            const lsKey = genKey();
+            const displayIndex = chapterNode.querySelectorAll('.lessonItem').length + 1;
+
+            const html = tplLesson
+                .replaceAll(/__chKey__/g, chKey)
+                .replaceAll(/__lsKey__/g, lsKey)
+                .replaceAll('__ls_display__', displayIndex);
+
+            const node = htmlToNode(html);
+
+
+            node.querySelector('.btnRemoveLesson').addEventListener('click', function () {
+                node.remove();
+                renumberDisplay();
+            });
+            node.querySelector('.btnAddContent').addEventListener('click', function () {
+                addContent(node);
+            });
+
+            chapterNode.querySelector('.lessonsContainer').appendChild(node);
+            renumberDisplay();
+            parseValidation(node);
+        }
+
+        function addContent(lessonNode) {
+            const chapterNode = lessonNode.closest('.chapterItem');
+            const chKey = chapterNode.getAttribute('data-ch-key');
+            const lsKey = lessonNode.getAttribute('data-ls-key') || lessonNode.getAttribute('data-ls-key', lessonNode.getAttribute('data-ls-key'));
+            const realLsKey = lessonNode.getAttribute('data-ls-key') || (function(){ const v = lessonNode.getAttribute('data-ls-key'); return v; })();
+
+            // đảm bảo lesson có data-ls-key
+            let lsKeyAttr = lessonNode.getAttribute('data-ls-key');
+            if (!lsKeyAttr) {
+                // khi được tạo từ template, đã có rồi; đề phòng trường hợp sửa tay
+                const hidden = lessonNode.querySelector('input[name$=".Lessons.index"]');
+                lsKeyAttr = hidden ? hidden.value : genKey();
+                lessonNode.setAttribute('data-ls-key', lsKeyAttr);
+            }
+
+            const ctKey = genKey();
+
+            const html = tplContent
+                .replaceAll(/__chKey__/g, chKey)
+                .replaceAll(/__lsKey__/g, lsKeyAttr)
+                .replaceAll(/__ctKey__/g, ctKey);
+
+            const node = htmlToNode(html);
+            applyContentRow(node);
+
+            node.querySelector('.btnRemoveContent').addEventListener('click', function () {
+                node.remove();
+                renumberDisplay();
+            });
+
+            lessonNode.querySelector('.contentsContainer').appendChild(node);
+            renumberDisplay();
+            parseValidation(node);
+        }
+
+        function htmlToNode(html) {
+            const w = document.createElement('div');
+            w.innerHTML = html.trim();
+            return w.firstElementChild;
+        }
+
+        // chỉ cập nhật số thứ tự hiển thị (badge/label), không đổi name
+        function renumberDisplay() {
+            chaptersContainer.querySelectorAll('.chapterItem').forEach((chap, i) => {
+                const span = chap.querySelector('.ch-index');
+                if (span) span.textContent = (i + 1);
+                chap.querySelectorAll('.lessonItem').forEach((ls, j) => {
+                    // set data-ls-key nếu chưa có (an toàn)
+                    if (!ls.getAttribute('data-ls-key')) {
+                        const hd = ls.querySelector('input[name$=".Lessons.index"]');
+                        const k = hd ? hd.value : genKey();
+                        ls.setAttribute('data-ls-key', k);
+                    }
+                    const s = ls.querySelector('.ls-index');
+                    if (s) s.textContent = (j + 1);
+                });
+            });
+        }
+
+        // Init: add 1 chapter + 1 lesson + 1 content
+        document.getElementById('btnAddChapter').addEventListener('click', addChapter);
+        addChapter();
+        (function seedFirst() {
+            const firstChap = chaptersContainer.querySelector('.chapterItem');
+            if (firstChap) {
+                addLesson(firstChap);
+                const firstLesson = firstChap.querySelector('.lessonItem');
+                if (firstLesson) addContent(firstLesson);
+            }
+        })();
+        chaptersContainer.querySelectorAll('.contentItem').forEach(applyContentRow);
+
+        // ====== Propagate visible ======
+        function setChecked(el, v) {
+            // đừng dùng disabled vì sẽ không post được; chỉ set checked
+            if (el && el.type === 'checkbox') el.checked = !!v;
+        }
+
+        // tìm chapter wrapper gần nhất
+        function closestChapter(el) { return el.closest('.chapterItem'); }
+        // tìm lesson wrapper gần nhất
+        function closestLesson(el) { return el.closest('.lessonItem'); }
+
+        function toYouTubeEmbed(u) {
+            if (!u) return null;
+            try {
+                const url = new URL(u.trim());
+                if (url.hostname.includes('youtu.be')) {
+                    const id = url.pathname.replace('/', '').trim();
+                    return id ? `https://www.youtube.com/embed/${id}` : null;
+                }
+                if (url.hostname.includes('youtube.com')) {
+                    const v = url.searchParams.get('v');
+                    if (v) return `https://www.youtube.com/embed/${v}`;
+                    if (url.pathname.startsWith('/embed/')) {
+                        return `https://www.youtube.com${url.pathname}`;
+                    }
+                }
+            } catch (e) { }
+            return null;
+        }
+
+        function applyContentRow(node) {
+            const typeSel = node.querySelector('.content-type');
+            const fileWrap = node.querySelector('.file-wrap');
+            const linkWrap = node.querySelector('.link-wrap');
+            const linkInp = node.querySelector('.yt-link');
+            const prevBox = node.querySelector('.yt-preview');
+            const iframe = prevBox ? prevBox.querySelector('iframe') : null;
+
+            function syncUI() {
+                const t = (typeSel?.value || '').toLowerCase();
+                if (fileWrap) fileWrap.style.display = (t === 'video' || t === 'text' || t === 'pdf' || t === '') ? '' : 'none';
+                if (linkWrap) linkWrap.style.display = (t === 'link') ? '' : 'none';
+                if (prevBox && iframe) {
+                    if (t === 'link') {
+                        const em = toYouTubeEmbed(linkInp?.value || '');
+                        if (em) {
+                            prevBox.style.display = '';
+                            iframe.src = em;
+                        } else {
+                            prevBox.style.display = 'none';
+                            iframe.src = '';
+                        }
+                    } else {
+                        prevBox.style.display = 'none';
+                        iframe.src = '';
+                    }
+                }
+            }
+
+            typeSel?.addEventListener('change', syncUI);
+            linkInp?.addEventListener('input', syncUI);
+            syncUI();
+        }
+
+
+        // Lắng nghe thay đổi cho tất cả checkbox trong vùng đề cương (event delegation)
+        chaptersContainer.addEventListener('change', function (e) {
+            const t = e.target;
+            if (!(t instanceof HTMLInputElement)) return;
+            if (t.type !== 'checkbox') return;
+
+            // 1) Chapter toggle => set toàn bộ lesson/content bên dưới
+            if (t.dataset.role === 'toggle-chapter') {
+                const chap = closestChapter(t);
+                if (!chap) return;
+                const checked = t.checked;
+
+                // tất cả checkbox is_visible của lesson trong chapter này
+                chap.querySelectorAll('input[type="checkbox"][data-role="toggle-lesson"]').forEach(cb => {
+                    setChecked(cb, checked);
+                });
+                // tất cả checkbox is_visible của content trong chapter này
+                chap.querySelectorAll('input[type="checkbox"][data-role="toggle-content"]').forEach(cb => {
+                    setChecked(cb, checked);
+                });
+            }
+
+            // 2) Lesson toggle => set toàn bộ content trong lesson đó
+            if (t.dataset.role === 'toggle-lesson') {
+                const lesson = closestLesson(t);
+                if (!lesson) return;
+                const checked = t.checked;
+
+                lesson.querySelectorAll('input[type="checkbox"][data-role="toggle-content"]').forEach(cb => {
+                    setChecked(cb, checked);
+                });
+            }
+        });
+        // Toastify CustomError (nếu có)
+        document.addEventListener("DOMContentLoaded", function () {
+            @if (ViewData.ModelState.ContainsKey("CustomError"))
+            {
+                var errors = ViewData.ModelState["CustomError"].Errors;
+                foreach (var error in errors)
+                {
+                    @:Toastify({text: @Html.Raw(Json.Encode(error.ErrorMessage)), duration: 3000, gravity: "top", position: "right", backgroundColor: "linear-gradient(to right, #ef4444, #dc2626)", close: true}).showToast();
+                }
+            }
+        });
+    })();
+</script>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Scripts/custom-validation.js"></script>
+    <script src="~/Scripts/bootstrap.bundle.min.js"></script>
+}
+
+<style>
+    .create-full .page-content {
+        max-width: 1280px !important;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .create-full .form-card {
+        padding: 2rem;
+    }
+</style>

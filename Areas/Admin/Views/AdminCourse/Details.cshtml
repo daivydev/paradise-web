@@ -1,0 +1,350 @@
+﻿@model paradise.Models.cours
+@using System.Globalization
+@{
+    ViewBag.Title = "Chi tiết khóa học";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayoutPage1.cshtml";
+
+    Func<int?, int> safeOrder = x => x ?? int.MaxValue;
+    var vi = CultureInfo.GetCultureInfo("vi-VN");
+}
+
+<link href="~/Content/custom-css/CreateView.css" rel="stylesheet" />
+
+<div class="page-container create-full no-margin">
+    <div class="d-flex justify-content-between align-items-center">
+        <h4 class="fw-bold m-0">Chi tiết khóa học</h4>
+        <div class="d-flex gap-2">
+            <a class="btn btn-secondary" href="@Url.Action("Index","AdminCourse", new { area="Admin" })">
+                ← Quay lại danh sách
+            </a>
+            <a class="btn btn-primary" href="@Url.Action("Edit","AdminCourse", new { area="Admin", id = Model.id })">
+                Sửa khóa học
+            </a>
+        </div>
+    </div>
+
+    <div class="page-content mt-3">
+        <div class="row g-4">
+            <!-- Cột trái: Thông tin cơ bản -->
+            <div class="col-md-3">
+                <div class="form-card">
+                    <h5 class="fw-bold mb-3">Thông tin khóa học</h5>
+
+                    <div class="mb-3">
+                        <div class="text-muted small">Chủ đề</div>
+                        <div class="fw-semibold">@Model.topic.topic_name</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="text-muted small">Người tạo (email)</div>
+                        <div class="fw-semibold">@Model.user.email</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="text-muted small">Tiêu đề</div>
+                        <div class="fw-semibold">@Model.course_title</div>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.course_thumbnail))
+                    {
+                        <div class="mb-3">
+                            <div class="text-muted small">Ảnh thumbnail</div>
+                            <img src="@Model.course_thumbnail"
+                                 alt="thumbnail"
+                                 class="img-fluid rounded border" />
+                        </div>
+                    }
+
+                    <div class="mb-3">
+                        <div class="text-muted small">Giá</div>
+                        <div class="fw-semibold">
+                            @String.Format(vi, "{0:N0} đ", (decimal?)Model.price ?? 0m)
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="text-muted small">Trạng thái hiển thị</div>
+                        @if (Model.is_visible)
+                        {
+                            <span class="badge bg-success">Đang hiển thị</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">Đang ẩn</span>
+                        }
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="text-muted small">Ngày tạo</div>
+                        <div>@(Model.created_at.ToString("dd/MM/yyyy HH:mm") ?? "-")</div>
+                    </div>
+                    <div class="mb-0">
+                        <div class="text-muted small">Cập nhật lúc</div>
+                        <div>@(Model.updated_at.ToString("dd/MM/yyyy HH:mm") ?? "-")</div>
+                    </div>
+                </div>
+
+                <div class="form-card mt-3">
+                    <h6 class="fw-bold mb-2">Mô tả khóa học</h6>
+                    <div class="text-body">
+                        @(string.IsNullOrWhiteSpace(Model.course_description) ? @Html.Raw("<em>Chưa có mô tả</em>") : @Html.Raw(HttpUtility.HtmlEncode(Model.course_description).Replace("\n","<br/>")))
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cột phải: Đề cương -->
+            <div class="col-md-9">
+                <div class="form-card">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="fw-bold mb-0">Đề cương</h5>
+                    </div>
+
+                    @if (Model.course_chapters == null || !Model.course_chapters.Any())
+                    {
+                        <div class="alert alert-light border">Chưa có chương nào.</div>
+                    }
+                    else
+                    {
+                        <div class="accordion" id="chaptersAccordion">
+                            @foreach (var ch in Model.course_chapters.OrderBy(c => safeOrder(c.display_order)).ThenBy(c => c.id))
+                            {
+                                var chapHeadingId = $"chapHeading_{ch.id}";
+                                var chapBodyId = $"chapBody_{ch.id}";
+                                var chIndexDisp = (Model.course_chapters
+                                                        .OrderBy(c => safeOrder(c.display_order)).ThenBy(c => c.id)
+                                                        .Select((c, idx) => new { c.id, idx })
+                                                        .FirstOrDefault(x => x.id == ch.id)?.idx ?? 0) + 1;
+
+                                <div class="accordion-item mb-2 shadow-sm rounded">
+                                    <h2 class="accordion-header" id="@chapHeadingId">
+                                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#@chapBodyId" aria-expanded="false" aria-controls="@chapBodyId">
+                                            <span class="fw-semibold me-2">Chương <span>@chIndexDisp</span>:</span>
+                                            <span class="ms-1">@ch.chapter_title</span>
+                                        </button>
+                                    </h2>
+                                    <div id="@chapBodyId" class="accordion-collapse collapse" aria-labelledby="@chapHeadingId" data-bs-parent="#chaptersAccordion">
+                                        <div class="accordion-body">
+                                            <div class="row g-2 mb-2">
+                                                <div class="col-md-3">
+                                                    <div class="text-muted small">Thứ tự</div>
+                                                    <div>@(ch.display_order.ToString() ?? "-")</div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="text-muted small">Hiển thị</div>
+                                                    @if ((ch.is_visible))
+                                                    {
+                                                        <span class="badge bg-success">Hiển thị</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-secondary">Ẩn</span>
+                                                    }
+                                                </div>
+                                            </div>
+
+                                            @if (!string.IsNullOrWhiteSpace(ch.chapter_description))
+                                            {
+                                                <div class="mb-3">
+                                                    <div class="text-muted small">Mô tả chương</div>
+                                                    <div>@Html.Raw(HttpUtility.HtmlEncode(ch.chapter_description).Replace("\n", "<br/>"))</div>
+                                                </div>
+                                            }
+
+                                            <!-- Lessons -->
+                                            @if (ch.course_lessons == null || !ch.course_lessons.Any())
+                                            {
+                                                <div class="alert alert-light border mt-2">Chưa có bài nào.</div>
+                                            }
+                                            else
+                                            {
+                                                <div class="list-group">
+                                                    @foreach (var ls in ch.course_lessons.OrderBy(l => safeOrder(l.display_order)).ThenBy(l => l.id))
+                                                    {
+                                                        var lsIndexDisp = (ch.course_lessons
+                                                                            .OrderBy(l => safeOrder(l.display_order)).ThenBy(l => l.id)
+                                                                            .Select((l, idx) => new { l.id, idx })
+                                                                            .FirstOrDefault(x => x.id == ls.id)?.idx ?? 0) + 1;
+
+                                                        <div class="list-group-item mb-2 p-2 border rounded">
+                                                            <div class="d-flex align-items-center justify-content-between flex-wrap">
+                                                                <div class="d-flex align-items-center gap-2 flex-wrap">
+                                                                    <span class="badge bg-secondary">Bài @lsIndexDisp</span>
+                                                                    <span class="fw-semibold">@ls.lesson_title</span>
+                                                                    <span class="text-muted small">• Thứ tự: @(ls.display_order.ToString() ?? "-")</span>
+                                                                    @if ((ls.is_visible as bool?) == true)
+                                                                    {
+                                                                        <span class="badge bg-success">Hiển thị</span>
+                                                                    }
+                                                                    else
+                                                                    {
+                                                                        <span class="badge bg-secondary">Ẩn</span>
+                                                                    }
+                                                                </div>
+                                                            </div>
+
+                                                            <!-- Contents -->
+                                                            @if (ls.lesson_contents == null || !ls.lesson_contents.Any())
+                                                            {
+                                                                <div class="alert alert-light border mt-2 mb-0">Chưa có nội dung nào.</div>
+                                                            }
+                                                            else
+                                                            {
+                                                                <div class="mt-2">
+                                                                    @foreach (var ct in ls.lesson_contents.OrderBy(cn => safeOrder(cn.display_order)).ThenBy(cn => cn.id))
+                                                                    {
+                                                                        <div class="border rounded p-2 mt-2">
+                                                                            <div class="row g-2 align-items-center">
+                                                                                <div class="col-md-4">
+                                                                                    <div class="text-muted small">Tiêu đề nội dung</div>
+                                                                                    <div class="fw-semibold">@ct.content_text</div>
+                                                                                </div>
+                                                                                <div class="col-md-3">
+                                                                                    <div class="text-muted small">Loại nội dung</div>
+                                                                                    <div>@(string.IsNullOrWhiteSpace(ct.content_type) ? "-" : ct.content_type)</div>
+                                                                                </div>
+                                                                                <div class="col-md-3">
+                                                                                    <div class="text-muted small">Thứ tự</div>
+                                                                                    <div>@(ct.display_order.ToString() ?? "-")</div>
+                                                                                </div>
+                                                                                <div class="col-md-2">
+                                                                                    <div class="text-muted small">Hiển thị</div>
+                                                                                    @if ((ct.is_visible as bool?) == true)
+                                                                                    {
+                                                                                        <span class="badge bg-success">Hiển thị</span>
+                                                                                    }
+                                                                                    else
+                                                                                    {
+                                                                                        <span class="badge bg-secondary">Ẩn</span>
+                                                                                    }
+                                                                                </div>
+
+                                                                                @* Hiển thị nội dung/URL *@
+                                                                                @if (!string.IsNullOrWhiteSpace(ct.content_url))
+                                                                                {
+                                                                                    <div class="col-12">
+                                                                                        <div class="text-muted small">Nội dung</div>
+                                                                                        @RenderContentInline(ct, Url, Request)
+                                                                                    </div>
+                                                                                }
+
+                                                                            </div>
+                                                                        </div>
+                                                                    }
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script src="~/Scripts/bootstrap.bundle.min.js"></script>
+}
+<style>
+    .create-full .page-content {
+        max-width: 1280px !important;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .create-full .form-card {
+        padding: 2rem;
+    }
+</style>
+
+@helper RenderContentInline(paradise.Models.lesson_contents c, System.Web.Mvc.UrlHelper urlHelper, System.Web.HttpRequestBase req)
+{
+    if (c == null || string.IsNullOrWhiteSpace(c.content_url)) { return; }
+
+    var url = c.content_url.Trim();
+    var ext = (System.IO.Path.GetExtension(url) ?? "").ToLowerInvariant();
+    var type = (c.content_type ?? "").Trim().ToLowerInvariant();
+
+    // Build absolute URL nếu đang là relative ( /Uploads/... )
+    var abs = url;
+    if (Uri.IsWellFormedUriString(url, UriKind.Relative))
+    {
+        abs = req.Url.Scheme + "://" + req.Url.Authority + urlHelper.Content(url);
+    }
+
+    // Tiện ích
+    Func<bool> isLocalHost = () => string.Equals(req.Url.Host, "localhost", StringComparison.OrdinalIgnoreCase)
+                                   || req.Url.IsLoopback;
+    Func<bool> isHttpsAbsolute = () =>
+        Uri.TryCreate(abs, UriKind.Absolute, out var u) && u.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase);
+
+    // 💡 YouTube (ưu tiên trước nhánh video): controller đã convert sang /embed/
+    if (url.IndexOf("youtube.com/embed", StringComparison.OrdinalIgnoreCase) >= 0)
+    {
+        <div style="position:relative;padding-top:56.25%;background:#000;border-radius:8px;overflow:hidden;margin:8px 0;">
+            <iframe src="@url" title="YouTube video" allowfullscreen loading="lazy"
+                    style="position:absolute;inset:0;width:100%;height:100%;border:0;"></iframe>
+        </div>
+        return;
+    }
+
+
+    // Ảnh
+    if (type == "image" || new[] { ".png", ".jpg", ".jpeg", ".gif", ".webp" }.Contains(ext))
+    {
+        @:<img src="@url" alt="@c.content_text" style="max-width:100%;height:auto;border:1px solid #eee;border-radius:6px;" />
+        return;
+    }
+
+    // Video file (mp4/mov/mkv/webm) hoặc type=video
+    if (type == "video" || new[] { ".mp4", ".mov", ".mkv", ".webm" }.Contains(ext))
+    {
+        @:<video src="@url" controls style="max-width:100%;border-radius:6px;"></video>
+        return;
+    }
+
+    // PDF
+    if (type == "pdf" || ext == ".pdf")
+    {
+        @:<embed src="@url" type="application/pdf" style="width:100%;height:520px;border:1px solid #eee;border-radius:6px;" />
+        return;
+    }
+
+    // Word / Excel
+    if (type == "doc" || type == "excel" || new[] { ".doc", ".docx", ".xls", ".xlsx" }.Contains(ext))
+    {
+        // Fallback: luôn cho tải
+        <div class="mb-2">
+            <a class="btn btn-outline-primary btn-sm" href="@url" download>Tải @(ext.Trim('.').ToUpper())</a>
+        </div>
+
+        // Chỉ embed nếu không phải localhost và URL absolute HTTPS (để Microsoft có thể truy cập)
+        if (!isLocalHost() && isHttpsAbsolute())
+        {
+            var office = "https://view.officeapps.live.com/op/embed.aspx?src=" + Uri.EscapeDataString(abs);
+            @:<iframe src="@office" style="width:100%;height:520px;border:1px solid #eee;border-radius:6px;"></iframe>
+        }
+        else
+        {
+            @:<div class="text-muted small">Xem trực tiếp Word/Excel chỉ khả dụng khi site public HTTPS. Hiện dùng nút tải xuống.</div>
+        }
+        return;
+    }
+
+    // Mặc định: hiện link/text
+    var anchorText = !string.IsNullOrWhiteSpace(c.content_text) ? c.content_text : url;
+    if (Uri.IsWellFormedUriString(url, UriKind.Absolute))
+    {
+        @:<a href="@url" target="_blank" rel="noopener" class="text-decoration-underline">@anchorText</a>
+    }
+    else
+    {
+        @:<div class="text-break">@Html.Raw(HttpUtility.HtmlEncode(url).Replace("\n", "<br/>"))</div>
+    }
+}

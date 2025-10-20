@@ -1,0 +1,84 @@
+﻿@model paradise.Models.course_chapters
+@{
+    ViewBag.Title = "Thêm mới chương học";
+}
+
+<link href="~/Content/custom-css/CreateView.css" rel="stylesheet" />
+
+<div class="page-container">
+    <h4 class="fw-bold m-0">Tạo mới chương học</h4>
+
+    <div class="page-content">
+        @using (Html.BeginForm("Create", "AdminCourse_chapters", FormMethod.Post, new { area = "Admin", id = "chapterForm", novalidate = "novalidate" }))
+        {
+            @Html.AntiForgeryToken()
+
+        <div class="form-card row g-3">
+            <!-- Khóa học -->
+            <div class="col-md-6 form-group">
+                @Html.LabelFor(m => m.course_id, "Khóa học")
+                @Html.DropDownListFor(m => m.course_id,
+                    (SelectList)ViewBag.course_id,
+                    "-- Chọn khóa học --",
+                    new { @class = "form-control" })
+                @Html.ValidationMessageFor(m => m.course_id, "", new { @class = "text-danger" })
+            </div>
+
+            <!-- Tiêu đề chương -->
+            <div class="col-md-6 form-group">
+                @Html.LabelFor(m => m.chapter_title, "Tiêu đề chương")
+                @Html.TextBoxFor(m => m.chapter_title, new { @class = "form-control", placeholder = "Nhập tên chương..." })
+                @Html.ValidationMessageFor(m => m.chapter_title, "", new { @class = "text-danger" })
+            </div>
+            <!-- Thứ tự hiển thị -->
+            <div class="col-md-6 form-group">
+                @Html.LabelFor(m => m.display_order, "Thứ tự hiển thị")
+                @Html.TextBoxFor(m => m.display_order, new { @class = "form-control", type = "number", min = "0", placeholder = "VD: 1" })
+                @Html.ValidationMessageFor(m => m.display_order, "", new { @class = "text-danger" })
+            </div>
+            <!-- Mô tả chương -->
+            <div class="col-6 form-group">
+                @Html.LabelFor(m => m.chapter_description, "Mô tả")
+                @Html.TextAreaFor(m => m.chapter_description, 4, 50, new { @class = "form-control", placeholder = "Mô tả nội dung chương..." })
+                @Html.ValidationMessageFor(m => m.chapter_description, "", new { @class = "text-danger" })
+            </div>
+
+            @* created_at set ở Controller, không cho nhập *@
+        </div>
+
+            <!-- Actions -->
+            <div class="actions">
+                <a href="@Url.Action("Index", "AdminCourse_chapters", new { area = "Admin" })" class="btn-secondary">Hủy bỏ</a>
+                <button type="submit" class="btn-primary">Xác nhận</button>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Hiển thị Toastify nếu có lỗi CustomError
+        @if (ViewData.ModelState.ContainsKey("CustomError"))
+        {
+            var errors = ViewData.ModelState["CustomError"].Errors;
+            foreach (var error in errors)
+            {
+                <text>
+                    Toastify({
+                        text: @Html.Raw(Json.Encode(error.ErrorMessage)),
+                        duration: 3000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: "linear-gradient(to right, #ef4444, #dc2626)",
+                        close: true
+                    }).showToast();
+                </text>
+            }
+        }
+    });
+</script>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+    <script src="~/Helpers/custom-validation.js"></script>
+}

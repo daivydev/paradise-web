@@ -1,0 +1,59 @@
+﻿@model paradise.Models.course_chapters
+
+@{
+    ViewBag.Title = "Details";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayoutPage1.cshtml";
+}
+
+<h2>Details</h2>
+
+<div>
+    <h4>course_chapters</h4>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.cours.course_title)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.cours.course_title)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.chapter_title)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.chapter_title)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.chapter_description)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.chapter_description)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.display_order)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.display_order)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.created_at)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.created_at)
+        </dd>
+
+    </dl>
+</div>
+<p>
+    @Html.ActionLink("Edit", "Edit", new { id = Model.id }) |
+    @Html.ActionLink("Back to List", "Index")
+</p>
