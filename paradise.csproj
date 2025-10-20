@@ -225,7 +225,9 @@
     <Compile Include="Areas\Admin\Controllers\AdminCourse_lessonsController.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminCourse_ReviewsController.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminHomeController.cs" />
+
     <Compile Include="Areas\Admin\Controllers\AdminLesson_contentsController.cs" />
+
     <Compile Include="Areas\Admin\Controllers\AdminUsersController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\usersController.cs" />
@@ -246,17 +248,19 @@
     <Compile Include="Models\course_reviews.cs" />
     <Compile Include="Models\lesson_contents.cs" />
     <Compile Include="Models\lesson_progress.cs" />
-    <Compile Include="Models\lesson_quizzes.cs" />
+    <Compile Include="Models\quiz.cs" />
     <Compile Include="Models\quiz_attempts.cs" />
     <Compile Include="Models\quiz_attempt_answers.cs" />
     <Compile Include="Models\quiz_options.cs" />
     <Compile Include="Models\quiz_questions.cs" />
     <Compile Include="Models\role.cs" />
-    <Compile Include="Models\sysdiagram.cs" />
     <Compile Include="Models\topic.cs" />
+    <Compile Include="Models\topic_quiz.cs" />
     <Compile Include="Models\user.cs" />
     <Compile Include="Models\user_profiles.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ViewModels\QuizCreateVm.cs" />
+    <Compile Include="ViewModels\QuizEditVm.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Areas\Admin\Views\AdminHome\Index.cshtml" />
@@ -311,6 +315,7 @@
     <Content Include="Content\custom-css\ListView.css" />
     <Content Include="Areas\Admin\Views\Shared\AddingButton.cshtml" />
     <Content Include="Areas\Admin\Views\Shared\ExportButton.cshtml" />
+
     <Content Include="Areas\Admin\Views\AdminCourse\Create.cshtml" />
     <Content Include="Areas\Admin\Views\AdminCourse\Delete.cshtml" />
     <Content Include="Areas\Admin\Views\AdminCourse\Details.cshtml" />
@@ -331,6 +336,7 @@
     <Content Include="Areas\Admin\Views\AdminCourse_lessons\Details.cshtml" />
     <Content Include="Areas\Admin\Views\AdminCourse_lessons\Edit.cshtml" />
     <Content Include="Areas\Admin\Views\AdminCourse_lessons\Index.cshtml" />
+
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -395,8 +401,10 @@
     <Content Include="Scripts\jquery-3.7.0.min.map" />
   </ItemGroup>
   <ItemGroup>
+
     <EmbeddedResource Include="Migrations\202510131211550_InitialSync.resx">
       <DependentUpon>202510131211550_InitialSync.cs</DependentUpon>
+
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

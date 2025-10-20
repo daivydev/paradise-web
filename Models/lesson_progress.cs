@@ -8,6 +8,7 @@ namespace paradise.Models
 
     public partial class lesson_progress
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long id { get; set; }
 
         public long user_id { get; set; }
@@ -16,8 +17,7 @@ namespace paradise.Models
 
         public bool is_completed { get; set; }
 
-        [Column(TypeName = "datetime2")]
-        public DateTime completed_at { get; set; }
+        public DateTime? completed_at { get; set; }
 
         public virtual course_lessons course_lessons { get; set; }
 

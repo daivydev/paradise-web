@@ -17,6 +17,7 @@
             course_reviews = new HashSet<course_reviews>();
         }
 
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long id { get; set; }
 
         [Required(ErrorMessage = "Vui lòng chọn chủ đề")]
@@ -26,12 +27,15 @@
         [Required(ErrorMessage = "Vui lòng chọn tác giả")]
         public long author_id { get; set; }
 
+
         [Required(ErrorMessage = "Vui lòng nhập tiêu đề khóa học")]
         [StringLength(255)]
-        [Column(TypeName = "nvarchar")]   // ép NVARCHAR 
+        [Column(TypeName = "nvarchar")]  
+
 
         public string course_title { get; set; }
 
+        [StringLength(1)]
         public string course_description { get; set; }
 
         [StringLength(255)]
@@ -41,11 +45,11 @@
         [Range(1000, Double.MaxValue, ErrorMessage = "Giá phải từ 1000 trở lên")]
         public decimal price { get; set; }
 
-        [Column(TypeName = "datetime2")]
-        public DateTime created_at { get; set; }
+        public DateTime? created_at { get; set; }
 
-        [Column(TypeName = "datetime2")]
-        public DateTime updated_at { get; set; }
+        public DateTime? updated_at { get; set; }
+
+        public bool is_visible { get; set; }
 
         public bool is_visible { get; set; } = true;
 

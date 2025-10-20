@@ -1,4 +1,4 @@
-﻿namespace paradise.Models
+namespace paradise.Models
 {
     using System;
     using System.Collections.Generic;
@@ -14,10 +14,11 @@
             user_profiles = new HashSet<user_profiles>();
         }
 
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long id { get; set; }
 
-        [Required(ErrorMessage = "")]
-        [StringLength(100)]
+        [Required]
+        [StringLength(255)]
         public string role_name { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

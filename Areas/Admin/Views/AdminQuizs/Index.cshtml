@@ -1,0 +1,149 @@
+﻿@model IEnumerable<paradise.Models.quiz>
+@{
+    ViewBag.Title = "Quản lý Quiz";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayoutPage1.cshtml";
+}
+
+<link href="~/Content/custom-css/ListView.css" rel="stylesheet" />
+
+@{
+    Html.RenderPartial("OverLayLoading", "AdminQuizs");
+}
+
+<h4 class="fw-bold m-0">Quản lý bài kiểm tra</h4>
+
+<div class="d-flex justify-content-between align-items-center mt-5">
+    @{
+        // Thanh tìm kiếm + nút thêm mới giống Users
+        Html.RenderPartial("SearchingBar", Tuple.Create("Tiêu đề hoặc chủ đề", "AdminQuizs"));
+        Html.RenderPartial("AddingButton", Tuple.Create("AdminQuizs"));
+    }
+</div>
+
+@functions{
+    // Hiển thị ngày tạo dd/MM/yyyy HH:mm; ẩn nếu null/invalid
+    public static string DateTimeVi(DateTime? dt)
+    {
+        if (!dt.HasValue) return "";
+        if (dt.Value == default(DateTime)) return "";
+        return dt.Value.ToString("dd/MM/yyyy HH:mm");
+    }
+}
+
+<div class="table-responsive overflow-hidden mt-2 p-4">
+    <table class="table align-middle mb-0">
+        <thead>
+            <tr>
+                <th style="min-width:220px">Tiêu đề</th>
+                <th style="min-width:180px">Chủ đề</th>
+                <th class="text-center">Thời lượng (phút)</th>
+                <th class="text-center">Số câu</th>
+                <th style="min-width:160px">Ngày tạo</th>
+                <th class="text-center">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">@item.title</td>
+                        <td>@(item.topic_quiz?.title ?? "")</td>
+                        <td class="text-center">
+                            @(item.is_infinity == true
+        ? "Không giới hạn"
+        : (item.time.HasValue
+            ? ((item.time.Value % 1 == 0)
+                ? ((int)item.time.Value).ToString()
+                : item.time.Value.ToString("0.#"))
+            : "-"))
+                        </td>
+
+                        <td class="text-center">@item.quantity</td>
+                        <td>@DateTimeVi(item.created_at)</td>
+                        <td class="action-icons">
+                            <div class="dropdown">
+                                <div class="cursor-pointer d-flex align-items-center justify-content-center text-dark text-decoration-none"
+                                     id="dropdownQuiz" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <button class="icon-btn">
+                                        <i class="bi bi-three-dots-vertical"></i>
+                                    </button>
+                                </div>
+                                <ul class="dropdown-menu custom-dropdown shadow bg-white" aria-labelledby="dropdownQuiz">
+                                    <li>
+                                        <a href="@Url.Action("Edit", "AdminQuizs", new { area = "Admin", id = item.id })"
+                                           class="text-decoration-none">
+                                            <button class="action_btn">Chỉnh sửa</button>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <button class="action_btn" title="Delete"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteModal"
+                                                data-quizid="@item.id"
+                                                data-quizname="@item.title">
+                                            Xóa
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="7" class="text-center text-muted p-5">Không có dữ liệu.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @{
+        // Phân trang đúng template chuẩn
+        Html.RenderPartial("Pagination",
+            Tuple.Create((int)ViewBag.Page, (int)ViewBag.TotalPages, "Index", (string)ViewBag.Search));
+    }
+</div>
+
+@* Modal popup xóa *@
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg rounded-3">
+            <div class="modal-header bg-dark text-white rounded-top-3">
+                <h5 class="modal-title fw-semibold">Xác nhận xóa</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa quiz <strong id="deleteQuizName"></strong> không?</p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" method="post" action="">
+                    <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Hủy</button>
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-dark shadow-sm">Xóa</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        const deleteModal = document.getElementById('deleteModal');
+        deleteModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const quizId = button.getAttribute('data-quizid');
+            const quizName = button.getAttribute('data-quizname') || '';
+
+            // Hiển thị tên quiz
+            document.getElementById('deleteQuizName').textContent = quizName;
+
+            // Gán action cho form delete theo chuẩn /Admin/AdminQuizs/Delete/{id}
+            const form = document.getElementById('deleteForm');
+            form.action = `/Admin/AdminQuizs/Delete/${quizId}`;
+        });
+    </script>
+}

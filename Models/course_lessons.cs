@@ -13,22 +13,24 @@ namespace paradise.Models
         {
             lesson_contents = new HashSet<lesson_contents>();
             lesson_progress = new HashSet<lesson_progress>();
-            lesson_quizzes = new HashSet<lesson_quizzes>();
         }
 
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long id { get; set; }
 
         public long chapter_id { get; set; }
 
         [Required]
-        [StringLength(255)]
+        [StringLength(1)]
         public string lesson_title { get; set; }
 
         public int display_order { get; set; }
 
+
         [Column(TypeName = "datetime2")]
         public DateTime created_at { get; set; }
         public bool is_visible { get; set; } = true;
+
 
         public virtual course_chapters course_chapters { get; set; }
 
@@ -37,8 +39,5 @@ namespace paradise.Models
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<lesson_progress> lesson_progress { get; set; }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<lesson_quizzes> lesson_quizzes { get; set; }
     }
 }

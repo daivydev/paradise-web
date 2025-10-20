@@ -45,9 +45,7 @@
                         <td>@u.email</td>
                         <td>@u.user_profiles.phone_number</td>
                         <td>
-                            @(u.user_profiles.date_of_birth.HasValue
-                        ? u.user_profiles.date_of_birth.Value.ToString("dd/MM/yyyy")
-                        : "")
+                            @(u.user_profiles.date_of_birth < new DateTime(1900,1,1) ? "" : u.user_profiles.date_of_birth.ToString("dd/MM/yyyy"))
                         </td>
                         <td>@u.user_profiles.gender</td>
                         <td>@u.user_profiles.role.role_name</td>

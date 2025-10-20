@@ -1,0 +1,355 @@
+﻿@model paradise.ViewModels.QuizEditVm
+@using System.Linq
+
+@{
+    ViewBag.Title = "Sửa quiz";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayoutPage1.cshtml";
+}
+<link href="~/Content/custom-css/CreateView.css" rel="stylesheet" />
+
+<style>
+    .question-block {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: .5rem;
+    }
+
+    .question-text, .option-text {
+        width: 100%;
+        min-height: 70px;
+        resize: vertical;
+        padding: 8px 10px;
+        font-size: 14px;
+    }
+
+    .option-item {
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+        margin-bottom: 8px;
+    }
+
+        .option-item .letter {
+            min-width: 32px;
+            background: #e9ecef;
+            border-radius: 4px;
+            text-align: center;
+            padding: 8px;
+            font-weight: 600;
+        }
+</style>
+
+<div class="page-container">
+    <h4 class="fw-bold m-0">Sửa quiz</h4>
+
+    <div class="page-content">
+        @using (Html.BeginForm("Edit", "AdminQuizs", FormMethod.Post, new { area = "Admin", id = "quizForm", novalidate = "novalidate", autocomplete = "off" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(m => m.id)
+            @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
+
+            <div class="form-card">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">Tiêu đề</label>
+                        @Html.TextBoxFor(m => m.title, new { @class = "form-control", placeholder = "Nhập tiêu đề", required = "required" })
+                        @Html.ValidationMessageFor(m => m.title, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Chủ đề</label>
+                        @Html.DropDownListFor(
+                            m => m.topic,
+                            (IEnumerable<SelectListItem>)ViewBag.topicItems,
+                            new { @class = "form-select", required = "required" }
+                        )
+                        @Html.ValidationMessageFor(m => m.topic, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Thời lượng (phút)</label>
+                        @Html.TextBoxFor(m => m.time, "{0:0.#}", new { @class = "form-control", type = "number", step = "1", min = "0", id = "time" })
+                        @Html.ValidationMessageFor(m => m.time, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Số câu</label>
+                        @Html.TextBoxFor(m => m.quantity, new { @class = "form-control", type = "number", min = "0", id = "quantity", @readonly = "readonly" })
+                    </div>
+
+                    <div class="col-md-4 d-flex align-items-end">
+                        <div class="form-check mt-1">
+                            @Html.CheckBoxFor(m => m.is_infinity, new { @class = "form-check-input", id = "isInf" })
+                            <label class="form-check-label" for="isInf">Không giới hạn thời gian</label>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h5 class="m-0">Câu hỏi</h5>
+                    <button type="button" id="btnAddQuestion" class="btn btn-outline-dark btn-sm">+ Thêm câu hỏi</button>
+                </div>
+
+                <div id="questionsContainer" class="mt-2">
+                    @for (int i = 0; i < (Model.Questions?.Count ?? 0); i++)
+                    {
+                        var q = Model.Questions[i];
+                        <div class="question-block p-3 mb-3" data-qindex="@i">
+                            @Html.Hidden($"Questions[{i}].id", q.id)
+                            @Html.Hidden($"Questions[{i}]._remove", "false", new { @class = "q-remove-flag" })
+
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h6 class="fw-bold m-0">Câu hỏi @(i + 1)</h6>
+                                <button type="button" class="btn btn-outline-danger btn-sm btn-remove-q">Xoá câu này</button>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Nội dung câu hỏi</label>
+                                <textarea name="Questions[@i].question_text" class="form-control question-text" rows="2">@q.question_text</textarea>
+                            </div>
+
+                            <div class="mb-2">
+                                <label class="form-label">Các đáp án</label>
+                                <div class="option-list">
+                                    @{
+                                        var opts = q.Options ?? new List<paradise.ViewModels.OptionEditVm>();
+                                        for (int j = 0; j < opts.Count; j++)
+                                        {
+                                            var o = opts[j];
+                                            <div class="option-item">
+                                                <span class="letter">@((char)('A' + j))</span>
+
+                                                @Html.Hidden($"Questions[{i}].Options[{j}].id", o.id)
+                                                @Html.Hidden($"Questions[{i}].Options[{j}]._remove", "false", new { @class = "o-remove-flag" })
+
+                                                <textarea name="Questions[@i].Options[@j].option_text"
+                                                          class="option-text" rows="1">@o.option_text</textarea>
+
+                                                <input class="form-check-input mt-1"
+                                                       type="radio"
+                                                       name="Questions[@i].CorrectOption"
+                                                       value="@j"
+                                                       @(q.CorrectOption == j ? "checked" : "") />
+
+                                                <button type="button" class="btn btn-outline-danger btn-sm btn-remove-opt">Xoá</button>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+
+                                <div class="mt-2">
+                                    <button type="button" class="btn btn-outline-secondary btn-sm btn-add-opt">+ Thêm đáp án</button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <div class="actions mt-4">
+                    <a class="btn btn-secondary" href="@Url.Action("Index","AdminQuizs", new { area="Admin"})">Huỷ</a>
+                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@section scripts{
+    <script>
+        (function () {
+            const chk = document.getElementById('isInf');
+            const time = document.getElementById('time');
+            const qty = document.getElementById('quantity');
+            const box = document.getElementById('questionsContainer');
+            const btnAddQ = document.getElementById('btnAddQuestion');
+
+            function toggleTime() {
+                const inf = chk && chk.checked === true;
+                if (time) {
+                    time.disabled = inf;
+                    if (inf) time.value = "";
+                }
+            }
+            if (chk) { chk.addEventListener('change', toggleTime); toggleTime(); }
+
+            function autoResize(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
+
+            function syncQuantity() {
+                const n = box.querySelectorAll('.question-block:not([data-hidden="1"])').length;
+                if (qty) qty.value = n;
+            }
+
+            function reindexAll() {
+                const qBlocks = box.querySelectorAll('.question-block');
+                qBlocks.forEach((qb, qi) => {
+                    qb.dataset.qindex = qi;
+                    const title = qb.querySelector('.fw-bold');
+                    if (title) title.textContent = 'Câu hỏi ' + (qi + 1);
+
+                    let qId = qb.querySelector('input[name$=".id"]');
+                    if (qId) qId.name = `Questions[${qi}].id`;
+
+                    let qRemove = qb.querySelector('.q-remove-flag');
+                    if (qRemove) qRemove.name = `Questions[${qi}]._remove`;
+
+                    let qText = qb.querySelector('.question-text');
+                    if (qText) qText.name = `Questions[${qi}].question_text`;
+
+                    const items = qb.querySelectorAll('.option-item');
+                    items.forEach((opt, oj) => {
+                        const letter = opt.querySelector('.letter');
+                        if (letter) letter.textContent = String.fromCharCode(65 + oj);
+
+                        let oId = opt.querySelector('input[name$=".id"]');
+                        if (oId) oId.name = `Questions[${qi}].Options[${oj}].id`;
+
+                        let oRemove = opt.querySelector('.o-remove-flag');
+                        if (oRemove) oRemove.name = `Questions[${qi}].Options[${oj}]._remove`;
+
+                        let oText = opt.querySelector('.option-text');
+                        if (oText) oText.name = `Questions[${qi}].Options[${oj}].option_text`;
+
+                        let radio = opt.querySelector('input[type="radio"]');
+                        if (radio) { radio.name = `Questions[${qi}].CorrectOption`; radio.value = String(oj); }
+                    });
+                });
+                syncQuantity();
+            }
+
+            function addOption(qb) {
+                const list = qb.querySelector('.option-list');
+                const oj = list.querySelectorAll('.option-item').length;
+
+                const wrap = document.createElement('div');
+                wrap.className = 'option-item';
+                wrap.innerHTML = `
+                    <span class="letter">A</span>
+                    <input type="hidden" class="o-remove-flag" name="" value="false" />
+                    <textarea class="option-text" rows="1" placeholder="Đáp án"></textarea>
+                    <input class="form-check-input mt-1" type="radio" name="" value="${oj}" />
+                    <button type="button" class="btn btn-outline-danger btn-sm btn-remove-opt">Xoá</button>
+                `;
+                list.appendChild(wrap);
+
+                const area = wrap.querySelector('.option-text');
+                area.addEventListener('input', () => autoResize(area));
+                autoResize(area);
+
+                wrap.querySelector('.btn-remove-opt').addEventListener('click', () => {
+                    const items = list.querySelectorAll('.option-item');
+                    if (items.length <= 2) { alert('Cần ít nhất 2 đáp án.'); return; }
+                    const idInput = wrap.querySelector('input[name$=".id"]');
+                    if (idInput && idInput.value) {
+                        wrap.querySelector('.o-remove-flag').value = 'true';
+                        wrap.style.display = 'none';
+                    } else {
+                        wrap.remove();
+                    }
+                    reindexAll();
+                });
+
+                reindexAll();
+            }
+
+            function addQuestion() {
+                const qi = box.querySelectorAll('.question-block').length;
+                const qb = document.createElement('div');
+                qb.className = 'question-block p-3 mb-3';
+                qb.dataset.qindex = qi;
+
+                qb.innerHTML = `
+                    <input type="hidden" name="Questions[${qi}].id" value="" />
+                    <input type="hidden" class="q-remove-flag" name="Questions[${qi}]._remove" value="false" />
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="fw-bold m-0">Câu hỏi ${qi + 1}</h6>
+                        <button type="button" class="btn btn-outline-danger btn-sm btn-remove-q">Xoá câu này</button>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nội dung câu hỏi</label>
+                        <textarea name="Questions[${qi}].question_text" class="form-control question-text" rows="2" placeholder="Nhập nội dung câu hỏi"></textarea>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Các đáp án</label>
+                        <div class="option-list"></div>
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-outline-secondary btn-sm btn-add-opt">+ Thêm đáp án</button>
+                        </div>
+                    </div>
+                `;
+
+                box.appendChild(qb);
+
+                // 4 đáp án mặc định
+                for (let j = 0; j < 4; j++) addOption(qb);
+                // chọn A mặc định
+                const firstRadio = qb.querySelector('.option-list input[type="radio"]');
+                if (firstRadio) firstRadio.checked = true;
+
+                qb.querySelector('.btn-add-opt').addEventListener('click', () => addOption(qb));
+
+                qb.querySelector('.btn-remove-q').addEventListener('click', () => {
+                    const idInput = qb.querySelector('input[name$=".id"]');
+                    if (idInput && idInput.value) {
+                        qb.querySelector('.q-remove-flag').value = 'true';
+                        qb.dataset.hidden = "1";
+                        qb.style.display = 'none';
+                    } else {
+                        qb.remove();
+                    }
+                    reindexAll();
+                });
+
+                const qArea = qb.querySelector('.question-text');
+                qArea.addEventListener('input', () => autoResize(qArea)); autoResize(qArea);
+
+                reindexAll();
+            }
+
+            // gắn sự kiện cho block có sẵn
+            box.querySelectorAll('.question-block').forEach(qb => {
+                qb.querySelectorAll('.option-text').forEach(t => { t.addEventListener('input', () => autoResize(t)); autoResize(t); });
+                const qArea = qb.querySelector('.question-text');
+                qArea.addEventListener('input', () => autoResize(qArea)); autoResize(qArea);
+
+                qb.querySelector('.btn-add-opt')?.addEventListener('click', () => addOption(qb));
+
+                qb.querySelectorAll('.btn-remove-opt').forEach(btn => {
+                    btn.addEventListener('click', (ev) => {
+                        const item = ev.target.closest('.option-item');
+                        const list = qb.querySelector('.option-list');
+                        const items = list.querySelectorAll('.option-item');
+                        if (items.length <= 2) { alert('Cần ít nhất 2 đáp án.'); return; }
+                        const idInput = item.querySelector('input[name$=".id"]');
+                        if (idInput && idInput.value) {
+                            item.querySelector('.o-remove-flag').value = 'true';
+                            item.style.display = 'none';
+                        } else {
+                            item.remove();
+                        }
+                        reindexAll();
+                    });
+                });
+
+                qb.querySelector('.btn-remove-q')?.addEventListener('click', () => {
+                    const idInput = qb.querySelector('input[name$=".id"]');
+                    if (idInput && idInput.value) {
+                        qb.querySelector('.q-remove-flag').value = 'true';
+                        qb.dataset.hidden = "1";
+                        qb.style.display = 'none';
+                    } else {
+                        qb.remove();
+                    }
+                    reindexAll();
+                });
+            });
+
+            if (btnAddQ) btnAddQ.addEventListener('click', addQuestion);
+
+            // init qty
+            syncQuantity();
+        })();
+    </script>
+}

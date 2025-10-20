@@ -4,8 +4,8 @@ namespace paradise.Models
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
-    using System.Data.Entity.Spatial;
 
+    [Table("quiz_options")]
     public partial class quiz_options
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
@@ -14,12 +14,15 @@ namespace paradise.Models
             quiz_attempt_answers = new HashSet<quiz_attempt_answers>();
         }
 
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long id { get; set; }
 
+        [ForeignKey("quiz_questions")]
         public long question_id { get; set; }
 
         [Required]
-        [StringLength(255)]
+        [StringLength(500)]
         public string option_text { get; set; }
 
         public bool is_correct { get; set; }
