@@ -44,7 +44,7 @@
                         <td>@r.user.email</td>
                         <td class="text-center">@r.rating⭐</td>
                         <td class="table-cell-wrap">@r.review_text</td>
-                        <td>@(r.created_at?.ToString("dd/MM/yyyy") ?? "")</td>
+                        <td>@(r.created_at.ToString("dd/MM/yyyy") ?? "")</td>
                         <td>
                             <div class="toggler">
                                 <input id="toggler-@r.id"

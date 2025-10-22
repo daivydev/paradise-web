@@ -8,22 +8,24 @@ namespace paradise.Models
 
     public partial class lesson_contents
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long id { get; set; }
 
-        public long? lesson_id { get; set; }
+        public long lesson_id { get; set; }
 
         [Required]
-        [StringLength(255)]
-        public string content_file { get; set; }
+        [StringLength(10)]
+        public string content_type { get; set; }
+
+        public string content_text { get; set; }
+
+        public string content_url { get; set; }
 
         public int display_order { get; set; }
 
-
         [Column(TypeName = "datetime2")]
         public DateTime created_at { get; set; }
-        public bool is_visible { get; set; } = true;
 
+        public bool is_visible { get; set; }
 
         public virtual course_lessons course_lessons { get; set; }
     }

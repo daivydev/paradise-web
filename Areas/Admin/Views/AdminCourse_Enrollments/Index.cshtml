@@ -39,7 +39,7 @@
                     <tr>
                         <td>@e.cours.course_title</td>
                         <td>@e.user.email</td>
-                        <td>@(e.enrolled_at?.ToString("dd/MM/yyyy") ?? "")</td>
+                        <td>@(e.enrolled_at.ToString("dd/MM/yyyy") ?? "")</td>
                         <td class="action-icons">
                             <div class="dropdown">
                                 <div class="cursor-pointer d-flex align-items-center justify-content-center text-dark text-decoration-none" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">

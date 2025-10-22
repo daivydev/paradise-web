@@ -4,8 +4,8 @@ namespace paradise.Models
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
+    using System.Data.Entity.Spatial;
 
-    [Table("quiz_attempts")]
     public partial class quiz_attempts
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
@@ -14,18 +14,16 @@ namespace paradise.Models
             quiz_attempt_answers = new HashSet<quiz_attempt_answers>();
         }
 
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long id { get; set; }
 
-        [ForeignKey("user")]
         public long user_id { get; set; }
 
-        [ForeignKey("quiz")]
         public long quiz_id { get; set; }
 
-        public DateTime? started_at { get; set; }
+        [Column(TypeName = "datetime2")]
+        public DateTime started_at { get; set; }
 
+        [Column(TypeName = "datetime2")]
         public DateTime? finished_at { get; set; }
 
         public int? score { get; set; }

@@ -14,7 +14,6 @@ namespace paradise.Models
             user_profiles = new HashSet<user_profiles>();
         }
 
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long id { get; set; }
 
         [Required]

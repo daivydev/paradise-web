@@ -18,7 +18,6 @@ namespace paradise.Models
             quiz_attempts = new HashSet<quiz_attempts>();
         }
 
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long id { get; set; }
 
         [Required]
@@ -29,9 +28,11 @@ namespace paradise.Models
         [StringLength(255)]
         public string password { get; set; }
 
-        public DateTime? created_at { get; set; }
+        [Column(TypeName = "datetime2")]
+        public DateTime created_at { get; set; }
 
-        public DateTime? updated_at { get; set; }
+        [Column(TypeName = "datetime2")]
+        public DateTime updated_at { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<course_enrollments> course_enrollments { get; set; }
