@@ -31,7 +31,7 @@
                 <th>Tiêu đề</th>
                 <th>Chủ đề</th>
                 <th>Người tạo (Email)</th>
-                <th class="text-end">Giá</th>
+                <th class="text-center">Giá</th>
                 <th>Ngày tạo</th>
                 <th class="text-nowrap">Hiển thị</th>
 
@@ -44,8 +44,8 @@
                 foreach (var c in Model)
                 {
                     <tr>
-                        <td class="fw-semibold">@c.course_title</td>
-                        <td>@(c.topic?.topic_name ?? "")</td>
+                        <td class="fw-semibold table-cell-wrap">@c.course_title</td>
+                        <td class="table-cell-wrap">@(c.topic?.topic_name ?? "")</td>
                         <td>@(c.user?.email ?? "")</td>
                         <td class="text-end">
                             @String.Format(

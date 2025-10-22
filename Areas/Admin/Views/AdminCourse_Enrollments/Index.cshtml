@@ -37,7 +37,7 @@
                 foreach (var e in Model)
                 {
                     <tr>
-                        <td>@e.cours.course_title</td>
+                        <td class="table-cell-wrap">@e.cours.course_title</td>
                         <td>@e.user.email</td>
                         <td>@(e.enrolled_at.ToString("dd/MM/yyyy") ?? "")</td>
                         <td class="action-icons">
