@@ -49,8 +49,6 @@
 
         public DateTime? updated_at { get; set; }
 
-        public bool is_visible { get; set; }
-
         public bool is_visible { get; set; } = true;
 
 

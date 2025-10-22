@@ -303,7 +303,7 @@ namespace paradise.Areas.Admin.Controllers
 
                 // Lấy danh sách content thuộc các bài
                 var lsIds = lessons.Select(x => x.id).ToList();
-                var contents = db.lesson_contents.Where(x => lsIds.Contains(x.lesson_id))
+                var contents = db.lesson_contents.Where(x => lsIds.Contains((long)x.lesson_id))
                                    .OrderBy(x => x.display_order).ThenBy(x => x.id).ToList();
 
                 var vm = new CourseFullCreateVm
@@ -409,7 +409,7 @@ namespace paradise.Areas.Admin.Controllers
                     var chIds = db.course_chapters.Where(x => x.course_id == course.id).Select(x => x.id).ToList();
                     var lsIds = db.course_lessons.Where(x => chIds.Contains(x.chapter_id)).Select(x => x.id).ToList();
 
-                    db.lesson_contents.RemoveRange(db.lesson_contents.Where(x => lsIds.Contains(x.lesson_id)));
+                    db.lesson_contents.RemoveRange(db.lesson_contents.Where(x => lsIds.Contains((long)x.lesson_id)));
                     db.course_lessons.RemoveRange(db.course_lessons.Where(x => chIds.Contains(x.chapter_id)));
                     db.course_chapters.RemoveRange(db.course_chapters.Where(x => x.course_id == course.id));
                     db.SaveChanges();

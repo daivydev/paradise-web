@@ -21,7 +21,7 @@ namespace paradise.Models
         public long chapter_id { get; set; }
 
         [Required]
-        [StringLength(1)]
+        [StringLength(255)]
         public string lesson_title { get; set; }
 
         public int display_order { get; set; }

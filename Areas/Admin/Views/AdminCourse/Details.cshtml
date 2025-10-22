@@ -76,11 +76,11 @@
 
                     <div class="mb-3">
                         <div class="text-muted small">Ngày tạo</div>
-                        <div>@(Model.created_at.ToString("dd/MM/yyyy HH:mm") ?? "-")</div>
+                        <div>@(Model.created_at.Value.ToString("dd/MM/yyyy HH:mm") ?? "-")</div>
                     </div>
                     <div class="mb-0">
                         <div class="text-muted small">Cập nhật lúc</div>
-                        <div>@(Model.updated_at.ToString("dd/MM/yyyy HH:mm") ?? "-")</div>
+                        <div>@(Model.updated_at.Value.ToString("dd/MM/yyyy HH:mm") ?? "-")</div>
                     </div>
                 </div>
 
