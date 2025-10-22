@@ -48,9 +48,9 @@
                 foreach (var item in Model)
                 {
                     <tr>
-                        <td class="fw-semibold">@item.title</td>
-                        <td>@(item.topic_quiz?.title ?? "")</td>
-                        <td class="text-center">
+                        <td class="fw-semibold table-cell-wrap" >@item.title</td>
+                        <td class="table-cell-wrap">@(item.topic_quiz?.title ?? "")</td>
+                        <td class="text-center table-cell-wrap">
                             @(item.is_infinity == true
         ? "Không giới hạn"
         : (item.time.HasValue
