@@ -14,13 +14,12 @@ namespace paradise.Models
             courses = new HashSet<cours>();
         }
 
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long id { get; set; }
 
-        [StringLength(1)]
+        [Required]
+        [StringLength(255)]
         public string topic_name { get; set; }
 
-        [StringLength(1)]
         public string topic_description { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

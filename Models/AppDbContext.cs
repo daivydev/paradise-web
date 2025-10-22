@@ -12,6 +12,7 @@ namespace paradise.Models
         {
         }
 
+        public virtual DbSet<C__MigrationHistory> C__MigrationHistory { get; set; }
         public virtual DbSet<course_chapters> course_chapters { get; set; }
         public virtual DbSet<course_enrollments> course_enrollments { get; set; }
         public virtual DbSet<course_lessons> course_lessons { get; set; }
@@ -35,19 +36,17 @@ namespace paradise.Models
             modelBuilder.Entity<course_chapters>()
                 .HasMany(e => e.course_lessons)
                 .WithRequired(e => e.course_chapters)
-                .HasForeignKey(e => e.chapter_id)
-                .WillCascadeOnDelete(false);
+                .HasForeignKey(e => e.chapter_id);
 
             modelBuilder.Entity<course_lessons>()
                 .HasMany(e => e.lesson_contents)
-                .WithOptional(e => e.course_lessons)
+                .WithRequired(e => e.course_lessons)
                 .HasForeignKey(e => e.lesson_id);
 
             modelBuilder.Entity<course_lessons>()
                 .HasMany(e => e.lesson_progress)
                 .WithRequired(e => e.course_lessons)
-                .HasForeignKey(e => e.lesson_id)
-                .WillCascadeOnDelete(false);
+                .HasForeignKey(e => e.lesson_id);
 
             modelBuilder.Entity<cours>()
                 .Property(e => e.price)
@@ -56,40 +55,36 @@ namespace paradise.Models
             modelBuilder.Entity<cours>()
                 .HasMany(e => e.course_chapters)
                 .WithRequired(e => e.cours)
-                .HasForeignKey(e => e.course_id)
-                .WillCascadeOnDelete(false);
+                .HasForeignKey(e => e.course_id);
 
             modelBuilder.Entity<cours>()
                 .HasMany(e => e.course_enrollments)
-                .WithOptional(e => e.cours)
+                .WithRequired(e => e.cours)
                 .HasForeignKey(e => e.course_id);
 
             modelBuilder.Entity<cours>()
                 .HasMany(e => e.course_reviews)
-                .WithOptional(e => e.cours)
+                .WithRequired(e => e.cours)
                 .HasForeignKey(e => e.course_id);
 
             modelBuilder.Entity<quiz>()
                 .Property(e => e.time)
-                .HasPrecision(18, 0);
+                .HasPrecision(10, 2);
 
             modelBuilder.Entity<quiz>()
                 .HasMany(e => e.quiz_attempts)
                 .WithRequired(e => e.quiz)
-                .HasForeignKey(e => e.quiz_id)
-                .WillCascadeOnDelete(false);
+                .HasForeignKey(e => e.quiz_id);
 
             modelBuilder.Entity<quiz>()
                 .HasMany(e => e.quiz_questions)
                 .WithRequired(e => e.quiz)
-                .HasForeignKey(e => e.quiz_id)
-                .WillCascadeOnDelete(false);
+                .HasForeignKey(e => e.quiz_id);
 
             modelBuilder.Entity<quiz_attempts>()
                 .HasMany(e => e.quiz_attempt_answers)
                 .WithRequired(e => e.quiz_attempts)
-                .HasForeignKey(e => e.attempt_id)
-                .WillCascadeOnDelete(false);
+                .HasForeignKey(e => e.attempt_id);
 
             modelBuilder.Entity<quiz_options>()
                 .HasMany(e => e.quiz_attempt_answers)
@@ -106,8 +101,7 @@ namespace paradise.Models
             modelBuilder.Entity<quiz_questions>()
                 .HasMany(e => e.quiz_options)
                 .WithRequired(e => e.quiz_questions)
-                .HasForeignKey(e => e.question_id)
-                .WillCascadeOnDelete(false);
+                .HasForeignKey(e => e.question_id);
 
             modelBuilder.Entity<role>()
                 .HasMany(e => e.user_profiles)
@@ -118,8 +112,7 @@ namespace paradise.Models
             modelBuilder.Entity<topic_quiz>()
                 .HasMany(e => e.quizs)
                 .WithRequired(e => e.topic_quiz)
-                .HasForeignKey(e => e.topic)
-                .WillCascadeOnDelete(false);
+                .HasForeignKey(e => e.topic);
 
             modelBuilder.Entity<topic>()
                 .HasMany(e => e.courses)
@@ -129,12 +122,12 @@ namespace paradise.Models
 
             modelBuilder.Entity<user>()
                 .HasMany(e => e.course_enrollments)
-                .WithOptional(e => e.user)
+                .WithRequired(e => e.user)
                 .HasForeignKey(e => e.user_id);
 
             modelBuilder.Entity<user>()
                 .HasMany(e => e.course_reviews)
-                .WithOptional(e => e.user)
+                .WithRequired(e => e.user)
                 .HasForeignKey(e => e.user_id);
 
             modelBuilder.Entity<user>()
@@ -146,18 +139,17 @@ namespace paradise.Models
             modelBuilder.Entity<user>()
                 .HasMany(e => e.lesson_progress)
                 .WithRequired(e => e.user)
-                .HasForeignKey(e => e.user_id)
-                .WillCascadeOnDelete(false);
+                .HasForeignKey(e => e.user_id);
 
             modelBuilder.Entity<user>()
                 .HasMany(e => e.quiz_attempts)
                 .WithRequired(e => e.user)
-                .HasForeignKey(e => e.user_id)
-                .WillCascadeOnDelete(false);
+                .HasForeignKey(e => e.user_id);
 
             modelBuilder.Entity<user>()
                 .HasOptional(e => e.user_profiles)
-                .WithRequired(e => e.user);
+                .WithRequired(e => e.user)
+                .WillCascadeOnDelete();
         }
     }
 }

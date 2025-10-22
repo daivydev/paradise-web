@@ -14,16 +14,17 @@ namespace paradise.Models
             quizs = new HashSet<quiz>();
         }
 
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long id { get; set; }
 
         [Required]
-        [StringLength(1)]
+        [StringLength(255)]
         public string title { get; set; }
 
-        public DateTime? created_at { get; set; }
+        [Column(TypeName = "datetime2")]
+        public DateTime created_at { get; set; }
 
-        public DateTime? updated_at { get; set; }
+        [Column(TypeName = "datetime2")]
+        public DateTime updated_at { get; set; }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<quiz> quizs { get; set; }

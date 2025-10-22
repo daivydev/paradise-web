@@ -15,22 +15,20 @@ namespace paradise.Models
             lesson_progress = new HashSet<lesson_progress>();
         }
 
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long id { get; set; }
 
         public long chapter_id { get; set; }
 
         [Required]
-        [StringLength(1)]
+        [StringLength(255)]
         public string lesson_title { get; set; }
 
         public int display_order { get; set; }
 
-
         [Column(TypeName = "datetime2")]
         public DateTime created_at { get; set; }
-        public bool is_visible { get; set; } = true;
 
+        public bool is_visible { get; set; }
 
         public virtual course_chapters course_chapters { get; set; }
 

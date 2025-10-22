@@ -1,0 +1,1382 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="paradiseModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="course_chapters">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="course_id" Type="bigint" Nullable="false" />
+          <Property Name="chapter_title" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="chapter_description" Type="nvarchar(max)" />
+          <Property Name="display_order" Type="int" Nullable="false" />
+          <Property Name="created_at" Type="datetime2" Precision="7" Nullable="false" />
+          <Property Name="is_visible" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="course_enrollments">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="course_id" Type="bigint" Nullable="false" />
+          <Property Name="user_id" Type="bigint" Nullable="false" />
+          <Property Name="enrolled_at" Type="datetime2" Precision="7" Nullable="false" />
+        </EntityType>
+        <EntityType Name="course_lessons">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="chapter_id" Type="bigint" Nullable="false" />
+          <Property Name="lesson_title" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="display_order" Type="int" Nullable="false" />
+          <Property Name="created_at" Type="datetime2" Precision="7" Nullable="false" />
+          <Property Name="is_visible" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="course_reviews">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="course_id" Type="bigint" Nullable="false" />
+          <Property Name="user_id" Type="bigint" Nullable="false" />
+          <Property Name="rating" Type="int" Nullable="false" />
+          <Property Name="review_text" Type="nvarchar(max)" />
+          <Property Name="created_at" Type="datetime2" Precision="7" Nullable="false" />
+          <Property Name="updated_at" Type="datetime2" Precision="7" Nullable="false" />
+          <Property Name="is_visible" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="courses">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="topics_id" Type="bigint" Nullable="false" />
+          <Property Name="author_id" Type="bigint" Nullable="false" />
+          <Property Name="course_title" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="course_description" Type="nvarchar(max)" />
+          <Property Name="course_thumbnail" Type="varchar" MaxLength="255" />
+          <Property Name="price" Type="decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="created_at" Type="datetime2" Precision="7" Nullable="false" />
+          <Property Name="updated_at" Type="datetime2" Precision="7" Nullable="false" />
+          <Property Name="is_visible" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="lesson_contents">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="lesson_id" Type="bigint" Nullable="false" />
+          <Property Name="content_type" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="content_text" Type="nvarchar(max)" />
+          <Property Name="content_url" Type="nvarchar(max)" />
+          <Property Name="display_order" Type="int" Nullable="false" />
+          <Property Name="created_at" Type="datetime2" Precision="7" Nullable="false" />
+          <Property Name="is_visible" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="lesson_progress">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="user_id" Type="bigint" Nullable="false" />
+          <Property Name="lesson_id" Type="bigint" Nullable="false" />
+          <Property Name="is_completed" Type="bit" Nullable="false" />
+          <Property Name="completed_at" Type="datetime2" Precision="7" Nullable="false" />
+        </EntityType>
+        <EntityType Name="lesson_quizzes">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="lesson_id" Type="bigint" Nullable="false" />
+          <Property Name="quiz_title" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="created_at" Type="datetime2" Precision="7" Nullable="false" />
+        </EntityType>
+        <EntityType Name="quiz_attempt_answers">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="attempt_id" Type="bigint" Nullable="false" />
+          <Property Name="question_id" Type="bigint" Nullable="false" />
+          <Property Name="selected_option_id" Type="bigint" Nullable="false" />
+          <Property Name="is_correct" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="quiz_attempts">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="user_id" Type="bigint" Nullable="false" />
+          <Property Name="quiz_id" Type="bigint" Nullable="false" />
+          <Property Name="started_at" Type="datetime2" Precision="7" Nullable="false" />
+          <Property Name="finished_at" Type="datetime2" Precision="7" Nullable="false" />
+          <Property Name="score" Type="float" Nullable="false" />
+        </EntityType>
+        <EntityType Name="quiz_options">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="question_id" Type="bigint" Nullable="false" />
+          <Property Name="option_text" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="is_correct" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="quiz_questions">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="quiz_id" Type="bigint" Nullable="false" />
+          <Property Name="question_text" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="created_at" Type="datetime2" Precision="7" Nullable="false" />
+        </EntityType>
+        <EntityType Name="roles">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="role_name" Type="varchar" MaxLength="100" Nullable="false" />
+        </EntityType>
+        <EntityType Name="topics">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="topic_name" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="topic_description" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="user_profiles">
+          <Key>
+            <PropertyRef Name="user_id" />
+          </Key>
+          <Property Name="user_id" Type="bigint" Nullable="false" />
+          <Property Name="first_name" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="last_name" Type="varchar" MaxLength="100" />
+          <Property Name="phone_number" Type="varchar" MaxLength="50" />
+          <Property Name="date_of_birth" Type="date" />
+          <Property Name="gender" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="role_id" Type="bigint" Nullable="false" />
+          <Property Name="created_at" Type="datetime2" Precision="7" Nullable="false" />
+          <Property Name="updated_at" Type="datetime2" Precision="7" Nullable="false" />
+        </EntityType>
+        <EntityType Name="users">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="email" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="password" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="created_at" Type="datetime2" Precision="7" Nullable="false" />
+          <Property Name="updated_at" Type="datetime2" Precision="7" Nullable="false" />
+        </EntityType>
+        <Association Name="fk_answer_attempt">
+          <End Role="quiz_attempts" Type="Self.quiz_attempts" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="quiz_attempt_answers" Type="Self.quiz_attempt_answers" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="quiz_attempts">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="quiz_attempt_answers">
+              <PropertyRef Name="attempt_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_answer_option">
+          <End Role="quiz_options" Type="Self.quiz_options" Multiplicity="1" />
+          <End Role="quiz_attempt_answers" Type="Self.quiz_attempt_answers" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="quiz_options">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="quiz_attempt_answers">
+              <PropertyRef Name="selected_option_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_answer_question">
+          <End Role="quiz_questions" Type="Self.quiz_questions" Multiplicity="1" />
+          <End Role="quiz_attempt_answers" Type="Self.quiz_attempt_answers" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="quiz_questions">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="quiz_attempt_answers">
+              <PropertyRef Name="question_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_attempt_quiz">
+          <End Role="lesson_quizzes" Type="Self.lesson_quizzes" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="quiz_attempts" Type="Self.quiz_attempts" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="lesson_quizzes">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="quiz_attempts">
+              <PropertyRef Name="quiz_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_attempt_user">
+          <End Role="users" Type="Self.users" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="quiz_attempts" Type="Self.quiz_attempts" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="quiz_attempts">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_chapter_course">
+          <End Role="courses" Type="Self.courses" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="course_chapters" Type="Self.course_chapters" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="courses">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="course_chapters">
+              <PropertyRef Name="course_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_content_lesson">
+          <End Role="course_lessons" Type="Self.course_lessons" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="lesson_contents" Type="Self.lesson_contents" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="course_lessons">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="lesson_contents">
+              <PropertyRef Name="lesson_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_course_author">
+          <End Role="users" Type="Self.users" Multiplicity="1" />
+          <End Role="courses" Type="Self.courses" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="courses">
+              <PropertyRef Name="author_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_course_topic">
+          <End Role="topics" Type="Self.topics" Multiplicity="1" />
+          <End Role="courses" Type="Self.courses" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="topics">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="courses">
+              <PropertyRef Name="topics_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_enroll_course">
+          <End Role="courses" Type="Self.courses" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="course_enrollments" Type="Self.course_enrollments" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="courses">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="course_enrollments">
+              <PropertyRef Name="course_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_enroll_user">
+          <End Role="users" Type="Self.users" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="course_enrollments" Type="Self.course_enrollments" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="course_enrollments">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_lesson_chapter">
+          <End Role="course_chapters" Type="Self.course_chapters" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="course_lessons" Type="Self.course_lessons" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="course_chapters">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="course_lessons">
+              <PropertyRef Name="chapter_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_option_question">
+          <End Role="quiz_questions" Type="Self.quiz_questions" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="quiz_options" Type="Self.quiz_options" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="quiz_questions">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="quiz_options">
+              <PropertyRef Name="question_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_profile_role">
+          <End Role="roles" Type="Self.roles" Multiplicity="1" />
+          <End Role="user_profiles" Type="Self.user_profiles" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="roles">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="user_profiles">
+              <PropertyRef Name="role_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_profile_user">
+          <End Role="users" Type="Self.users" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="user_profiles" Type="Self.user_profiles" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="user_profiles">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_progress_lesson">
+          <End Role="course_lessons" Type="Self.course_lessons" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="lesson_progress" Type="Self.lesson_progress" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="course_lessons">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="lesson_progress">
+              <PropertyRef Name="lesson_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_progress_user">
+          <End Role="users" Type="Self.users" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="lesson_progress" Type="Self.lesson_progress" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="lesson_progress">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_question_quiz">
+          <End Role="lesson_quizzes" Type="Self.lesson_quizzes" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="quiz_questions" Type="Self.quiz_questions" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="lesson_quizzes">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="quiz_questions">
+              <PropertyRef Name="quiz_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_quiz_lesson">
+          <End Role="course_lessons" Type="Self.course_lessons" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="lesson_quizzes" Type="Self.lesson_quizzes" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="course_lessons">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="lesson_quizzes">
+              <PropertyRef Name="lesson_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_review_course">
+          <End Role="courses" Type="Self.courses" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="course_reviews" Type="Self.course_reviews" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="courses">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="course_reviews">
+              <PropertyRef Name="course_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_review_user">
+          <End Role="users" Type="Self.users" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="course_reviews" Type="Self.course_reviews" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="course_reviews">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="paradiseModelStoreContainer">
+          <EntitySet Name="course_chapters" EntityType="Self.course_chapters" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="course_enrollments" EntityType="Self.course_enrollments" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="course_lessons" EntityType="Self.course_lessons" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="course_reviews" EntityType="Self.course_reviews" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="courses" EntityType="Self.courses" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="lesson_contents" EntityType="Self.lesson_contents" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="lesson_progress" EntityType="Self.lesson_progress" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="lesson_quizzes" EntityType="Self.lesson_quizzes" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="quiz_attempt_answers" EntityType="Self.quiz_attempt_answers" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="quiz_attempts" EntityType="Self.quiz_attempts" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="quiz_options" EntityType="Self.quiz_options" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="quiz_questions" EntityType="Self.quiz_questions" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="roles" EntityType="Self.roles" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="topics" EntityType="Self.topics" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="user_profiles" EntityType="Self.user_profiles" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="users" EntityType="Self.users" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="fk_answer_attempt" Association="Self.fk_answer_attempt">
+            <End Role="quiz_attempts" EntitySet="quiz_attempts" />
+            <End Role="quiz_attempt_answers" EntitySet="quiz_attempt_answers" />
+          </AssociationSet>
+          <AssociationSet Name="fk_answer_option" Association="Self.fk_answer_option">
+            <End Role="quiz_options" EntitySet="quiz_options" />
+            <End Role="quiz_attempt_answers" EntitySet="quiz_attempt_answers" />
+          </AssociationSet>
+          <AssociationSet Name="fk_answer_question" Association="Self.fk_answer_question">
+            <End Role="quiz_questions" EntitySet="quiz_questions" />
+            <End Role="quiz_attempt_answers" EntitySet="quiz_attempt_answers" />
+          </AssociationSet>
+          <AssociationSet Name="fk_attempt_quiz" Association="Self.fk_attempt_quiz">
+            <End Role="lesson_quizzes" EntitySet="lesson_quizzes" />
+            <End Role="quiz_attempts" EntitySet="quiz_attempts" />
+          </AssociationSet>
+          <AssociationSet Name="fk_attempt_user" Association="Self.fk_attempt_user">
+            <End Role="users" EntitySet="users" />
+            <End Role="quiz_attempts" EntitySet="quiz_attempts" />
+          </AssociationSet>
+          <AssociationSet Name="fk_chapter_course" Association="Self.fk_chapter_course">
+            <End Role="courses" EntitySet="courses" />
+            <End Role="course_chapters" EntitySet="course_chapters" />
+          </AssociationSet>
+          <AssociationSet Name="fk_content_lesson" Association="Self.fk_content_lesson">
+            <End Role="course_lessons" EntitySet="course_lessons" />
+            <End Role="lesson_contents" EntitySet="lesson_contents" />
+          </AssociationSet>
+          <AssociationSet Name="fk_course_author" Association="Self.fk_course_author">
+            <End Role="users" EntitySet="users" />
+            <End Role="courses" EntitySet="courses" />
+          </AssociationSet>
+          <AssociationSet Name="fk_course_topic" Association="Self.fk_course_topic">
+            <End Role="topics" EntitySet="topics" />
+            <End Role="courses" EntitySet="courses" />
+          </AssociationSet>
+          <AssociationSet Name="fk_enroll_course" Association="Self.fk_enroll_course">
+            <End Role="courses" EntitySet="courses" />
+            <End Role="course_enrollments" EntitySet="course_enrollments" />
+          </AssociationSet>
+          <AssociationSet Name="fk_enroll_user" Association="Self.fk_enroll_user">
+            <End Role="users" EntitySet="users" />
+            <End Role="course_enrollments" EntitySet="course_enrollments" />
+          </AssociationSet>
+          <AssociationSet Name="fk_lesson_chapter" Association="Self.fk_lesson_chapter">
+            <End Role="course_chapters" EntitySet="course_chapters" />
+            <End Role="course_lessons" EntitySet="course_lessons" />
+          </AssociationSet>
+          <AssociationSet Name="fk_option_question" Association="Self.fk_option_question">
+            <End Role="quiz_questions" EntitySet="quiz_questions" />
+            <End Role="quiz_options" EntitySet="quiz_options" />
+          </AssociationSet>
+          <AssociationSet Name="fk_profile_role" Association="Self.fk_profile_role">
+            <End Role="roles" EntitySet="roles" />
+            <End Role="user_profiles" EntitySet="user_profiles" />
+          </AssociationSet>
+          <AssociationSet Name="fk_profile_user" Association="Self.fk_profile_user">
+            <End Role="users" EntitySet="users" />
+            <End Role="user_profiles" EntitySet="user_profiles" />
+          </AssociationSet>
+          <AssociationSet Name="fk_progress_lesson" Association="Self.fk_progress_lesson">
+            <End Role="course_lessons" EntitySet="course_lessons" />
+            <End Role="lesson_progress" EntitySet="lesson_progress" />
+          </AssociationSet>
+          <AssociationSet Name="fk_progress_user" Association="Self.fk_progress_user">
+            <End Role="users" EntitySet="users" />
+            <End Role="lesson_progress" EntitySet="lesson_progress" />
+          </AssociationSet>
+          <AssociationSet Name="fk_question_quiz" Association="Self.fk_question_quiz">
+            <End Role="lesson_quizzes" EntitySet="lesson_quizzes" />
+            <End Role="quiz_questions" EntitySet="quiz_questions" />
+          </AssociationSet>
+          <AssociationSet Name="fk_quiz_lesson" Association="Self.fk_quiz_lesson">
+            <End Role="course_lessons" EntitySet="course_lessons" />
+            <End Role="lesson_quizzes" EntitySet="lesson_quizzes" />
+          </AssociationSet>
+          <AssociationSet Name="fk_review_course" Association="Self.fk_review_course">
+            <End Role="courses" EntitySet="courses" />
+            <End Role="course_reviews" EntitySet="course_reviews" />
+          </AssociationSet>
+          <AssociationSet Name="fk_review_user" Association="Self.fk_review_user">
+            <End Role="users" EntitySet="users" />
+            <End Role="course_reviews" EntitySet="course_reviews" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="paradiseModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="course_chapters">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="course_id" Type="Int64" Nullable="false" />
+          <Property Name="chapter_title" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="chapter_description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="display_order" Type="Int32" Nullable="false" />
+          <Property Name="created_at" Type="DateTime" Nullable="false" Precision="7" />
+          <Property Name="is_visible" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="cours" Relationship="Self.fk_chapter_course" FromRole="course_chapters" ToRole="courses" />
+          <NavigationProperty Name="course_lessons" Relationship="Self.fk_lesson_chapter" FromRole="course_chapters" ToRole="course_lessons" />
+        </EntityType>
+        <EntityType Name="course_enrollments">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="course_id" Type="Int64" Nullable="false" />
+          <Property Name="user_id" Type="Int64" Nullable="false" />
+          <Property Name="enrolled_at" Type="DateTime" Nullable="false" Precision="7" />
+          <NavigationProperty Name="cours" Relationship="Self.fk_enroll_course" FromRole="course_enrollments" ToRole="courses" />
+          <NavigationProperty Name="user" Relationship="Self.fk_enroll_user" FromRole="course_enrollments" ToRole="users" />
+        </EntityType>
+        <EntityType Name="course_lessons">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="chapter_id" Type="Int64" Nullable="false" />
+          <Property Name="lesson_title" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="display_order" Type="Int32" Nullable="false" />
+          <Property Name="created_at" Type="DateTime" Nullable="false" Precision="7" />
+          <Property Name="is_visible" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="course_chapters" Relationship="Self.fk_lesson_chapter" FromRole="course_lessons" ToRole="course_chapters" />
+          <NavigationProperty Name="lesson_contents" Relationship="Self.fk_content_lesson" FromRole="course_lessons" ToRole="lesson_contents" />
+          <NavigationProperty Name="lesson_progress" Relationship="Self.fk_progress_lesson" FromRole="course_lessons" ToRole="lesson_progress" />
+          <NavigationProperty Name="lesson_quizzes" Relationship="Self.fk_quiz_lesson" FromRole="course_lessons" ToRole="lesson_quizzes" />
+        </EntityType>
+        <EntityType Name="course_reviews">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="course_id" Type="Int64" Nullable="false" />
+          <Property Name="user_id" Type="Int64" Nullable="false" />
+          <Property Name="rating" Type="Int32" Nullable="false" />
+          <Property Name="review_text" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="created_at" Type="DateTime" Nullable="false" Precision="7" />
+          <Property Name="updated_at" Type="DateTime" Nullable="false" Precision="7" />
+          <Property Name="is_visible" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="cours" Relationship="Self.fk_review_course" FromRole="course_reviews" ToRole="courses" />
+          <NavigationProperty Name="user" Relationship="Self.fk_review_user" FromRole="course_reviews" ToRole="users" />
+        </EntityType>
+        <EntityType Name="cours">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="topics_id" Type="Int64" Nullable="false" />
+          <Property Name="author_id" Type="Int64" Nullable="false" />
+          <Property Name="course_title" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="course_description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="course_thumbnail" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="price" Type="Decimal" Precision="10" Scale="2" Nullable="false" />
+          <Property Name="created_at" Type="DateTime" Nullable="false" Precision="7" />
+          <Property Name="updated_at" Type="DateTime" Nullable="false" Precision="7" />
+          <Property Name="is_visible" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="course_chapters" Relationship="Self.fk_chapter_course" FromRole="courses" ToRole="course_chapters" />
+          <NavigationProperty Name="course_enrollments" Relationship="Self.fk_enroll_course" FromRole="courses" ToRole="course_enrollments" />
+          <NavigationProperty Name="course_reviews" Relationship="Self.fk_review_course" FromRole="courses" ToRole="course_reviews" />
+          <NavigationProperty Name="user" Relationship="Self.fk_course_author" FromRole="courses" ToRole="users" />
+          <NavigationProperty Name="topic" Relationship="Self.fk_course_topic" FromRole="courses" ToRole="topics" />
+        </EntityType>
+        <EntityType Name="lesson_contents">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="lesson_id" Type="Int64" Nullable="false" />
+          <Property Name="content_type" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="content_text" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="content_url" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="display_order" Type="Int32" Nullable="false" />
+          <Property Name="created_at" Type="DateTime" Nullable="false" Precision="7" />
+          <Property Name="is_visible" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="course_lessons" Relationship="Self.fk_content_lesson" FromRole="lesson_contents" ToRole="course_lessons" />
+        </EntityType>
+        <EntityType Name="lesson_progress">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="user_id" Type="Int64" Nullable="false" />
+          <Property Name="lesson_id" Type="Int64" Nullable="false" />
+          <Property Name="is_completed" Type="Boolean" Nullable="false" />
+          <Property Name="completed_at" Type="DateTime" Nullable="false" Precision="7" />
+          <NavigationProperty Name="course_lessons" Relationship="Self.fk_progress_lesson" FromRole="lesson_progress" ToRole="course_lessons" />
+          <NavigationProperty Name="user" Relationship="Self.fk_progress_user" FromRole="lesson_progress" ToRole="users" />
+        </EntityType>
+        <EntityType Name="lesson_quizzes">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="lesson_id" Type="Int64" Nullable="false" />
+          <Property Name="quiz_title" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="created_at" Type="DateTime" Nullable="false" Precision="7" />
+          <NavigationProperty Name="course_lessons" Relationship="Self.fk_quiz_lesson" FromRole="lesson_quizzes" ToRole="course_lessons" />
+          <NavigationProperty Name="quiz_attempts" Relationship="Self.fk_attempt_quiz" FromRole="lesson_quizzes" ToRole="quiz_attempts" />
+          <NavigationProperty Name="quiz_questions" Relationship="Self.fk_question_quiz" FromRole="lesson_quizzes" ToRole="quiz_questions" />
+        </EntityType>
+        <EntityType Name="quiz_attempt_answers">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="attempt_id" Type="Int64" Nullable="false" />
+          <Property Name="question_id" Type="Int64" Nullable="false" />
+          <Property Name="selected_option_id" Type="Int64" Nullable="false" />
+          <Property Name="is_correct" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="quiz_attempts" Relationship="Self.fk_answer_attempt" FromRole="quiz_attempt_answers" ToRole="quiz_attempts" />
+          <NavigationProperty Name="quiz_options" Relationship="Self.fk_answer_option" FromRole="quiz_attempt_answers" ToRole="quiz_options" />
+          <NavigationProperty Name="quiz_questions" Relationship="Self.fk_answer_question" FromRole="quiz_attempt_answers" ToRole="quiz_questions" />
+        </EntityType>
+        <EntityType Name="quiz_attempts">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="user_id" Type="Int64" Nullable="false" />
+          <Property Name="quiz_id" Type="Int64" Nullable="false" />
+          <Property Name="started_at" Type="DateTime" Nullable="false" Precision="7" />
+          <Property Name="finished_at" Type="DateTime" Nullable="false" Precision="7" />
+          <Property Name="score" Type="Double" Nullable="false" />
+          <NavigationProperty Name="lesson_quizzes" Relationship="Self.fk_attempt_quiz" FromRole="quiz_attempts" ToRole="lesson_quizzes" />
+          <NavigationProperty Name="quiz_attempt_answers" Relationship="Self.fk_answer_attempt" FromRole="quiz_attempts" ToRole="quiz_attempt_answers" />
+          <NavigationProperty Name="user" Relationship="Self.fk_attempt_user" FromRole="quiz_attempts" ToRole="users" />
+        </EntityType>
+        <EntityType Name="quiz_options">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="question_id" Type="Int64" Nullable="false" />
+          <Property Name="option_text" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="is_correct" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="quiz_attempt_answers" Relationship="Self.fk_answer_option" FromRole="quiz_options" ToRole="quiz_attempt_answers" />
+          <NavigationProperty Name="quiz_questions" Relationship="Self.fk_option_question" FromRole="quiz_options" ToRole="quiz_questions" />
+        </EntityType>
+        <EntityType Name="quiz_questions">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="quiz_id" Type="Int64" Nullable="false" />
+          <Property Name="question_text" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="created_at" Type="DateTime" Nullable="false" Precision="7" />
+          <NavigationProperty Name="lesson_quizzes" Relationship="Self.fk_question_quiz" FromRole="quiz_questions" ToRole="lesson_quizzes" />
+          <NavigationProperty Name="quiz_attempt_answers" Relationship="Self.fk_answer_question" FromRole="quiz_questions" ToRole="quiz_attempt_answers" />
+          <NavigationProperty Name="quiz_options" Relationship="Self.fk_option_question" FromRole="quiz_questions" ToRole="quiz_options" />
+        </EntityType>
+        <EntityType Name="role">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="role_name" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="user_profiles" Relationship="Self.fk_profile_role" FromRole="roles" ToRole="user_profiles" />
+        </EntityType>
+        <EntityType Name="topic">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="topic_name" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="topic_description" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="courses" Relationship="Self.fk_course_topic" FromRole="topics" ToRole="courses" />
+        </EntityType>
+        <EntityType Name="user_profiles">
+          <Key>
+            <PropertyRef Name="user_id" />
+          </Key>
+          <Property Name="user_id" Type="Int64" Nullable="false" />
+          <Property Name="first_name" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="last_name" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="phone_number" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="date_of_birth" Type="DateTime" Precision="0" />
+          <Property Name="gender" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="role_id" Type="Int64" Nullable="false" />
+          <Property Name="created_at" Type="DateTime" Nullable="false" Precision="7" />
+          <Property Name="updated_at" Type="DateTime" Nullable="false" Precision="7" />
+          <NavigationProperty Name="role" Relationship="Self.fk_profile_role" FromRole="user_profiles" ToRole="roles" />
+          <NavigationProperty Name="user" Relationship="Self.fk_profile_user" FromRole="user_profiles" ToRole="users" />
+        </EntityType>
+        <EntityType Name="user">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="email" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="password" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="created_at" Type="DateTime" Nullable="false" Precision="7" />
+          <Property Name="updated_at" Type="DateTime" Nullable="false" Precision="7" />
+          <NavigationProperty Name="course_enrollments" Relationship="Self.fk_enroll_user" FromRole="users" ToRole="course_enrollments" />
+          <NavigationProperty Name="course_reviews" Relationship="Self.fk_review_user" FromRole="users" ToRole="course_reviews" />
+          <NavigationProperty Name="courses" Relationship="Self.fk_course_author" FromRole="users" ToRole="courses" />
+          <NavigationProperty Name="lesson_progress" Relationship="Self.fk_progress_user" FromRole="users" ToRole="lesson_progress" />
+          <NavigationProperty Name="quiz_attempts" Relationship="Self.fk_attempt_user" FromRole="users" ToRole="quiz_attempts" />
+          <NavigationProperty Name="user_profiles" Relationship="Self.fk_profile_user" FromRole="users" ToRole="user_profiles" />
+        </EntityType>
+        <Association Name="fk_chapter_course">
+          <End Role="courses" Type="Self.cours" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="course_chapters" Type="Self.course_chapters" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="courses">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="course_chapters">
+              <PropertyRef Name="course_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_lesson_chapter">
+          <End Role="course_chapters" Type="Self.course_chapters" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="course_lessons" Type="Self.course_lessons" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="course_chapters">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="course_lessons">
+              <PropertyRef Name="chapter_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_enroll_course">
+          <End Role="courses" Type="Self.cours" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="course_enrollments" Type="Self.course_enrollments" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="courses">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="course_enrollments">
+              <PropertyRef Name="course_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_enroll_user">
+          <End Role="users" Type="Self.user" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="course_enrollments" Type="Self.course_enrollments" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="course_enrollments">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_content_lesson">
+          <End Role="course_lessons" Type="Self.course_lessons" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="lesson_contents" Type="Self.lesson_contents" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="course_lessons">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="lesson_contents">
+              <PropertyRef Name="lesson_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_progress_lesson">
+          <End Role="course_lessons" Type="Self.course_lessons" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="lesson_progress" Type="Self.lesson_progress" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="course_lessons">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="lesson_progress">
+              <PropertyRef Name="lesson_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_quiz_lesson">
+          <End Role="course_lessons" Type="Self.course_lessons" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="lesson_quizzes" Type="Self.lesson_quizzes" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="course_lessons">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="lesson_quizzes">
+              <PropertyRef Name="lesson_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_review_course">
+          <End Role="courses" Type="Self.cours" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="course_reviews" Type="Self.course_reviews" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="courses">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="course_reviews">
+              <PropertyRef Name="course_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_review_user">
+          <End Role="users" Type="Self.user" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="course_reviews" Type="Self.course_reviews" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="course_reviews">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_course_author">
+          <End Role="users" Type="Self.user" Multiplicity="1" />
+          <End Role="courses" Type="Self.cours" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="courses">
+              <PropertyRef Name="author_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_course_topic">
+          <End Role="topics" Type="Self.topic" Multiplicity="1" />
+          <End Role="courses" Type="Self.cours" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="topics">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="courses">
+              <PropertyRef Name="topics_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_progress_user">
+          <End Role="users" Type="Self.user" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="lesson_progress" Type="Self.lesson_progress" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="lesson_progress">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_attempt_quiz">
+          <End Role="lesson_quizzes" Type="Self.lesson_quizzes" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="quiz_attempts" Type="Self.quiz_attempts" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="lesson_quizzes">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="quiz_attempts">
+              <PropertyRef Name="quiz_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_question_quiz">
+          <End Role="lesson_quizzes" Type="Self.lesson_quizzes" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="quiz_questions" Type="Self.quiz_questions" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="lesson_quizzes">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="quiz_questions">
+              <PropertyRef Name="quiz_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_answer_attempt">
+          <End Role="quiz_attempts" Type="Self.quiz_attempts" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="quiz_attempt_answers" Type="Self.quiz_attempt_answers" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="quiz_attempts">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="quiz_attempt_answers">
+              <PropertyRef Name="attempt_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_answer_option">
+          <End Role="quiz_options" Type="Self.quiz_options" Multiplicity="1" />
+          <End Role="quiz_attempt_answers" Type="Self.quiz_attempt_answers" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="quiz_options">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="quiz_attempt_answers">
+              <PropertyRef Name="selected_option_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_answer_question">
+          <End Role="quiz_questions" Type="Self.quiz_questions" Multiplicity="1" />
+          <End Role="quiz_attempt_answers" Type="Self.quiz_attempt_answers" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="quiz_questions">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="quiz_attempt_answers">
+              <PropertyRef Name="question_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_attempt_user">
+          <End Role="users" Type="Self.user" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="quiz_attempts" Type="Self.quiz_attempts" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="quiz_attempts">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_option_question">
+          <End Role="quiz_questions" Type="Self.quiz_questions" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="quiz_options" Type="Self.quiz_options" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="quiz_questions">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="quiz_options">
+              <PropertyRef Name="question_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_profile_role">
+          <End Role="roles" Type="Self.role" Multiplicity="1" />
+          <End Role="user_profiles" Type="Self.user_profiles" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="roles">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="user_profiles">
+              <PropertyRef Name="role_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="fk_profile_user">
+          <End Role="users" Type="Self.user" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="user_profiles" Type="Self.user_profiles" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="users">
+              <PropertyRef Name="id" />
+            </Principal>
+            <Dependent Role="user_profiles">
+              <PropertyRef Name="user_id" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="paradiseEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="course_chapters" EntityType="Self.course_chapters" />
+          <EntitySet Name="course_enrollments" EntityType="Self.course_enrollments" />
+          <EntitySet Name="course_lessons" EntityType="Self.course_lessons" />
+          <EntitySet Name="course_reviews" EntityType="Self.course_reviews" />
+          <EntitySet Name="courses" EntityType="Self.cours" />
+          <EntitySet Name="lesson_contents" EntityType="Self.lesson_contents" />
+          <EntitySet Name="lesson_progress" EntityType="Self.lesson_progress" />
+          <EntitySet Name="lesson_quizzes" EntityType="Self.lesson_quizzes" />
+          <EntitySet Name="quiz_attempt_answers" EntityType="Self.quiz_attempt_answers" />
+          <EntitySet Name="quiz_attempts" EntityType="Self.quiz_attempts" />
+          <EntitySet Name="quiz_options" EntityType="Self.quiz_options" />
+          <EntitySet Name="quiz_questions" EntityType="Self.quiz_questions" />
+          <EntitySet Name="roles" EntityType="Self.role" />
+          <EntitySet Name="topics" EntityType="Self.topic" />
+          <EntitySet Name="user_profiles" EntityType="Self.user_profiles" />
+          <EntitySet Name="users" EntityType="Self.user" />
+          <AssociationSet Name="fk_chapter_course" Association="Self.fk_chapter_course">
+            <End Role="courses" EntitySet="courses" />
+            <End Role="course_chapters" EntitySet="course_chapters" />
+          </AssociationSet>
+          <AssociationSet Name="fk_lesson_chapter" Association="Self.fk_lesson_chapter">
+            <End Role="course_chapters" EntitySet="course_chapters" />
+            <End Role="course_lessons" EntitySet="course_lessons" />
+          </AssociationSet>
+          <AssociationSet Name="fk_enroll_course" Association="Self.fk_enroll_course">
+            <End Role="courses" EntitySet="courses" />
+            <End Role="course_enrollments" EntitySet="course_enrollments" />
+          </AssociationSet>
+          <AssociationSet Name="fk_enroll_user" Association="Self.fk_enroll_user">
+            <End Role="users" EntitySet="users" />
+            <End Role="course_enrollments" EntitySet="course_enrollments" />
+          </AssociationSet>
+          <AssociationSet Name="fk_content_lesson" Association="Self.fk_content_lesson">
+            <End Role="course_lessons" EntitySet="course_lessons" />
+            <End Role="lesson_contents" EntitySet="lesson_contents" />
+          </AssociationSet>
+          <AssociationSet Name="fk_progress_lesson" Association="Self.fk_progress_lesson">
+            <End Role="course_lessons" EntitySet="course_lessons" />
+            <End Role="lesson_progress" EntitySet="lesson_progress" />
+          </AssociationSet>
+          <AssociationSet Name="fk_quiz_lesson" Association="Self.fk_quiz_lesson">
+            <End Role="course_lessons" EntitySet="course_lessons" />
+            <End Role="lesson_quizzes" EntitySet="lesson_quizzes" />
+          </AssociationSet>
+          <AssociationSet Name="fk_review_course" Association="Self.fk_review_course">
+            <End Role="courses" EntitySet="courses" />
+            <End Role="course_reviews" EntitySet="course_reviews" />
+          </AssociationSet>
+          <AssociationSet Name="fk_review_user" Association="Self.fk_review_user">
+            <End Role="users" EntitySet="users" />
+            <End Role="course_reviews" EntitySet="course_reviews" />
+          </AssociationSet>
+          <AssociationSet Name="fk_course_author" Association="Self.fk_course_author">
+            <End Role="users" EntitySet="users" />
+            <End Role="courses" EntitySet="courses" />
+          </AssociationSet>
+          <AssociationSet Name="fk_course_topic" Association="Self.fk_course_topic">
+            <End Role="topics" EntitySet="topics" />
+            <End Role="courses" EntitySet="courses" />
+          </AssociationSet>
+          <AssociationSet Name="fk_progress_user" Association="Self.fk_progress_user">
+            <End Role="users" EntitySet="users" />
+            <End Role="lesson_progress" EntitySet="lesson_progress" />
+          </AssociationSet>
+          <AssociationSet Name="fk_attempt_quiz" Association="Self.fk_attempt_quiz">
+            <End Role="lesson_quizzes" EntitySet="lesson_quizzes" />
+            <End Role="quiz_attempts" EntitySet="quiz_attempts" />
+          </AssociationSet>
+          <AssociationSet Name="fk_question_quiz" Association="Self.fk_question_quiz">
+            <End Role="lesson_quizzes" EntitySet="lesson_quizzes" />
+            <End Role="quiz_questions" EntitySet="quiz_questions" />
+          </AssociationSet>
+          <AssociationSet Name="fk_answer_attempt" Association="Self.fk_answer_attempt">
+            <End Role="quiz_attempts" EntitySet="quiz_attempts" />
+            <End Role="quiz_attempt_answers" EntitySet="quiz_attempt_answers" />
+          </AssociationSet>
+          <AssociationSet Name="fk_answer_option" Association="Self.fk_answer_option">
+            <End Role="quiz_options" EntitySet="quiz_options" />
+            <End Role="quiz_attempt_answers" EntitySet="quiz_attempt_answers" />
+          </AssociationSet>
+          <AssociationSet Name="fk_answer_question" Association="Self.fk_answer_question">
+            <End Role="quiz_questions" EntitySet="quiz_questions" />
+            <End Role="quiz_attempt_answers" EntitySet="quiz_attempt_answers" />
+          </AssociationSet>
+          <AssociationSet Name="fk_attempt_user" Association="Self.fk_attempt_user">
+            <End Role="users" EntitySet="users" />
+            <End Role="quiz_attempts" EntitySet="quiz_attempts" />
+          </AssociationSet>
+          <AssociationSet Name="fk_option_question" Association="Self.fk_option_question">
+            <End Role="quiz_questions" EntitySet="quiz_questions" />
+            <End Role="quiz_options" EntitySet="quiz_options" />
+          </AssociationSet>
+          <AssociationSet Name="fk_profile_role" Association="Self.fk_profile_role">
+            <End Role="roles" EntitySet="roles" />
+            <End Role="user_profiles" EntitySet="user_profiles" />
+          </AssociationSet>
+          <AssociationSet Name="fk_profile_user" Association="Self.fk_profile_user">
+            <End Role="users" EntitySet="users" />
+            <End Role="user_profiles" EntitySet="user_profiles" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="paradiseModelStoreContainer" CdmEntityContainer="paradiseEntities">
+          <EntitySetMapping Name="course_chapters">
+            <EntityTypeMapping TypeName="paradiseModel.course_chapters">
+              <MappingFragment StoreEntitySet="course_chapters">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="course_id" ColumnName="course_id" />
+                <ScalarProperty Name="chapter_title" ColumnName="chapter_title" />
+                <ScalarProperty Name="chapter_description" ColumnName="chapter_description" />
+                <ScalarProperty Name="display_order" ColumnName="display_order" />
+                <ScalarProperty Name="created_at" ColumnName="created_at" />
+                <ScalarProperty Name="is_visible" ColumnName="is_visible" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="course_enrollments">
+            <EntityTypeMapping TypeName="paradiseModel.course_enrollments">
+              <MappingFragment StoreEntitySet="course_enrollments">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="course_id" ColumnName="course_id" />
+                <ScalarProperty Name="user_id" ColumnName="user_id" />
+                <ScalarProperty Name="enrolled_at" ColumnName="enrolled_at" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="course_lessons">
+            <EntityTypeMapping TypeName="paradiseModel.course_lessons">
+              <MappingFragment StoreEntitySet="course_lessons">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="chapter_id" ColumnName="chapter_id" />
+                <ScalarProperty Name="lesson_title" ColumnName="lesson_title" />
+                <ScalarProperty Name="display_order" ColumnName="display_order" />
+                <ScalarProperty Name="created_at" ColumnName="created_at" />
+                <ScalarProperty Name="is_visible" ColumnName="is_visible" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="course_reviews">
+            <EntityTypeMapping TypeName="paradiseModel.course_reviews">
+              <MappingFragment StoreEntitySet="course_reviews">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="course_id" ColumnName="course_id" />
+                <ScalarProperty Name="user_id" ColumnName="user_id" />
+                <ScalarProperty Name="rating" ColumnName="rating" />
+                <ScalarProperty Name="review_text" ColumnName="review_text" />
+                <ScalarProperty Name="created_at" ColumnName="created_at" />
+                <ScalarProperty Name="updated_at" ColumnName="updated_at" />
+                <ScalarProperty Name="is_visible" ColumnName="is_visible" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="courses">
+            <EntityTypeMapping TypeName="paradiseModel.cours">
+              <MappingFragment StoreEntitySet="courses">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="topics_id" ColumnName="topics_id" />
+                <ScalarProperty Name="author_id" ColumnName="author_id" />
+                <ScalarProperty Name="course_title" ColumnName="course_title" />
+                <ScalarProperty Name="course_description" ColumnName="course_description" />
+                <ScalarProperty Name="course_thumbnail" ColumnName="course_thumbnail" />
+                <ScalarProperty Name="price" ColumnName="price" />
+                <ScalarProperty Name="created_at" ColumnName="created_at" />
+                <ScalarProperty Name="updated_at" ColumnName="updated_at" />
+                <ScalarProperty Name="is_visible" ColumnName="is_visible" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="lesson_contents">
+            <EntityTypeMapping TypeName="paradiseModel.lesson_contents">
+              <MappingFragment StoreEntitySet="lesson_contents">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="lesson_id" ColumnName="lesson_id" />
+                <ScalarProperty Name="content_type" ColumnName="content_type" />
+                <ScalarProperty Name="content_text" ColumnName="content_text" />
+                <ScalarProperty Name="content_url" ColumnName="content_url" />
+                <ScalarProperty Name="display_order" ColumnName="display_order" />
+                <ScalarProperty Name="created_at" ColumnName="created_at" />
+                <ScalarProperty Name="is_visible" ColumnName="is_visible" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="lesson_progress">
+            <EntityTypeMapping TypeName="paradiseModel.lesson_progress">
+              <MappingFragment StoreEntitySet="lesson_progress">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="user_id" ColumnName="user_id" />
+                <ScalarProperty Name="lesson_id" ColumnName="lesson_id" />
+                <ScalarProperty Name="is_completed" ColumnName="is_completed" />
+                <ScalarProperty Name="completed_at" ColumnName="completed_at" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="lesson_quizzes">
+            <EntityTypeMapping TypeName="paradiseModel.lesson_quizzes">
+              <MappingFragment StoreEntitySet="lesson_quizzes">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="lesson_id" ColumnName="lesson_id" />
+                <ScalarProperty Name="quiz_title" ColumnName="quiz_title" />
+                <ScalarProperty Name="created_at" ColumnName="created_at" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="quiz_attempt_answers">
+            <EntityTypeMapping TypeName="paradiseModel.quiz_attempt_answers">
+              <MappingFragment StoreEntitySet="quiz_attempt_answers">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="attempt_id" ColumnName="attempt_id" />
+                <ScalarProperty Name="question_id" ColumnName="question_id" />
+                <ScalarProperty Name="selected_option_id" ColumnName="selected_option_id" />
+                <ScalarProperty Name="is_correct" ColumnName="is_correct" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="quiz_attempts">
+            <EntityTypeMapping TypeName="paradiseModel.quiz_attempts">
+              <MappingFragment StoreEntitySet="quiz_attempts">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="user_id" ColumnName="user_id" />
+                <ScalarProperty Name="quiz_id" ColumnName="quiz_id" />
+                <ScalarProperty Name="started_at" ColumnName="started_at" />
+                <ScalarProperty Name="finished_at" ColumnName="finished_at" />
+                <ScalarProperty Name="score" ColumnName="score" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="quiz_options">
+            <EntityTypeMapping TypeName="paradiseModel.quiz_options">
+              <MappingFragment StoreEntitySet="quiz_options">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="question_id" ColumnName="question_id" />
+                <ScalarProperty Name="option_text" ColumnName="option_text" />
+                <ScalarProperty Name="is_correct" ColumnName="is_correct" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="quiz_questions">
+            <EntityTypeMapping TypeName="paradiseModel.quiz_questions">
+              <MappingFragment StoreEntitySet="quiz_questions">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="quiz_id" ColumnName="quiz_id" />
+                <ScalarProperty Name="question_text" ColumnName="question_text" />
+                <ScalarProperty Name="created_at" ColumnName="created_at" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="roles">
+            <EntityTypeMapping TypeName="paradiseModel.role">
+              <MappingFragment StoreEntitySet="roles">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="role_name" ColumnName="role_name" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="topics">
+            <EntityTypeMapping TypeName="paradiseModel.topic">
+              <MappingFragment StoreEntitySet="topics">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="topic_name" ColumnName="topic_name" />
+                <ScalarProperty Name="topic_description" ColumnName="topic_description" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="user_profiles">
+            <EntityTypeMapping TypeName="paradiseModel.user_profiles">
+              <MappingFragment StoreEntitySet="user_profiles">
+                <ScalarProperty Name="user_id" ColumnName="user_id" />
+                <ScalarProperty Name="first_name" ColumnName="first_name" />
+                <ScalarProperty Name="last_name" ColumnName="last_name" />
+                <ScalarProperty Name="phone_number" ColumnName="phone_number" />
+                <ScalarProperty Name="date_of_birth" ColumnName="date_of_birth" />
+                <ScalarProperty Name="gender" ColumnName="gender" />
+                <ScalarProperty Name="role_id" ColumnName="role_id" />
+                <ScalarProperty Name="created_at" ColumnName="created_at" />
+                <ScalarProperty Name="updated_at" ColumnName="updated_at" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="users">
+            <EntityTypeMapping TypeName="paradiseModel.user">
+              <MappingFragment StoreEntitySet="users">
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="email" ColumnName="email" />
+                <ScalarProperty Name="password" ColumnName="password" />
+                <ScalarProperty Name="created_at" ColumnName="created_at" />
+                <ScalarProperty Name="updated_at" ColumnName="updated_at" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

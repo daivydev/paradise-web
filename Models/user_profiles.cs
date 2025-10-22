@@ -13,14 +13,14 @@ namespace paradise.Models
         public long user_id { get; set; }
 
         [Required]
-        [StringLength(1)]
+        [StringLength(255)]
         public string first_name { get; set; }
 
-        [StringLength(1)]
+        [StringLength(255)]
         public string last_name { get; set; }
 
         [Required]
-        [StringLength(255)]
+        [StringLength(50)]
         public string phone_number { get; set; }
 
         [Column(TypeName = "date")]
@@ -32,9 +32,11 @@ namespace paradise.Models
 
         public long role_id { get; set; }
 
-        public DateTime? created_at { get; set; }
+        [Column(TypeName = "datetime2")]
+        public DateTime created_at { get; set; }
 
-        public DateTime? updated_at { get; set; }
+        [Column(TypeName = "datetime2")]
+        public DateTime updated_at { get; set; }
 
         public virtual role role { get; set; }
 

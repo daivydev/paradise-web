@@ -225,9 +225,8 @@
     <Compile Include="Areas\Admin\Controllers\AdminCourse_lessonsController.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminCourse_ReviewsController.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminHomeController.cs" />
-
     <Compile Include="Areas\Admin\Controllers\AdminLesson_contentsController.cs" />
-
+    <Compile Include="Areas\Admin\Controllers\AdminQuizsController.cs" />
     <Compile Include="Areas\Admin\Controllers\AdminUsersController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\usersController.cs" />
@@ -250,6 +249,7 @@
     <Compile Include="Models\course_enrollments.cs" />
     <Compile Include="Models\course_lessons.cs" />
     <Compile Include="Models\course_reviews.cs" />
+    <Compile Include="Models\C__MigrationHistory.cs" />
     <Compile Include="Models\lesson_contents.cs" />
     <Compile Include="Models\lesson_progress.cs" />
     <Compile Include="Models\quiz.cs" />
@@ -320,7 +320,6 @@
     <Content Include="Content\custom-css\ListView.css" />
     <Content Include="Areas\Admin\Views\Shared\AddingButton.cshtml" />
     <Content Include="Areas\Admin\Views\Shared\ExportButton.cshtml" />
-
     <Content Include="Areas\Admin\Views\AdminCourse\Create.cshtml" />
     <Content Include="Areas\Admin\Views\AdminCourse\Delete.cshtml" />
     <Content Include="Areas\Admin\Views\AdminCourse\Details.cshtml" />
@@ -341,7 +340,6 @@
     <Content Include="Areas\Admin\Views\AdminCourse_lessons\Details.cshtml" />
     <Content Include="Areas\Admin\Views\AdminCourse_lessons\Edit.cshtml" />
     <Content Include="Areas\Admin\Views\AdminCourse_lessons\Index.cshtml" />
-
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -406,10 +404,8 @@
     <Content Include="Scripts\jquery-3.7.0.min.map" />
   </ItemGroup>
   <ItemGroup>
-
     <EmbeddedResource Include="Migrations\202510131211550_InitialSync.resx">
       <DependentUpon>202510131211550_InitialSync.cs</DependentUpon>
-
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202510201217557_AddQuestionTypeToQuizQuestions.resx">
       <DependentUpon>202510201217557_AddQuestionTypeToQuizQuestions.cs</DependentUpon>

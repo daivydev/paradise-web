@@ -14,28 +14,22 @@ namespace paradise.Models
             course_lessons = new HashSet<course_lessons>();
         }
 
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long id { get; set; }
 
         public long course_id { get; set; }
 
         [Required]
-
         [StringLength(255)]
-        [Column(TypeName = "nvarchar")]   // ép NVARCHAR 
         public string chapter_title { get; set; }
-
-       
 
         public string chapter_description { get; set; }
 
         public int display_order { get; set; }
 
-
         [Column(TypeName = "datetime2")]
         public DateTime created_at { get; set; }
-        public bool is_visible { get; set; } = true;
 
+        public bool is_visible { get; set; }
 
         public virtual cours cours { get; set; }
 
