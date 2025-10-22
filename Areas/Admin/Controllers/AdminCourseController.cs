@@ -204,8 +204,7 @@ namespace paradise.Areas.Admin.Controllers
                                     content_type = (ct.content_type ?? "").Trim(), // bạn có thể set theo extension ở dưới
                                     content_text = (ct.title ?? "").Trim(),
                                     // content_url sẽ set sau khi xử lý file
-                                    display_order = (ct.display_order.HasValue && ct.display_order.Value > 0)
-        ? ct.display_order.Value : ctOrd++,
+                                    display_order = (ct.display_order.HasValue && ct.display_order.Value > 0) ? ct.display_order.Value : ctOrd++,
                                     is_visible = ct.is_visible,
                                     created_at = DateTime.Now
                                 };
@@ -231,18 +230,13 @@ namespace paradise.Areas.Admin.Controllers
                                     new[] { ".png", ".jpg", ".jpeg", ".gif", ".webp" }.Contains(ext, StringComparer.OrdinalIgnoreCase) ? "image" :
                                     "file";
 
-                                    // nếu user không chọn loại hoặc chọn "text" thì cho detected đè lên
-                                    if (string.IsNullOrWhiteSpace(content.content_type) ||
-                                        content.content_type.Equals("text", StringComparison.OrdinalIgnoreCase))
-                                    {
-                                        content.content_type = detected;
-                                    }
+
 
                                 }
                                 else
                                 {
-                                    // Không có file: nếu bạn vẫn muốn hỗ trợ URL text, dùng content_body làm URL
-                                    // (Nếu bạn không cần nữa, có thể bỏ nhánh này)
+                                    // không upload mới -> dùng URL/text sẵn có
+                                    content.content_url = ct.content_body;
                                     var body = ct.content_body;
                                     var embed = ToYouTubeEmbed(body);
                                     content.content_url = embed ?? body;
@@ -648,5 +642,5 @@ namespace paradise.Areas.Admin.Controllers
         }
 
     }
-} 
-     
+}
+

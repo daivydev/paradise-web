@@ -238,7 +238,6 @@
                                                                                             <option value="">-- Loại nội dung --</option>
                                                                                             <option @(ct.content_type == "text" ? "selected" : "") value="text">text</option>
                                                                                             <option @(ct.content_type == "video" ? "selected" : "") value="video">video</option>
-                                                                                            <option @(ct.content_type == "pdf" ? "selected" : "") value="pdf">pdf</option>
                                                                                             <option @(ct.content_type == "link" ? "selected" : "") value="link">link (YouTube)</option>
                                                                                         </select>
                                                                                     </div>
@@ -559,7 +558,7 @@
 
                 function syncUI() {
                     const t = (typeSel?.value || '').toLowerCase();
-                    if (fileWrap) fileWrap.style.display = (t === 'video' || t === 'pdf' || t === 'text' || t === '') ? '' : 'none';
+                    if (fileWrap) fileWrap.style.display = (t === 'video' || t === 'text' || t === '') ? '' : 'none';
                     if (linkWrap) linkWrap.style.display = (t === 'link') ? '' : 'none';
 
                     // Khi là link → disable hiddenOld để tránh post trùng tên
