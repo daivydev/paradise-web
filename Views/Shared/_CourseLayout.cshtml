@@ -1,0 +1,283 @@
+﻿@{
+    Layout = null;
+    var title = ViewBag.Title ?? "Khóa học";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@title - Paradise</title>
+
+    <!-- Bootstrap & Site -->
+    <link href="@Url.Content("~/Content/bootstrap.css")" rel="stylesheet" />
+
+    <style>
+        body {
+            background: #fff7f2 !important;
+        }
+
+        /* Header */
+        .learning-header {
+            background: #1677ff;
+            color: #fff;
+            padding: 18px 0;
+            margin-bottom: 18px;
+        }
+
+            .learning-header h1 {
+                font-size: 24px;
+                font-weight: 800;
+                margin: 0;
+            }
+
+        /* --- Sidebar spacing & look --- */
+        .sidebar-card .card-header {
+            background: #f6f9ff;
+            font-weight: 700;
+            padding: .75rem 1rem;
+        }
+
+        .sidebar-card .list-group-item.lesson {
+            padding: .85rem 1rem; /* nới padding mỗi bài */
+            gap: .75rem; /* giãn khoảng cách icon - text - thời lượng */
+            border: 0;
+            border-top: 1px solid #eef2f7;
+        }
+
+            .sidebar-card .list-group-item.lesson:hover {
+                background: #f2f7ff;
+            }
+
+        .sidebar-card .list-group + .list-group { /* cách các section */
+            margin-top: .25rem;
+        }
+
+        .sidebar-card .card-section { /* khoảng cách giữa sections */
+            margin-bottom: .75rem;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #e9eef5;
+        }
+
+        .btn-sec-toggle {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            border: 0;
+            background: transparent;
+            padding: .25rem .25rem;
+            color: #334155;
+        }
+
+            .btn-sec-toggle .chev {
+                transition: transform .3s ease;
+            }
+
+            .btn-sec-toggle.collapsed .chev {
+                transform: rotate(360deg);
+            }
+
+            .btn-sec-toggle:not(.collapsed) .chev {
+                transform: rotate(450deg);
+            }
+
+
+        /* Progress ring: viền ngoài chạy %, nền trong 1 màu + số ở giữa */
+        #ring {
+            --val: 0;
+            --size: 56px;
+            --thick: 6px;
+            --bg: transparent; /* trong suốt để thấy gradient */
+            --bar: rgba(255,255,255,.85); /* vạch trắng nổi bật */
+            --track: rgba(255,255,255,.25);
+            width: var(--size);
+            height: var(--size);
+            border: 2px solid rgba(255,255,255,.25);
+            border-radius: 50%;
+            background: var(--bg);
+            position: relative;
+            display: grid;
+            place-items: center;
+        }
+
+            #ring::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                border-radius: 50%;
+                background: conic-gradient(var(--bar) calc(var(--val) * 1%), var(--track) 0);
+                -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--thick)), #000 0);
+                mask: radial-gradient(farthest-side, transparent calc(100% - var(--thick)), #000 0);
+            }
+
+            #ring > span {
+                color: #fff;
+                font-weight: 800;
+                font-size: .95rem;
+                line-height: 1;
+            }
+
+        /* Card */
+        .learning-card {
+            background: #fff;
+            border: 1px solid #e9eef5;
+            border-radius: 10px;
+        }
+
+        .learning-card .card-header {
+            background: #f5f8ff;
+            border-bottom: 1px solid #e9eef5;
+            font-weight: 700;
+        }
+
+        .lesson {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+            .lesson.active {
+                color: #666;
+                background: #e8f3ff;
+            }
+
+            .lesson.disabled {
+                opacity: .6;
+                cursor: not-allowed;
+            }
+
+        /* Bottom bar */
+        .border-white-10 {
+            border-color: rgba(255,255,255,.10) !important;
+        }
+
+        .btn-hamburger {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            background: rgba(255,255,255,.12);
+            border: 1px solid rgba(255,255,255,.35);
+        }
+
+            .btn-hamburger:active {
+                transform: scale(.98);
+            }
+
+            .btn-hamburger svg {
+                height: 22px;
+                fill: #fff;
+            }
+
+        /* Offcanvas rộng hơn trên tablet */
+        @@media (min-width: 768px) and (max-width: 991.98px) {
+            #lessonDrawer.offcanvas-end {
+                width: 420px;
+            }
+        }
+
+        @@media (max-width: 767.98px) {
+            #lessonDrawer.offcanvas-end {
+                width: 340px;
+            }
+        }
+
+
+
+    /* ===== 2-cột cố định bằng CSS Grid ===== */
+    .learn-layout{
+      display:grid;
+      grid-template-columns: 3fr 1fr; /* trái | phải */
+      gap:16px;
+      align-items:start;
+    }
+
+    /* Sidebar: cuộn độc lập, không rớt xuống */
+    .learn-sidebar{
+      min-width:0;
+      max-height: calc(100vh - 220px); /* chỉnh cho hợp page của bạn */
+      overflow:auto;
+    }
+
+    /* Thu gọn: cột phải về 0, không chiếm chỗ */
+    .learn-layout.is-collapsed{
+      grid-template-columns: 1fr 0;
+    }
+    .learn-layout.is-collapsed .learn-sidebar{
+      opacity:.0;
+      pointer-events:none;
+      visibility:hidden;
+    }
+
+    /* Nút 3 gạch nổi (desktop/tablet) */
+    .learn-fab{
+      position:fixed;
+      right:18px;
+      bottom:76px;         
+      width:44px;height:44px;
+      border-radius:50%;
+      border:none;
+      background:#ff6b35;    /* màu brand mới */
+      color:#fff;
+      box-shadow:0 6px 16px rgba(0,0,0,.18);
+      display:grid;place-items:center;
+      z-index:1030;
+    }
+    .learn-fab:active{ transform:scale(.97); }
+
+    /* Mobile < 992px: ẩn cột phải, dùng offcanvas mobile */
+    @@media (max-width: 991.98px){
+      .learn-layout{ grid-template-columns: 1fr; }
+      .learn-sidebar{ display:none; }        /* chỉ dùng drawer mobile */
+      .learn-fab{ right:14px; bottom:88px; } /* có thể đổi sang mở drawer */
+    }
+
+    </style>
+
+    <link href="@Url.Content("~/Content/Site.css")?v=20250930" rel="stylesheet" />
+
+
+    @RenderSection("head", required: false)
+</head>
+<body>
+    <!-- Header -->
+    <header class="learning-header">
+        <div class="mx-4 d-flex align-items-center justify-content-start gap-3">
+            <h1 class="text-truncate">@RenderSection("pageTitle", required: false)</h1>
+            <div id="ring"><span>0%</span></div>
+
+            <button class="btn btn-hamburger d-lg-none ms-auto"
+                    type="button"
+                    data-bs-toggle="offcanvas"
+                    data-bs-target="#lessonDrawer"
+                    aria-controls="lessonDrawer"
+                    aria-label="Danh sách bài">
+                <svg viewBox="0 0 16 16" aria-hidden="true">
+                    <rect x="2" y="3" width="12" height="2" rx="1"></rect>
+                    <rect x="2" y="7" width="12" height="2" rx="1"></rect>
+                    <rect x="2" y="11" width="12" height="2" rx="1"></rect>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Nội dung -->
+    <main class="container-fluid">
+        @RenderBody()
+    </main>
+
+    <!-- Bottom bar -->
+    <div class="position-fixed bottom-0 start-0 end-0 bg-dark text-white border-top border-white-10" style="opacity: 0.96">
+        <div class="container-fluid py-2 d-flex flex-wrap align-items-center gap-2">
+            <button id="bb-prev" class="btn btn-outline-light rounded-pill px-3 flex-grow-1 flex-sm-grow-0">← Bài trước</button>
+            <div id="bb-title" class="fw-bold text-truncate text-center flex-grow-1 px-2 order-4 order-sm-0">Đang tải...</div>
+            <button id="bb-next" class="btn rounded-pill px-4 shadow flex-grow-1 flex-sm-grow-0">Bài tiếp theo →</button>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    @RenderSection("scripts", required: false)
+</body>
+</html>
