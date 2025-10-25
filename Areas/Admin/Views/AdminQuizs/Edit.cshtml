@@ -104,6 +104,7 @@
                     {
                         var q = Model.Questions[i];
                         var isEssay = (q.question_type ?? "multiple_choice").ToLower() == "essay";
+                        var essayOpt = q.Options?.FirstOrDefault(); // dùng Options[0] cho đáp án tự luận
                         <div class="question-block p-3 mb-3" data-qindex="@i">
                             @Html.Hidden($"Questions[{i}].id", q.id)
                             @Html.Hidden($"Questions[{i}]._remove", "false", new { @class = "q-remove-flag" })
@@ -123,7 +124,7 @@
                                 </div>
                                 <div class="col d-flex align-items-end">
                                     <div class="question-type-note type-note" @(isEssay ? "" : "hidden")>
-                                        Câu tự luận: không có đáp án lựa chọn, hệ thống không tự chấm điểm.
+                                        Câu tự luận: có ô “đáp án tham chiếu”, hệ thống không tự chấm điểm.
                                     </div>
                                 </div>
                             </div>
@@ -133,11 +134,32 @@
                                 <textarea name="Questions[@i].question_text" class="form-control question-text" rows="2">@q.question_text</textarea>
                             </div>
 
+                            <!-- ESSAY ANSWER (lưu vào Options[0].option_text) -->
+                            <div class="mb-3 essay-wrap" style="@(isEssay ? "" : "display:none")">
+                                @if (essayOpt != null && essayOpt.id.HasValue)
+                                {
+                                    @Html.Hidden($"Questions[{i}].Options[0].id", essayOpt.id)
+                                }
+                                else
+                                {
+                                    <input type="hidden" name="Questions[@i].Options[0].id" value="" />
+                                }
+                                @Html.Hidden($"Questions[{i}].Options[0]._remove", "false", new { @class = "o-remove-flag" })
+
+                                <label class="form-label">Đáp án tham chiếu (tự luận)</label>
+                                <textarea name="Questions[@i].Options[0].option_text"
+                                          class="form-control essay-answer" rows="2"
+                                          placeholder="Nhập đáp án tham chiếu">@((essayOpt?.option_text) ?? "")</textarea>
+                                <div class="form-text">Lưu vào <code>quiz_options.option_text</code> (is_correct = 1).</div>
+                            </div>
+
+                            <!-- MULTIPLE CHOICE -->
                             <div class="mb-2 mc-wrap" style="@(isEssay ? "display:none" : "")">
                                 <label class="form-label">Các đáp án</label>
                                 <div class="option-list">
                                     @{
-                                        var opts = q.Options != null
+                                        // CHỈ render options khi KHÔNG phải tự luận
+                                        var opts = (!isEssay && q.Options != null)
                                             ? q.Options.Cast<OptionVm>().ToList()
                                             : new List<OptionVm>();
 
@@ -190,6 +212,7 @@
             const qty = document.getElementById('quantity');
             const box = document.getElementById('questionsContainer');
             const btnAddQ = document.getElementById('btnAddQuestion');
+            const form = document.getElementById('quizForm');
 
             function toggleTime() {
                 const inf = chk && chk.checked === true;
@@ -207,27 +230,59 @@
                 if (qty) qty.value = n;
             }
 
-            // Hiển thị theo loại câu hỏi
+            // Ẩn/hiện theo loại; khi ẩn thì DISABLED + bỏ name để không post về server
             function syncTypeUI(qb) {
+                const qi = qb.dataset.qindex;
                 const sel = qb.querySelector('.q-type');
                 const mcWrap = qb.querySelector('.mc-wrap');
+                const essayWrap = qb.querySelector('.essay-wrap');
                 const note = qb.querySelector('.type-note');
                 const isEssay = (sel?.value || 'multiple_choice') === 'essay';
 
-                if (!mcWrap) return;
-
                 if (isEssay) {
-                    mcWrap.style.display = 'none';
+                    // Essay ON
+                    if (essayWrap) {
+                        essayWrap.style.display = '';
+                        const ans = essayWrap.querySelector('.essay-answer');
+                        if (ans) {
+                            ans.disabled = false;
+                            ans.required = true;
+                            ans.setAttribute('name', `Questions[${qi}].Options[0].option_text`);
+                        }
+                    }
+                    if (mcWrap) {
+                        mcWrap.style.display = 'none';
+                        mcWrap.querySelectorAll('.option-text').forEach(t => { t.required = false; t.disabled = true; t.removeAttribute('name'); });
+                        mcWrap.querySelectorAll('input[type="radio"]').forEach(r => { r.required = false; r.checked = false; r.disabled = true; r.removeAttribute('name'); });
+                    }
                     note && (note.hidden = false);
-                    mcWrap.querySelectorAll('.option-text').forEach(t => t.required = false);
-                    mcWrap.querySelectorAll('input[type="radio"]').forEach(r => { r.required = false; r.checked = false; });
                 } else {
-                    mcWrap.style.display = '';
+                    // Multiple choice ON
+                    if (mcWrap) {
+                        mcWrap.style.display = '';
+
+                        // Nếu chưa có đáp án, tự thêm 4 đáp án trống
+                        const list = mcWrap.querySelector('.option-list');
+                        let count = list.querySelectorAll('.option-item').length;
+                        if (count < 2) {
+                            for (let k = count; k < 4; k++) addOption(qb);
+                        }
+
+                        mcWrap.querySelectorAll('.option-text').forEach((t, oj) => {
+                            t.disabled = false; t.required = true; t.setAttribute('name', `Questions[${qi}].Options[${oj}].option_text`);
+                        });
+                        mcWrap.querySelectorAll('input[type="radio"]').forEach((r, oj) => {
+                            r.disabled = false; r.required = true; r.setAttribute('name', `Questions[${qi}].CorrectOption`); r.value = String(oj);
+                        });
+                        const first = mcWrap.querySelector('input[type="radio"]');
+                        if (first && !mcWrap.querySelector('input[type="radio"]:checked')) first.checked = true;
+                    }
+                    if (essayWrap) {
+                        essayWrap.style.display = 'none';
+                        const ans = essayWrap.querySelector('.essay-answer');
+                        if (ans) { ans.required = false; ans.disabled = true; ans.removeAttribute('name'); } // không post
+                    }
                     note && (note.hidden = true);
-                    mcWrap.querySelectorAll('.option-text').forEach(t => t.required = true);
-                    const first = mcWrap.querySelector('input[type="radio"]');
-                    if (first && !mcWrap.querySelector('input[type="radio"]:checked')) first.checked = true;
-                    mcWrap.querySelectorAll('input[type="radio"]').forEach(r => r.required = true);
                 }
             }
 
@@ -250,6 +305,18 @@
                     let qType = qb.querySelector('.q-type');
                     if (qType) qType.name = `Questions[${qi}].question_type`;
 
+                    // Essay fields (Options[0])
+                    const essayWrap = qb.querySelector('.essay-wrap');
+                    if (essayWrap) {
+                        const ans = essayWrap.querySelector('.essay-answer');
+                        const id = essayWrap.querySelector('input[name$=".Options[0].id"]');
+                        const rem = essayWrap.querySelector('.o-remove-flag');
+                        if (ans) ans.name = `Questions[${qi}].Options[0].option_text`;
+                        if (id) id.name = `Questions[${qi}].Options[0].id`;
+                        if (rem) rem.name = `Questions[${qi}].Options[0]._remove`;
+                    }
+
+                    // Multiple choice options
                     const items = qb.querySelectorAll('.option-item');
                     items.forEach((opt, oj) => {
                         const letter = opt.querySelector('.letter');
@@ -268,6 +335,7 @@
                         if (radio) { radio.name = `Questions[${qi}].CorrectOption`; radio.value = String(oj); }
                     });
 
+                    // đảm bảo enable/disable đúng sau khi reindex
                     syncTypeUI(qb);
                 });
                 syncQuantity();
@@ -280,17 +348,16 @@
                 const wrap = document.createElement('div');
                 wrap.className = 'option-item';
                 wrap.innerHTML = `
-                        <span class="letter">A</span>
-                        <input type="hidden" class="o-remove-flag" name="" value="false" />
-                        <textarea class="option-text" rows="1" placeholder="Đáp án"></textarea>
-                        <input class="form-check-input mt-1" type="radio" name="" value="${oj}" />
-                        <button type="button" class="btn btn-outline-danger btn-sm btn-remove-opt">Xoá</button>
-                    `;
+                <span class="letter">A</span>
+                <input type="hidden" class="o-remove-flag" name="" value="false" />
+                <textarea class="option-text" rows="1" placeholder="Đáp án"></textarea>
+                <input class="form-check-input mt-1" type="radio" name="" value="${oj}" />
+                <button type="button" class="btn btn-outline-danger btn-sm btn-remove-opt">Xoá</button>
+            `;
                 list.appendChild(wrap);
 
                 const area = wrap.querySelector('.option-text');
-                area.addEventListener('input', () => autoResize(area));
-                autoResize(area);
+                area.addEventListener('input', () => autoResize(area)); autoResize(area);
 
                 wrap.querySelector('.btn-remove-opt').addEventListener('click', () => {
                     const items = list.querySelectorAll('.option-item');
@@ -315,43 +382,50 @@
                 qb.dataset.qindex = qi;
 
                 qb.innerHTML = `
-                        <input type="hidden" name="Questions[${qi}].id" value="" />
-                        <input type="hidden" class="q-remove-flag" name="Questions[${qi}]._remove" value="false" />
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h6 class="fw-bold m-0">Câu hỏi ${qi + 1}</h6>
-                            <button type="button" class="btn btn-outline-danger btn-sm btn-remove-q">Xoá câu này</button>
-                        </div>
+                <input type="hidden" name="Questions[${qi}].id" value="" />
+                <input type="hidden" class="q-remove-flag" name="Questions[${qi}]._remove" value="false" />
 
-                        <div class="row g-2 mb-2">
-                            <div class="col-md-4">
-                                <label class="form-label">Loại câu hỏi</label>
-                                <select class="form-select q-type" name="Questions[${qi}].question_type">
-                                    <option value="multiple_choice" selected>Trắc nghiệm</option>
-                                    <option value="essay">Tự luận</option>
-                                </select>
-                            </div>
-                            <div class="col d-flex align-items-end">
-                                <div class="question-type-note type-note" hidden>
-                                    Câu tự luận: không có đáp án lựa chọn, hệ thống không tự chấm điểm.
-                                </div>
-                            </div>
-                        </div>
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="fw-bold m-0">Câu hỏi ${qi + 1}</h6>
+                    <button type="button" class="btn btn-outline-danger btn-sm btn-remove-q">Xoá câu này</button>
+                </div>
 
-                        <div class="mb-3">
-                            <label class="form-label">Nội dung câu hỏi</label>
-                            <textarea name="Questions[${qi}].question_text" class="form-control question-text" rows="2" placeholder="Nhập nội dung câu hỏi"></textarea>
-                        </div>
-                        <div class="mb-2 mc-wrap">
-                            <label class="form-label">Các đáp án</label>
-                            <div class="option-list"></div>
-                            <div class="mt-2">
-                                <button type="button" class="btn btn-outline-secondary btn-sm btn-add-opt">+ Thêm đáp án</button>
-                            </div>
-                        </div>
-                    `;
+                <div class="row g-2 mb-2">
+                    <div class="col-md-4">
+                        <label class="form-label">Loại câu hỏi</label>
+                        <select class="form-select q-type" name="Questions[${qi}].question_type">
+                            <option value="multiple_choice" selected>Trắc nghiệm</option>
+                            <option value="essay">Tự luận</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Nội dung câu hỏi</label>
+                    <textarea name="Questions[${qi}].question_text" class="form-control question-text" rows="2" placeholder="Nhập nội dung câu hỏi"></textarea>
+                </div>
+
+                <!-- Essay answer -->
+                <div class="mb-3 essay-wrap" style="display:none">
+                    <input type="hidden" name="Questions[${qi}].Options[0].id" value="" />
+                    <input type="hidden" class="o-remove-flag" name="Questions[${qi}].Options[0]._remove" value="false" />
+                    <label class="form-label">Đáp án</label>
+                    <textarea name="Questions[${qi}].Options[0].option_text" class="form-control essay-answer" rows="2" placeholder="Nhập đáp án"></textarea>
+                </div>
+
+                <!-- Multiple choice -->
+                <div class="mb-2 mc-wrap">
+                    <label class="form-label">Các đáp án</label>
+                    <div class="option-list"></div>
+                    <div class="mt-2">
+                        <button type="button" class="btn btn-outline-secondary btn-sm btn-add-opt">+ Thêm đáp án</button>
+                    </div>
+                </div>
+            `;
 
                 box.appendChild(qb);
 
+                // Mặc định 4 đáp án
                 for (let j = 0; j < 4; j++) addOption(qb);
                 const firstRadio = qb.querySelector('.option-list input[type="radio"]');
                 if (firstRadio) firstRadio.checked = true;
@@ -373,15 +447,19 @@
                 const qArea = qb.querySelector('.question-text');
                 qArea.addEventListener('input', () => autoResize(qArea)); autoResize(qArea);
 
+                const essayArea = qb.querySelector('.essay-answer');
+                essayArea.addEventListener('input', () => autoResize(essayArea));
+
                 qb.querySelector('.q-type').addEventListener('change', () => syncTypeUI(qb));
                 syncTypeUI(qb);
 
                 reindexAll();
             }
 
-            // gắn sự kiện cho block có sẵn
+            // Bind cho các block sẵn có
             box.querySelectorAll('.question-block').forEach(qb => {
                 qb.querySelectorAll('.option-text').forEach(t => { t.addEventListener('input', () => autoResize(t)); autoResize(t); });
+                qb.querySelectorAll('.essay-answer').forEach(t => { t.addEventListener('input', () => autoResize(t)); autoResize(t); });
                 const qArea = qb.querySelector('.question-text');
                 qArea.addEventListener('input', () => autoResize(qArea)); autoResize(qArea);
 
@@ -421,6 +499,11 @@
             });
 
             if (btnAddQ) btnAddQ.addEventListener('click', addQuestion);
+
+            // Trước khi submit: xóa name của field đang disabled để model binder bỏ qua hoàn toàn
+            if (form) form.addEventListener('submit', () => {
+                form.querySelectorAll('[disabled]').forEach(el => el.removeAttribute('name'));
+            });
 
             syncQuantity();
         })();
