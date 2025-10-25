@@ -18,3 +18,505 @@ select,
 textarea {
     max-width: 280px;
 }
+
+
+/* === Medical theme (E-learning) === */
+:root {
+    --brand: #ff6b35;
+    --brand-600: #E85E2F; /* ~12–15% tối hơn */
+    --brand-700: #C74E28; /* ~25% tối hơn */
+    --brand-100: #FFE8DF; /* cam tint nhạt */
+    --accent: #7EC983;
+    --ink: #0B3B36;
+    --ring-track: rgba(255,255,255,.2);
+}
+
+#bb-prev, #bb-next {
+    width: 10rem;
+}
+
+#bb-next {
+    --brand: #ff6b35;
+    color: #fff !important;
+    background: var(--brand) !important;
+    border: none !important;
+    transition: opacity 0.2s ease, color 0.2s ease;
+}
+
+    #bb-next:hover {
+        color: var(--brand-100);
+        opacity: 0.85;
+    }
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    margin-top: 15px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+/* Override the default bootstrap behavior where horizontal description lists 
+   will truncate terms that are too long to fit in the left column */
+
+.dl-horizontal dt {
+    white-space: normal;
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+
+/* Nền trang dịu mắt */
+body {
+    background: #F5FAF9;
+    color: var(--ink);
+}
+
+/* Header CAM + pattern y tế (giữ duy nhất 1 block) */
+.learning-header {
+    color: #fff;
+    padding: 18px 0;
+    margin-bottom: 18px;
+    /* Gradient cam */
+    --med-start: #FF7A18;
+    --med-mid: #FF9A44;
+    --med-end: #FFC26A;
+    /* SVG pattern (dấu cộng y tế) mờ nhạt */
+    --dna: url("data:image/svg+xml;utf8,\ <svg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'>\ <defs><style>\ .s{fill:none;stroke:%23ffffff;stroke-opacity:.10;stroke-width:2}\ </style></defs>\ <path class='s' d='M10,10 C30,10 50,70 70,70'/>\ <path class='s' d='M10,70 C30,70 50,10 70,10'/>\ <path class='s' d='M20,26 H60M20,40 H60M20,54 H60'/>\ </svg>");
+    background-image: var(--dna), linear-gradient(90deg,var(--med-start) 0%, var(--med-mid) 45%, var(--med-end) 100%);
+    background-repeat: repeat,no-repeat;
+    background-size: 56px 56px, cover;
+    background-position: center, center;
+    box-shadow: inset 0 -1px 0 rgba(255,255,255,.18);
+}
+
+    .learning-header h1 {
+        color: #fff;
+        font-size: 24px;
+        font-weight: 800;
+        margin: 0;
+    }
+
+/* Vòng tiến độ */
+#ring {
+    --val: 0;
+    --size: 56px;
+    --thick: 6px;
+    --bg: rgba(255,255,255,0.14);
+    --track: var(--ring-track);
+    --bar: #ffffff;
+    width: var(--size);
+    height: var(--size);
+    border-radius: 50%;
+    background: var(--bg);
+    position: relative;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(255,255,255,.35);
+}
+
+    #ring::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: conic-gradient(var(--bar) calc(var(--val)*1%), var(--track) 0);
+        -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--thick)), #000 0);
+        mask: radial-gradient(farthest-side, transparent calc(100% - var(--thick)), #000 0);
+    }
+
+    #ring > span {
+        color: #fff;
+    }
+
+/* Card & cạnh nhấn */
+.learning-card {
+    background: #fff;
+    border: 1px solid #e6eeea;
+    border-radius: 12px;
+    box-shadow: 0 1px 0 rgba(11,59,54,.03);
+}
+
+    .learning-card .card-header {
+        background: var(--brand-100);
+        border-bottom: 1px solid #e1efe9;
+        color: var(--ink);
+        font-weight: 700;
+    }
+
+/* Nút chủ đạo = teal của brand */
+.btn-primary {
+    --bs-btn-bg: var(--brand);
+    --bs-btn-border-color: var(--brand);
+    --bs-btn-hover-bg: var(--brand-600);
+    --bs-btn-hover-border-color: var(--brand-600);
+    --bs-btn-active-bg: var(--brand-700);
+    --bs-btn-active-border-color: var(--brand-700);
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--brand);
+    --bs-btn-border-color: var(--brand);
+    --bs-btn-hover-bg: var(--brand);
+    --bs-btn-hover-border-color: var(--brand);
+    --bs-btn-hover-color: #fff;
+}
+
+
+/* Nút Toggle (hamburger) trên di động */
+.btn-hamburger {
+    background: rgba(255,255,255,.14);
+    border: 1px solid rgba(255,255,255,.38);
+}
+
+    .btn-hamburger svg {
+        fill: #fff;
+    }
+
+/* Sidebar/offcanvas rộng vừa phải */
+#lessonDrawer.offcanvas-end {
+    --bs-offcanvas-width: 340px;
+}
+
+@media (min-width:768px) and (max-width:991.98px) {
+    #lessonDrawer.offcanvas-end {
+        --bs-offcanvas-width: 420px;
+    }
+}
+
+/* Bottom bar: giữ tối, nhấn bằng teal */
+.border-white-10 {
+    border-color: rgba(255,255,255,.12) !important;
+}
+
+#bb-next {
+    box-shadow: 0 6px 16px rgba(43,183,169,.25);
+}
+
+/* Checklist bài học */
+.lesson.active {
+    background: #E8F7F5;
+    color: var(--ink);
+}
+
+/* Link màu y khoa */
+a {
+    color: var(--brand-700);
+}
+
+    a:hover {
+        color: var(--brand-600);
+    }
+
+/* Progress text trong header nhỏ gọn hơn trên tablet */
+@media (max-width: 575.98px) {
+    .learning-header h1 {
+        font-size: 20px;
+    }
+}
+
+
+
+/* --- Custom video player --- */
+#player {
+    overflow: hidden;
+}
+
+    #player video {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+/* thanh điều khiển phủ dưới cùng */
+.v-controls {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .5rem .75rem;
+    background: linear-gradient(to top, rgba(0,0,0,.6), rgba(0,0,0,.25));
+    border-radius: 10px;
+    color: #fff;
+    opacity: 1;
+    transition: opacity .2s ease;
+}
+
+#player {
+    position: relative;
+}
+
+    #player .v-controls {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+    }
+
+    #player .ratio {
+        background: #000;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+        #player .ratio > video {
+            display: block; /* tránh khoảng trống inline */
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #000; /* chỗ letterbox là màu đen */
+        }
+
+    #player .v-controls {
+        position: absolute;
+        left: 12px;
+        right: 12px;
+        bottom: 12px;
+    }
+
+    #player:not(:hover) .v-controls {
+        opacity: .9;
+    }
+
+    #player.hide-controls .v-controls {
+        opacity: 0;
+        pointer-events: none;
+    }
+
+/* nút */
+.vc-btn {
+    display: inline-grid;
+    place-items: center;
+    width: 36px;
+    height: 32px;
+    border: 0;
+    border-radius: 8px;
+    background: rgba(255,255,255,.08);
+    color: #fff;
+    cursor: pointer;
+}
+
+    .vc-btn:hover {
+        background: rgba(255,255,255,.18);
+    }
+
+/* progress */
+.vc-progress {
+    position: relative;
+    flex: 1;
+    height: 8px;
+    cursor: pointer;
+    background: rgba(255,255,255,.25);
+    border-radius: 999px;
+}
+
+.vc-bar {
+    position: absolute;
+    inset: 0 100% 0 0; /* width 0% */
+    background: linear-gradient(90deg, #ffb76b, #ff7b39);
+    border-radius: 999px;
+}
+
+/* thời gian & input */
+.vc-time {
+    font-variant-numeric: tabular-nums;
+    opacity: .9;
+}
+
+#vc-volume {
+    width: 90px;
+    accent-color: #ff7b39;
+}
+
+/* Responsive: đơn giản hóa ở màn nhỏ */
+@media (max-width: 575.98px) {
+    #vc-volume {
+        display: none;
+    }
+
+    #vc-speed {
+        display: none;
+    }
+}
+
+/* Nút đánh dấu đã hoàn thành khi là video YT hoặc Text*/
+#bb-markdone {
+    --md-color: var(--accent, #39bda7);
+    display: inline-block;
+    padding: 8px 14px;
+    min-width: 11rem;
+    border: 1px solid var(--md-color);
+    border-radius: 10px;
+    background: transparent;
+    color: var(--md-color);
+    font-weight: 600;
+    font-size: 15px;
+    line-height: 1.2;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    transition: color .2s ease, border-color .2s ease, transform .06s ease;
+}
+
+    #bb-markdone::before,
+    #bb-markdone::after {
+        content: "";
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%) scaleY(1) scaleX(1.25);
+        border-radius: 50%;
+        display: block;
+        transition: all .5s .1s cubic-bezier(.55,0,.1,1);
+        z-index: -1;
+    }
+
+    #bb-markdone::before {
+        top: 100%;
+        width: 140%;
+        height: 180%;
+        background-color: rgba(0,0,0,.05);
+    }
+
+    #bb-markdone::after {
+        left: 55%;
+        top: 180%;
+        width: 160%;
+        height: 190%;
+        background-color: var(--md-color);
+        transform: translateX(-50%) scaleY(1) scaleX(1.45);
+    }
+
+    /* Hover/active */
+    #bb-markdone:hover {
+        color: #fff;
+        border-color: var(--md-color);
+    }
+
+        #bb-markdone:hover::before {
+            top: -35%;
+            background-color: var(--md-color);
+            transform: translateX(-50%) scaleY(1.3) scaleX(.8);
+        }
+
+        #bb-markdone:hover::after {
+            top: -45%;
+            background-color: var(--md-color);
+            transform: translateX(-50%) scaleY(1.3) scaleX(.8);
+        }
+
+    #bb-markdone:active {
+        transform: translateY(1px);
+    }
+
+
+@media (max-width:575.98px) {
+    #bb-markdone {
+        min-width: auto;
+        font-size: 14px;
+        padding: 6px 10px;
+    }
+}
+
+
+/* Thanh tìm kiếm trong sidebar */
+.lesson-search {
+    position: relative;
+    width: 100%;
+    padding: 8px 10px;
+    box-sizing: border-box;
+}
+
+    .lesson-search .ico {
+        position: absolute;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 18px;
+        height: 18px;
+        color: #6b7280;
+        opacity: .9;
+    }
+
+    .lesson-search input {
+        width: 100%;
+        padding: 10px 40px 10px 42px; /* chừa chỗ icon kính lúp và nút X */
+        border-radius: 10px;
+        border: 1px solid #e5e7eb;
+        background: #f9fafb;
+        color: #111827;
+        outline: none;
+        transition: box-shadow .2s, border-color .2s;
+    }
+
+        .lesson-search input:focus {
+            border-color: #ff6b35;
+            box-shadow: 0 0 0 3px rgba(255,107,53,.15);
+            background: #fff;
+        }
+
+    /* Nút X – mặc định ẩn, chỉ hiện khi có text */
+    .lesson-search .clear {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 24px;
+        height: 24px;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        color: #9ca3af;
+        font-size: 18px;
+        line-height: 24px;
+        cursor: pointer;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .15s ease;
+    }
+
+    /* hiện X khi input có giá trị */
+    .lesson-search input:not(:placeholder-shown) ~ .clear {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .lesson-search .clear:hover {
+        background: #f3f4f6;
+        color: #6b7280;
+    }
+
+/* đảm bảo ô full-width trong khối sidebar/card */
+#sidebar .lesson-search,
+#sidebar-mobile .lesson-search {
+    margin: 8px 8px 4px;
+}
+
+
+
+/* Sidebar search full width + clear button logic */
+.sidebar-search {
+    padding: 6px 8px;
+}
+
+    .sidebar-search .input-group {
+        width: 100%;
+    }
+
+    .sidebar-search .btn-clear {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .15s ease;
+    }
+
+        .sidebar-search .btn-clear.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
