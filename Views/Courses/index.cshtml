@@ -5,6 +5,10 @@
 }
 
 <style>
+    body {
+        background: #fff7f2 !important
+    }
+
     :root {
         --brand: #ff6b35;
         --ink: #212121;
@@ -22,8 +26,8 @@
     }
 
         .course-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 24px rgba(0,0,0,.08);
+            transform: translateY(-10px);
+            box-shadow: 0 10px 24px rgba(0,0,0,.09);
             border-color: #e7eaee;
         }
 
@@ -61,7 +65,7 @@
         .course-card .card-text {
             color: var(--muted);
             margin-bottom: 40px;
-            min-height: 2.6em; /* giữ cao đều 2 dòng */
+            min-height: 2.6em;
         }
 
     .price-pill {
@@ -191,7 +195,7 @@
         }
 
         .search-wrap .form-control {
-            padding-left: 40px; /* chừa chỗ cho icon */
+            padding-left: 40px;
         }
 
 
@@ -202,6 +206,7 @@
         <h2 class="mb-0">Tất cả khóa học</h2>
         <span class="text-dark fw-bold align-self-end">@Model.Total khóa học sẵn có</span>
     </div>
+
 
     <form method="get" class="row g-2 mb-3">
         <div class="col-12 col-md-6">

@@ -1,10 +1,10 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using paradise.Models;
 using paradise.Models.ViewModels;
+using paradise.Helpers;
 
 namespace paradise.Controllers
 {
@@ -13,7 +13,6 @@ namespace paradise.Controllers
         private readonly AppDbContext db = new AppDbContext();
 
         // ===================== DANH SÁCH KHÓA HỌC =====================
-        // /Courses?q=...&topicId=...
         public ActionResult Index(string q = "", int? topicId = null, int page = 1, int pageSize = 12)
         {
             if (page < 1) page = 1;
@@ -96,14 +95,12 @@ namespace paradise.Controllers
 
             var lessonIds = lessons.Select(x => x.id).ToList();
 
-            // Lấy toàn bộ content liên quan đến các bài (chỉ cái đang hiển thị)
             var contents = db.lesson_contents
                 .Where(ct => lessonIds.Contains((long)ct.lesson_id) && ct.is_visible == true)
                 .OrderBy(ct => (int?)ct.display_order ?? int.MaxValue)
                 .ThenBy(ct => ct.id)
                 .ToList();
 
-            // Gom theo lesson_id để tra nhanh
             var contentsByLesson = contents
                 .GroupBy(c => c.lesson_id)
                 .ToDictionary(g => g.Key, g => g.ToList());
@@ -130,12 +127,14 @@ namespace paradise.Controllers
                     var l = lsInChapter[li];
                     var lsOrder = (l.display_order > 0) ? l.display_order : (li + 1);
 
-                    // ==== Chọn "loại nội dung chính" của bài ====
-                    // Ưu tiên: YOUTUBE -> VIDEO -> TEXT
+                    // ==== Ưu tiên: YOUTUBE -> VIDEO -> DOCX -> TEXT ====
                     var list = contentsByLesson.ContainsKey(l.id) ? contentsByLesson[l.id] : new List<lesson_contents>();
                     var cYouTube = list.FirstOrDefault(x => IsYouTubeType(x.content_type) || LooksLikeYouTube(x.content_url));
                     var cVideo = list.FirstOrDefault(x => IsVideoType(x.content_type));
-                    var cText = list.FirstOrDefault(x => IsTextType(x.content_type));
+                    var cDocx = list.FirstOrDefault(x =>
+                                      !string.IsNullOrWhiteSpace(x.content_url) &&
+                                      x.content_url.EndsWith(".docx", StringComparison.OrdinalIgnoreCase));
+                    var cText = list.FirstOrDefault(x => IsTextType(x.content_type) && !string.IsNullOrWhiteSpace(x.content_text));
 
                     string kind = "video";
                     string videoSrc = null;
@@ -146,26 +145,27 @@ namespace paradise.Controllers
                     {
                         kind = "youtube";
                         youtubeId = ExtractYoutubeId(cYouTube.content_url);
-                        html = (cText != null ? cText.content_text : null);
+                        // nếu có text kèm theo thì show dưới player
+                        html = cText?.content_text;
                     }
                     else if (cVideo != null)
                     {
                         kind = "video";
                         videoSrc = BuildFileUrl(cVideo.content_url);
-                        html = (cText != null ? cText.content_text : null);
+                        html = cText?.content_text;
+                    }
+                    else if (cDocx != null)
+                    {
+                        kind = "text";
+                        // Convert DOCX -> HTML
+                        var docxRel = BuildFileUrl(cDocx.content_url); // đảm bảo dạng "/Uploads/.."
+                        html = DocxToHtmlHelper.ConvertRelativeDocxToHtml(Server, docxRel);
                     }
                     else if (cText != null)
                     {
                         kind = "text";
                         html = cText.content_text;
                     }
-                    //else
-                    //{
-                    //    // Fallback nếu chưa có content trong DB: dùng quy ước trong thư mục /Content/videos
-                    //    kind = "video";
-                    //    videoSrc = ResolveVideoSrc(course.id, chOrder, lsOrder, l.id);
-                    //    html = "<h3>Nội dung</h3><p>Đang cập nhật…</p>";
-                    //}
 
                     sec.Lessons.Add(new LessonVM
                     {
@@ -173,10 +173,9 @@ namespace paradise.Controllers
                         Title = string.IsNullOrEmpty(l.lesson_title) ? "Bài học" : l.lesson_title,
                         Duration = ToDurationString(300),
 
-                        // các field phục vụ client
-                        Kind = kind,                 // "video" | "youtube" | "text"
-                        VideoSrc = videoSrc,         // nếu kind=video
-                        YoutubeId = youtubeId,       // nếu kind=youtube
+                        Kind = kind,          // "video" | "youtube" | "text"
+                        VideoSrc = videoSrc,
+                        YoutubeId = youtubeId,
                         ContentHtml = html ?? ""
                     });
                 }
@@ -190,7 +189,7 @@ namespace paradise.Controllers
         // =================== END: CHI TIẾT KHÓA HỌC ===================
 
 
-        // -------- Helpers: nhận diện loại nội dung --------
+        // -------- Helpers nhận diện loại nội dung --------
         private static bool IsVideoType(string t)
             => !string.IsNullOrWhiteSpace(t) && t.Trim().Equals("VIDEO", StringComparison.OrdinalIgnoreCase);
 
@@ -210,8 +209,7 @@ namespace paradise.Controllers
                 || s.IndexOf("youtu.be", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
-
-        // Chuẩn hoá đường dẫn file đã upload (nếu admin lưu file-name trần)
+        // Chuẩn hoá đường dẫn web của file upload
         private static string BuildFileUrl(string contentUrl)
         {
             if (string.IsNullOrWhiteSpace(contentUrl)) return null;
@@ -221,14 +219,12 @@ namespace paradise.Controllers
                 s.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ||
                 s.StartsWith("/", StringComparison.Ordinal))
             {
-                return s; // đã là URL tuyệt đối hoặc đường dẫn web
+                return s;
             }
-
-            // file-name => map vào thư mục upload mặc định
+            // chỉ là file-name -> map vào thư mục Uploads
             return "/Uploads/LessonContents/" + s;
         }
 
-        // Trích YouTube ID từ url hoặc id
         private static string ExtractYoutubeId(string urlOrId)
         {
             if (string.IsNullOrWhiteSpace(urlOrId)) return null;
@@ -243,7 +239,7 @@ namespace paradise.Controllers
             idx = s.IndexOf("/embed/", StringComparison.OrdinalIgnoreCase);
             if (idx >= 0) return s.Substring(idx + "/embed/".Length).Split('?', '#', '&')[0];
 
-            return s; // có thể đã là ID
+            return s;
         }
 
         private static string ToDurationString(int seconds)

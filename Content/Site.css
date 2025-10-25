@@ -70,7 +70,6 @@ textarea {
 }
 
 
-
 /* Nền trang dịu mắt */
 body {
     background: #F5FAF9;
@@ -97,6 +96,9 @@ body {
 
     .learning-header h1 {
         color: #fff;
+        font-size: 24px;
+        font-weight: 800;
+        margin: 0;
     }
 
 /* Vòng tiến độ */
@@ -422,3 +424,99 @@ a {
         padding: 6px 10px;
     }
 }
+
+
+/* Thanh tìm kiếm trong sidebar */
+.lesson-search {
+    position: relative;
+    width: 100%;
+    padding: 8px 10px;
+    box-sizing: border-box;
+}
+
+    .lesson-search .ico {
+        position: absolute;
+        left: 20px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 18px;
+        height: 18px;
+        color: #6b7280;
+        opacity: .9;
+    }
+
+    .lesson-search input {
+        width: 100%;
+        padding: 10px 40px 10px 42px; /* chừa chỗ icon kính lúp và nút X */
+        border-radius: 10px;
+        border: 1px solid #e5e7eb;
+        background: #f9fafb;
+        color: #111827;
+        outline: none;
+        transition: box-shadow .2s, border-color .2s;
+    }
+
+        .lesson-search input:focus {
+            border-color: #ff6b35;
+            box-shadow: 0 0 0 3px rgba(255,107,53,.15);
+            background: #fff;
+        }
+
+    /* Nút X – mặc định ẩn, chỉ hiện khi có text */
+    .lesson-search .clear {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 24px;
+        height: 24px;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        color: #9ca3af;
+        font-size: 18px;
+        line-height: 24px;
+        cursor: pointer;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .15s ease;
+    }
+
+    /* hiện X khi input có giá trị */
+    .lesson-search input:not(:placeholder-shown) ~ .clear {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .lesson-search .clear:hover {
+        background: #f3f4f6;
+        color: #6b7280;
+    }
+
+/* đảm bảo ô full-width trong khối sidebar/card */
+#sidebar .lesson-search,
+#sidebar-mobile .lesson-search {
+    margin: 8px 8px 4px;
+}
+
+
+
+/* Sidebar search full width + clear button logic */
+.sidebar-search {
+    padding: 6px 8px;
+}
+
+    .sidebar-search .input-group {
+        width: 100%;
+    }
+
+    .sidebar-search .btn-clear {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity .15s ease;
+    }
+
+        .sidebar-search .btn-clear.show {
+            opacity: 1;
+            pointer-events: auto;
+        }

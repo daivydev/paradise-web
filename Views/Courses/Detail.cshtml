@@ -5,6 +5,7 @@
 }
 @section pageTitle { @Model.CourseTitle }
 
+<link href="~/Content/course-css/docx-content.css" rel="stylesheet" />
 
 <div class="offcanvas offcanvas-end" tabindex="-1" id="lessonDrawer">
     <div class="offcanvas-header">
@@ -28,7 +29,6 @@
                 </video>
             </div>
             
-
             <!-- Custom controls -->
             <div class="v-controls" id="vControls" aria-label="Trình điều khiển video">
                 <button class="vc-btn" id="vc-play" aria-label="Phát / Tạm dừng">
@@ -70,10 +70,10 @@
 
 
         <div id="lessonContent" class="p-3 learning-card mb-3"></div>
-        @*<div id="quizContainer" class="learning-card p-3"></div>*@
+        
     </section>
 
-    <!-- RIGHT: sidebar luôn ở cột phải -->
+    <!-- RIGHT: sidebar -->
     <aside id="sidebarPane" class="learn-sidebar learning-card">
         <div id="sidebar"></div>
     </aside>
