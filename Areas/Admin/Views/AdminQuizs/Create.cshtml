@@ -150,6 +150,7 @@
                         txt.name = `Questions[${qIndex}].Options[${i}].option_text`;
                         txt.placeholder = `Đáp án ${String.fromCharCode(65 + i)}`;
                         txt.required = true;
+                        txt.disabled = false; // sẽ bị set true khi là essay
                     }
 
                     const radio = optEl.querySelector('input[type="radio"]');
@@ -158,34 +159,65 @@
                         radio.value = i.toString();
                         radio.required = true;
                         radio.title = "Đáp án đúng";
+                        radio.disabled = false; // sẽ bị set true khi là essay
                     }
                 });
             }
 
-            // --- NEW: đồng bộ hiển thị theo loại ---
+            // Ẩn/hiện theo loại + đảm bảo essay không post trắc nghiệm
             function syncTypeUI(qBlock) {
                 const typeSel = qBlock.querySelector('.q-type');
                 const mcWrap = qBlock.querySelector('.mc-wrap');
+                const essayWrap = qBlock.querySelector('.essay-wrap');
+                const note = qBlock.querySelector('.type-note');
                 const isEssay = (typeSel?.value || 'multiple_choice') === 'essay';
 
                 if (isEssay) {
-                    mcWrap.style.display = 'none';
-                    mcWrap.querySelectorAll('.option-text').forEach(t => t.required = false);
-                    mcWrap.querySelectorAll('input[type="radio"]').forEach(r => { r.required = false; r.checked = false; });
-                    qBlock.querySelector('.type-note').hidden = false;
+                    // Ẩn & disable inputs trắc nghiệm để không submit
+                    if (mcWrap) {
+                        mcWrap.style.display = 'none';
+                        mcWrap.querySelectorAll('.option-text').forEach(t => { t.required = false; t.disabled = true; });
+                        mcWrap.querySelectorAll('input[type="radio"]').forEach(r => { r.required = false; r.checked = false; r.disabled = true; });
+                    }
+                    if (essayWrap) {
+                        essayWrap.style.display = '';
+                        // đảm bảo có hidden Options.index=0 cho essay
+                        let idxH = essayWrap.querySelector('input[name$=".Options.index"]');
+                        if (!idxH) {
+                            const h = document.createElement('input');
+                            h.type = 'hidden';
+                            h.name = `Questions[${qBlock.dataset.qindex}].Options.index`;
+                            h.value = '0';
+                            essayWrap.appendChild(h);
+                        } else {
+                            idxH.name = `Questions[${qBlock.dataset.qindex}].Options.index`;
+                            idxH.value = '0';
+                        }
+                        // đảm bảo tên field đúng
+                        const ans = essayWrap.querySelector('textarea');
+                        if (ans) ans.name = `Questions[${qBlock.dataset.qindex}].Options[0].option_text`;
+                    }
+                    if (note) note.hidden = false;
                 } else {
-                    mcWrap.style.display = '';
-                    mcWrap.querySelectorAll('.option-text').forEach(t => t.required = true);
-                    const first = mcWrap.querySelector('input[type="radio"]');
-                    if (first && !mcWrap.querySelector('input[type="radio"]:checked')) first.checked = true;
-                    mcWrap.querySelectorAll('input[type="radio"]').forEach(r => r.required = true);
-                    qBlock.querySelector('.type-note').hidden = true;
+                    // Bật trắc nghiệm trở lại
+                    if (mcWrap) {
+                        mcWrap.style.display = '';
+                        mcWrap.querySelectorAll('.option-text').forEach(t => { t.required = true; t.disabled = false; });
+                        const first = mcWrap.querySelector('input[type="radio"]');
+                        if (first && !mcWrap.querySelector('input[type="radio"]:checked')) first.checked = true;
+                        mcWrap.querySelectorAll('input[type="radio"]').forEach(r => { r.required = true; r.disabled = false; });
+                    }
+                    if (essayWrap) {
+                        essayWrap.style.display = 'none';
+                    }
+                    if (note) note.hidden = true;
                 }
             }
 
             function createQuestionBlock(qIndex) {
                 const el = document.createElement('div');
                 el.className = 'question-block border rounded p-3 mb-3 shadow-sm';
+                el.dataset.qindex = qIndex;
 
                 el.innerHTML = `
                 <div class="d-flex justify-content-between align-items-center mb-2">
@@ -201,9 +233,7 @@
                         </select>
                     </div>
                     <div class="col d-flex align-items-end">
-                        <div class="type-note question-type-note" hidden>
-                            Câu tự luận: không có đáp án lựa chọn, hệ thống không tự chấm điểm.
-                        </div>
+                        
                     </div>
                 </div>
 
@@ -214,6 +244,16 @@
                               placeholder="Nhập nội dung câu hỏi" rows="1" required></textarea>
                 </div>
 
+                <!-- ESSAY ANSWER (lưu Options[0].option_text) -->
+                <div class="mb-3 essay-wrap" style="display:none">
+                    <label class="form-label">Đáp án</label>
+                    <textarea class="form-control essay-answer" rows="2"
+                              name="Questions[${qIndex}].Options[0].option_text"
+                              placeholder="Nhập đáp án"></textarea>
+                    <input type="hidden" name="Questions[${qIndex}].Options.index" value="0" />
+                </div>
+
+                <!-- MULTIPLE CHOICE -->
                 <div class="mb-2 mc-wrap">
                     <label class="form-label">Các đáp án</label>
                     <div class="option-list"></div>
@@ -225,6 +265,9 @@
 
                 const qText = el.querySelector('.question-text');
                 qText.addEventListener('input', () => autoResize(qText)); autoResize(qText);
+
+                const essayAns = el.querySelector('.essay-answer');
+                essayAns.addEventListener('input', () => autoResize(essayAns));
 
                 const optionList = el.querySelector('.option-list');
                 const addBtn = el.querySelector('.add-option');
@@ -252,6 +295,7 @@
                     reindexOptions(qIndex, optionList);
                 }
 
+                // mặc định 4 đáp án trắc nghiệm
                 for (let j = 0; j < 4; j++) addOption();
                 const firstRadio = optionList.querySelector('input[type="radio"]');
                 if (firstRadio) firstRadio.checked = true;
@@ -270,7 +314,10 @@
                 box.innerHTML = "";
                 n = parseInt(n) || 0;
                 if (n <= 0) return;
-                for (let i = 0; i < n; i++) box.appendChild(createQuestionBlock(i));
+                for (let i = 0; i < n; i++) {
+                    const qb = createQuestionBlock(i);
+                    box.appendChild(qb);
+                }
             }
 
             if (qty) {
@@ -283,7 +330,7 @@
                 renderQuestions(qty.value);
             }
 
-            // giữ index cho model binder; bỏ Options.index nếu là tự luận
+            // Hidden index cho model binder (bao gồm essay -> Options.index = 0)
             function addHiddenIndexInputs() {
                 form.querySelectorAll('input[name="Questions.index"], input[name$=".Options.index"]').forEach(x => x.remove());
 
@@ -297,16 +344,25 @@
 
                     const typeSel = qb.querySelector('.q-type');
                     const isEssay = (typeSel?.value || 'multiple_choice') === 'essay';
-                    if (isEssay) return; // không thêm Options.index
 
-                    const optItems = qb.querySelectorAll('.option-list .option-item');
-                    optItems.forEach((_, oj) => {
-                        const ojHidden = document.createElement('input');
-                        ojHidden.type = 'hidden';
-                        ojHidden.name = `Questions[${qi}].Options.index`;
-                        ojHidden.value = oj.toString();
-                        form.appendChild(ojHidden);
-                    });
+                    if (isEssay) {
+                        // chắc chắn có Options.index = 0 (essay-wrap đã có, nhưng đảm bảo lần cuối)
+                        const h = document.createElement('input');
+                        h.type = 'hidden';
+                        h.name = `Questions[${qi}].Options.index`;
+                        h.value = '0';
+                        form.appendChild(h);
+                    } else {
+                        // multiple choice: add index theo số lượng option
+                        const optItems = qb.querySelectorAll('.option-list .option-item');
+                        optItems.forEach((_, oj) => {
+                            const ojHidden = document.createElement('input');
+                            ojHidden.type = 'hidden';
+                            ojHidden.name = `Questions[${qi}].Options.index`;
+                            ojHidden.value = oj.toString();
+                            form.appendChild(ojHidden);
+                        });
+                    }
                 });
 
                 const qCount = qBlocks.length;
