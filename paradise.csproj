@@ -241,6 +241,10 @@
     <Compile Include="Migrations\202510201217557_AddQuestionTypeToQuizQuestions.Designer.cs">
       <DependentUpon>202510201217557_AddQuestionTypeToQuizQuestions.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202510221450242_FixDbSchema.cs" />
+    <Compile Include="Migrations\202510221450242_FixDbSchema.Designer.cs">
+      <DependentUpon>202510221450242_FixDbSchema.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AppDbContext.cs" />
     <Compile Include="Models\cours.cs" />
@@ -340,6 +344,16 @@
     <Content Include="Areas\Admin\Views\AdminCourse_lessons\Details.cshtml" />
     <Content Include="Areas\Admin\Views\AdminCourse_lessons\Edit.cshtml" />
     <Content Include="Areas\Admin\Views\AdminCourse_lessons\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminQuizs\Create.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminQuizs\Delete.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminQuizs\Details.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminQuizs\Edit.cshtml" />
+    <Content Include="Areas\Admin\Views\AdminQuizs\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Quizs\Create.cshtml" />
+    <Content Include="Areas\Admin\Views\Quizs\Delete.cshtml" />
+    <Content Include="Areas\Admin\Views\Quizs\Details.cshtml" />
+    <Content Include="Areas\Admin\Views\Quizs\Edit.cshtml" />
+    <Content Include="Areas\Admin\Views\Quizs\Index.cshtml" />
     <None Include="Scripts\jquery-3.7.0.intellisense.js" />
     <Content Include="Scripts\jquery-3.7.0.js" />
     <Content Include="Scripts\jquery-3.7.0.min.js" />
@@ -370,7 +384,7 @@
     <Content Include="Views\users\Details.cshtml" />
     <Content Include="Views\users\Edit.cshtml" />
     <Content Include="Views\users\Index.cshtml" />
-    <None Include="Web.Local.Config" />
+    <None Include="Web.Local.config" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -409,6 +423,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202510201217557_AddQuestionTypeToQuizQuestions.resx">
       <DependentUpon>202510201217557_AddQuestionTypeToQuizQuestions.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202510221450242_FixDbSchema.resx">
+      <DependentUpon>202510221450242_FixDbSchema.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

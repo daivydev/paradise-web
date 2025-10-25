@@ -3,8 +3,6 @@ using paradise.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
-using System.Data.Entity.Infrastructure;
-using System.Data.Entity.Validation;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -162,22 +160,28 @@ namespace paradise.Areas.Admin.Controllers
                         {
                             for (int j = 0; j < q.Options.Count; j++)
                             {
-                                if (string.IsNullOrWhiteSpace(q.Options[j] != null ? q.Options[j].option_text : null))
+                                if (string.IsNullOrWhiteSpace(q.Options[j]?.option_text))
                                     ModelState.AddModelError($"Questions[{i}].Options[{j}].option_text", "Đáp án không được trống.");
                             }
                         }
 
                         if (!q.CorrectOption.HasValue ||
                             q.CorrectOption.Value < 0 ||
-                            q.CorrectOption.Value >= (q.Options != null ? q.Options.Count : 0))
+                            q.CorrectOption.Value >= (q.Options?.Count ?? 0))
                         {
                             ModelState.AddModelError($"Questions[{i}].CorrectOption", "Phải chọn 1 đáp án đúng cho câu trắc nghiệm.");
                         }
                     }
                     else if (type == "essay")
                     {
-                        // essay: bỏ qua options & correct
-                        q.Options = new List<OptionVm>();
+                        // ✅ CHANGED: YÊU CẦU có Options[0].option_text để lưu đáp án tham chiếu
+                        var ans = q.Options?.FirstOrDefault(o => o._remove != true)?.option_text;
+                        if (string.IsNullOrWhiteSpace(ans))
+                        {
+                            ModelState.AddModelError($"Questions[{i}].Options[0].option_text",
+                                "Vui lòng nhập đáp án tham chiếu cho câu tự luận.");
+                        }
+                        // Không dùng CorrectOption cho essay
                         q.CorrectOption = null;
                     }
                     else
@@ -187,7 +191,7 @@ namespace paradise.Areas.Admin.Controllers
                 }
             }
 
-            model.quantity = model.Questions != null ? model.Questions.Count : 0;
+            model.quantity = model.Questions?.Count ?? 0;
 
             if (!ModelState.IsValid)
             {
@@ -210,7 +214,7 @@ namespace paradise.Areas.Admin.Controllers
                 {
                     var quiz = new quiz
                     {
-                        title = model.title != null ? model.title.Trim() : null,
+                        title = model.title?.Trim(),
                         topic = model.topic,
                         time = model.is_infinity ? (decimal?)null : model.time,
                         is_infinity = model.is_infinity,
@@ -229,7 +233,7 @@ namespace paradise.Areas.Admin.Controllers
                         var q = new quiz_questions
                         {
                             quiz_id = quiz.id,
-                            question_text = qvm.question_text != null ? qvm.question_text.Trim() : null,
+                            question_text = qvm.question_text?.Trim(),
                             question_type = qtype,
                             created_at = DateTime.Now
                         };
@@ -244,14 +248,25 @@ namespace paradise.Areas.Admin.Controllers
                                 var opt = new quiz_options
                                 {
                                     question_id = q.id,
-                                    option_text = optVm != null ? (optVm.option_text != null ? optVm.option_text.Trim() : null) : null,
-                                    is_correct = (idx == qvm.CorrectOption)
+                                    option_text = optVm?.option_text?.Trim(),
+                                    is_correct = (idx == qvm.CorrectOption) // giữ nguyên
                                 };
                                 db.quiz_options.Add(opt);
                             }
                             db.SaveChanges();
                         }
-                        // essay: không thêm options
+                        else if (qtype == "essay")
+                        {
+                            // ✅ NEW: Lưu 1 option duy nhất = đáp án tham chiếu, is_correct = true
+                            var ans = qvm.Options?.FirstOrDefault(o => o._remove != true)?.option_text?.Trim();
+                            db.quiz_options.Add(new quiz_options
+                            {
+                                question_id = q.id,
+                                option_text = ans,
+                                is_correct = true
+                            });
+                            db.SaveChanges();
+                        }
                     }
 
                     tx.Commit();
@@ -378,7 +393,10 @@ namespace paradise.Areas.Admin.Controllers
                 }
                 else if (type == "essay")
                 {
-                    // OK
+                    // ✅ NEW: yêu cầu có đáp án tham chiếu trong Options[0].option_text
+                    var ans = q.Options?.FirstOrDefault(o => o._remove != true)?.option_text;
+                    if (string.IsNullOrWhiteSpace(ans))
+                        ModelState.AddModelError($"Questions[{i}].Options[0].option_text", "Vui lòng nhập đáp án tham chiếu cho câu tự luận.");
                 }
                 else
                 {
@@ -405,7 +423,7 @@ namespace paradise.Areas.Admin.Controllers
                 try
                 {
                     // header
-                    entity.title = model.title != null ? model.title.Trim() : null;
+                    entity.title = model.title?.Trim();
                     entity.topic = model.topic;
                     entity.is_infinity = model.is_infinity;
                     entity.time = model.is_infinity ? (decimal?)null : model.time;
@@ -438,7 +456,7 @@ namespace paradise.Areas.Admin.Controllers
                         {
                             // update
                             qq = entity.quiz_questions.First(x => x.id == qvm.id.Value);
-                            qq.question_text = qvm.question_text != null ? qvm.question_text.Trim() : null;
+                            qq.question_text = qvm.question_text?.Trim();
                             qq.question_type = qtype;
                         }
                         else
@@ -447,7 +465,7 @@ namespace paradise.Areas.Admin.Controllers
                             qq = new quiz_questions
                             {
                                 quiz_id = entity.id,
-                                question_text = qvm.question_text != null ? qvm.question_text.Trim() : null,
+                                question_text = qvm.question_text?.Trim(),
                                 question_type = qtype,
                                 created_at = DateTime.Now
                             };
@@ -477,14 +495,14 @@ namespace paradise.Areas.Admin.Controllers
                                 if (ovm.id.HasValue && ovm.id.Value > 0)
                                 {
                                     var opt = qq.quiz_options.First(o => o.id == ovm.id.Value);
-                                    opt.option_text = ovm.option_text != null ? ovm.option_text.Trim() : null;
+                                    opt.option_text = ovm.option_text?.Trim();
                                 }
                                 else
                                 {
                                     db.quiz_options.Add(new quiz_options
                                     {
                                         question_id = qq.id,
-                                        option_text = ovm.option_text != null ? ovm.option_text.Trim() : null,
+                                        option_text = ovm.option_text?.Trim(),
                                         is_correct = false
                                     });
                                 }
@@ -494,18 +512,33 @@ namespace paradise.Areas.Admin.Controllers
 
                             // set correct
                             var ordered = qq.quiz_options.OrderBy(o => o.id).ToList();
-                            int correctIdx = qvm.CorrectOption.HasValue ? qvm.CorrectOption.Value : -1;
+                            int correctIdx = qvm.CorrectOption ?? -1;
                             for (int i = 0; i < ordered.Count; i++)
                                 ordered[i].is_correct = (i == correctIdx);
                         }
                         else // essay
                         {
-                            // essay: xoá sạch options nếu còn
-                            if (qq.quiz_options.Any())
+                            // ✅ NEW: đảm bảo có đúng 1 option là đáp án tham chiếu, is_correct = true
+                            var newText = qvm.Options?.FirstOrDefault(o => o._remove != true)?.option_text?.Trim();
+
+                            var existing = qq.quiz_options.OrderBy(o => o.id).ToList();
+                            if (existing.Count == 0)
                             {
-                                db.quiz_options.RemoveRange(qq.quiz_options.ToList());
-                                db.SaveChanges();
+                                db.quiz_options.Add(new quiz_options
+                                {
+                                    question_id = qq.id,
+                                    option_text = newText,
+                                    is_correct = true
+                                });
                             }
+                            else
+                            {
+                                existing[0].option_text = newText;
+                                existing[0].is_correct = true;
+                                if (existing.Count > 1)
+                                    db.quiz_options.RemoveRange(existing.Skip(1)); // dọn dư
+                            }
+                            db.SaveChanges();
                         }
                     }
 
